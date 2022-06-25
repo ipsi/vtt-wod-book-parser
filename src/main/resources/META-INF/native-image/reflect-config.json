@@ -1,18 +1,5 @@
 [
 {
-  "name":"[B"
-},
-{
-  "name":"[Ljava.lang.String;"
-},
-{
-  "name":"[Lsun.security.pkcs.SignerInfo;"
-},
-{
-  "name":"apple.security.AppleProvider",
-  "methods":[{"name":"<init>","parameterTypes":[] }]
-},
-{
   "name":"com.fasterxml.jackson.databind.ext.Java7HandlersImpl",
   "methods":[{"name":"<init>","parameterTypes":[] }]
 },
@@ -29,253 +16,187 @@
   "allDeclaredFields":true
 },
 {
-  "name":"com.sun.crypto.provider.AESCipher$General",
-  "methods":[{"name":"<init>","parameterTypes":[] }]
+  "name":"java.lang.Class",
+  "methods":[{"name":"getRecordComponents","parameterTypes":[] }]
 },
 {
-  "name":"com.sun.crypto.provider.ARCFOURCipher",
-  "methods":[{"name":"<init>","parameterTypes":[] }]
+  "name":"java.lang.Record",
+  "allDeclaredFields":true,
+  "queryAllDeclaredMethods":true
 },
 {
-  "name":"com.sun.crypto.provider.ChaCha20Cipher$ChaCha20Poly1305",
-  "methods":[{"name":"<init>","parameterTypes":[] }]
+  "name":"java.lang.reflect.RecordComponent",
+  "methods":[{"name":"getName","parameterTypes":[] }],
+  "queriedMethods":[{"name":"getType","parameterTypes":[] }]
 },
 {
-  "name":"com.sun.crypto.provider.DESCipher",
-  "methods":[{"name":"<init>","parameterTypes":[] }]
+  "name":"name.ipsi.project.fwbp.foundry.DamageTypes",
+  "allDeclaredFields":true,
+  "queryAllDeclaredMethods":true
 },
 {
-  "name":"com.sun.crypto.provider.DESedeCipher",
-  "methods":[{"name":"<init>","parameterTypes":[] }]
+  "name":"name.ipsi.project.fwbp.foundry.DocumentTypes",
+  "allDeclaredFields":true,
+  "queryAllDeclaredMethods":true
 },
 {
-  "name":"com.sun.crypto.provider.DHParameters",
-  "methods":[{"name":"<init>","parameterTypes":[] }]
+  "name":"name.ipsi.project.fwbp.foundry.FoundryDocument",
+  "queryAllDeclaredMethods":true
 },
 {
-  "name":"com.sun.crypto.provider.GaloisCounterMode$AESGCM",
-  "methods":[{"name":"<init>","parameterTypes":[] }]
-},
-{
-  "name":"com.sun.crypto.provider.HmacCore$HmacSHA256",
-  "methods":[{"name":"<init>","parameterTypes":[] }]
-},
-{
-  "name":"com.sun.crypto.provider.TlsKeyMaterialGenerator",
-  "methods":[{"name":"<init>","parameterTypes":[] }]
-},
-{
-  "name":"com.sun.crypto.provider.TlsMasterSecretGenerator",
-  "methods":[{"name":"<init>","parameterTypes":[] }]
-},
-{
-  "name":"com.sun.crypto.provider.TlsPrfGenerator$V12",
-  "methods":[{"name":"<init>","parameterTypes":[] }]
-},
-{
-  "name":"java.lang.String"
-},
-{
-  "name":"java.security.AlgorithmParametersSpi"
-},
-{
-  "name":"java.security.KeyStoreSpi"
-},
-{
-  "name":"java.security.SecureRandomParameters"
-},
-{
-  "name":"java.security.interfaces.ECPrivateKey"
-},
-{
-  "name":"java.security.interfaces.ECPublicKey"
-},
-{
-  "name":"java.security.interfaces.RSAPrivateKey"
-},
-{
-  "name":"java.security.interfaces.RSAPublicKey"
-},
-{
-  "name":"java.util.Date"
-},
-{
-  "name":"javax.security.auth.x500.X500Principal",
-  "fields":[{"name":"thisX500Name"}],
-  "methods":[{"name":"<init>","parameterTypes":["sun.security.x509.X500Name"] }]
-},
-{
-  "name":"name.ipsi.project.fwbp.dtrpg.Downloader$DtrpgFileMessage",
+  "name":"name.ipsi.project.fwbp.foundry.GiftData",
   "allDeclaredFields":true,
   "queryAllDeclaredMethods":true,
   "queryAllDeclaredConstructors":true,
-  "methods":[{"name":"<init>","parameterTypes":["java.lang.String","java.lang.String","java.lang.String"] }]
+  "methods":[
+    {"name":"getBonus","parameterTypes":[] }, 
+    {"name":"getDescription","parameterTypes":[] }, 
+    {"name":"getDice1","parameterTypes":[] }, 
+    {"name":"getDice2","parameterTypes":[] }, 
+    {"name":"getDifficulty","parameterTypes":[] }, 
+    {"name":"getLevel","parameterTypes":[] }, 
+    {"name":"getSystem","parameterTypes":[] }, 
+    {"name":"getType","parameterTypes":[] }, 
+    {"name":"getVersion","parameterTypes":[] }, 
+    {"name":"getWorldAnvil","parameterTypes":[] }, 
+    {"name":"isActive","parameterTypes":[] }, 
+    {"name":"isCreated","parameterTypes":[] }, 
+    {"name":"isIsRollable","parameterTypes":[] }, 
+    {"name":"isIsactive","parameterTypes":[] }, 
+    {"name":"isIscreated","parameterTypes":[] }, 
+    {"name":"isRollable","parameterTypes":[] }
+  ]
 },
 {
-  "name":"name.ipsi.project.fwbp.dtrpg.Downloader$DtrpgFileResponse",
+  "name":"name.ipsi.project.fwbp.foundry.Item",
   "allDeclaredFields":true,
   "queryAllDeclaredMethods":true,
   "queryAllDeclaredConstructors":true,
-  "methods":[{"name":"<init>","parameterTypes":["java.lang.String","name.ipsi.project.fwbp.dtrpg.Downloader$DtrpgFileMessage"] }]
+  "methods":[
+    {"name":"getData","parameterTypes":[] }, 
+    {"name":"getEffects","parameterTypes":[] }, 
+    {"name":"getFlags","parameterTypes":[] }, 
+    {"name":"getFolder","parameterTypes":[] }, 
+    {"name":"getId","parameterTypes":[] }, 
+    {"name":"getImg","parameterTypes":[] }, 
+    {"name":"getName","parameterTypes":[] }, 
+    {"name":"getPermission","parameterTypes":[] }, 
+    {"name":"getSort","parameterTypes":[] }, 
+    {"name":"getType","parameterTypes":[] }
+  ]
 },
 {
-  "name":"name.ipsi.project.fwbp.dtrpg.Downloader$DtrpgTokenMessage",
+  "name":"name.ipsi.project.fwbp.foundry.ItemData",
+  "queryAllDeclaredMethods":true
+},
+{
+  "name":"name.ipsi.project.fwbp.foundry.ItemTypes",
+  "allDeclaredFields":true,
+  "queryAllDeclaredMethods":true
+},
+{
+  "name":"name.ipsi.project.fwbp.foundry.Journal",
   "allDeclaredFields":true,
   "queryAllDeclaredMethods":true,
   "queryAllDeclaredConstructors":true,
-  "methods":[{"name":"<init>","parameterTypes":["java.lang.String","java.lang.String","java.lang.String","java.lang.String","java.lang.String"] }]
+  "methods":[
+    {"name":"getContent","parameterTypes":[] }, 
+    {"name":"getFolder","parameterTypes":[] }, 
+    {"name":"getId","parameterTypes":[] }, 
+    {"name":"getName","parameterTypes":[] }
+  ]
 },
 {
-  "name":"name.ipsi.project.fwbp.dtrpg.Downloader$DtrpgTokenResponse",
+  "name":"name.ipsi.project.fwbp.foundry.MeleeWeaponData",
   "allDeclaredFields":true,
   "queryAllDeclaredMethods":true,
   "queryAllDeclaredConstructors":true,
-  "methods":[{"name":"<init>","parameterTypes":["java.lang.String","name.ipsi.project.fwbp.dtrpg.Downloader$DtrpgTokenMessage"] }]
+  "methods":[
+    {"name":"getAttack","parameterTypes":[] }, 
+    {"name":"getConceal","parameterTypes":[] }, 
+    {"name":"getDamage","parameterTypes":[] }, 
+    {"name":"getDescription","parameterTypes":[] }, 
+    {"name":"getDiff","parameterTypes":[] }, 
+    {"name":"getDifficulty","parameterTypes":[] }, 
+    {"name":"getLabel","parameterTypes":[] }, 
+    {"name":"getVersion","parameterTypes":[] }, 
+    {"name":"getWorldanvil","parameterTypes":[] }, 
+    {"name":"isCreated","parameterTypes":[] }, 
+    {"name":"isIsEquipped","parameterTypes":[] }, 
+    {"name":"isIsMagical","parameterTypes":[] }, 
+    {"name":"isIscreated","parameterTypes":[] }, 
+    {"name":"isIstwohanded","parameterTypes":[] }, 
+    {"name":"isNatural","parameterTypes":[] }, 
+    {"name":"isTwohanded","parameterTypes":[] }
+  ]
 },
 {
-  "name":"sun.security.pkcs12.PKCS12KeyStore",
-  "methods":[{"name":"<init>","parameterTypes":[] }]
+  "name":"name.ipsi.project.fwbp.foundry.MeleeWeaponData$Attack",
+  "allDeclaredFields":true,
+  "queryAllDeclaredMethods":true,
+  "queryAllDeclaredConstructors":true,
+  "methods":[
+    {"name":"ability","parameterTypes":[] }, 
+    {"name":"attribute","parameterTypes":[] }, 
+    {"name":"isRollable","parameterTypes":[] }, 
+    {"name":"roll","parameterTypes":[] }
+  ]
 },
 {
-  "name":"sun.security.pkcs12.PKCS12KeyStore$DualFormatPKCS12",
-  "methods":[{"name":"<init>","parameterTypes":[] }]
+  "name":"name.ipsi.project.fwbp.foundry.MeleeWeaponData$Damage",
+  "allDeclaredFields":true,
+  "queryAllDeclaredMethods":true,
+  "queryAllDeclaredConstructors":true,
+  "methods":[
+    {"name":"attribute","parameterTypes":[] }, 
+    {"name":"bonus","parameterTypes":[] }, 
+    {"name":"isRollable","parameterTypes":[] }, 
+    {"name":"roll","parameterTypes":[] }, 
+    {"name":"type","parameterTypes":[] }
+  ]
 },
 {
-  "name":"sun.security.provider.DSA$SHA224withDSA",
-  "methods":[{"name":"<init>","parameterTypes":[] }]
+  "name":"name.ipsi.project.fwbp.foundry.Module",
+  "allDeclaredFields":true,
+  "queryAllDeclaredMethods":true,
+  "queryAllDeclaredConstructors":true,
+  "methods":[
+    {"name":"getAuthor","parameterTypes":[] }, 
+    {"name":"getCompatibleCoreVersion","parameterTypes":[] }, 
+    {"name":"getDescription","parameterTypes":[] }, 
+    {"name":"getMinimumCoreVersion","parameterTypes":[] }, 
+    {"name":"getName","parameterTypes":[] }, 
+    {"name":"getPacks","parameterTypes":[] }, 
+    {"name":"getTitle","parameterTypes":[] }, 
+    {"name":"getVersion","parameterTypes":[] }
+  ]
 },
 {
-  "name":"sun.security.provider.DSA$SHA256withDSA",
-  "methods":[{"name":"<init>","parameterTypes":[] }]
+  "name":"name.ipsi.project.fwbp.foundry.ModulePacks",
+  "allDeclaredFields":true,
+  "queryAllDeclaredMethods":true,
+  "queryAllDeclaredConstructors":true,
+  "methods":[
+    {"name":"getLabel","parameterTypes":[] }, 
+    {"name":"getModule","parameterTypes":[] }, 
+    {"name":"getName","parameterTypes":[] }, 
+    {"name":"getPath","parameterTypes":[] }, 
+    {"name":"getType","parameterTypes":[] }
+  ]
 },
 {
-  "name":"sun.security.provider.JavaKeyStore$DualFormatJKS",
-  "methods":[{"name":"<init>","parameterTypes":[] }]
+  "name":"name.ipsi.project.fwbp.foundry.PowerTypes",
+  "allDeclaredFields":true,
+  "queryAllDeclaredMethods":true
 },
 {
-  "name":"sun.security.provider.JavaKeyStore$JKS",
-  "methods":[{"name":"<init>","parameterTypes":[] }]
+  "name":"name.ipsi.project.fwbp.foundry.WeaponConcealment",
+  "allDeclaredFields":true,
+  "queryAllDeclaredMethods":true
 },
 {
-  "name":"sun.security.provider.NativePRNG",
-  "methods":[{"name":"<init>","parameterTypes":[] }]
-},
-{
-  "name":"sun.security.provider.SHA",
-  "methods":[{"name":"<init>","parameterTypes":[] }]
-},
-{
-  "name":"sun.security.provider.SHA2$SHA224",
-  "methods":[{"name":"<init>","parameterTypes":[] }]
-},
-{
-  "name":"sun.security.provider.SHA2$SHA256",
-  "methods":[{"name":"<init>","parameterTypes":[] }]
-},
-{
-  "name":"sun.security.provider.SHA5$SHA384",
-  "methods":[{"name":"<init>","parameterTypes":[] }]
-},
-{
-  "name":"sun.security.provider.SHA5$SHA512",
-  "methods":[{"name":"<init>","parameterTypes":[] }]
-},
-{
-  "name":"sun.security.provider.X509Factory",
-  "methods":[{"name":"<init>","parameterTypes":[] }]
-},
-{
-  "name":"sun.security.provider.certpath.PKIXCertPathValidator",
-  "methods":[{"name":"<init>","parameterTypes":[] }]
-},
-{
-  "name":"sun.security.rsa.PSSParameters",
-  "methods":[{"name":"<init>","parameterTypes":[] }]
-},
-{
-  "name":"sun.security.rsa.RSAKeyFactory$Legacy",
-  "methods":[{"name":"<init>","parameterTypes":[] }]
-},
-{
-  "name":"sun.security.rsa.RSAPSSSignature",
-  "methods":[{"name":"<init>","parameterTypes":[] }]
-},
-{
-  "name":"sun.security.rsa.RSASignature$SHA224withRSA",
-  "methods":[{"name":"<init>","parameterTypes":[] }]
-},
-{
-  "name":"sun.security.rsa.RSASignature$SHA256withRSA",
-  "methods":[{"name":"<init>","parameterTypes":[] }]
-},
-{
-  "name":"sun.security.rsa.RSASignature$SHA384withRSA",
-  "methods":[{"name":"<init>","parameterTypes":[] }]
-},
-{
-  "name":"sun.security.ssl.KeyManagerFactoryImpl$SunX509",
-  "methods":[{"name":"<init>","parameterTypes":[] }]
-},
-{
-  "name":"sun.security.ssl.SSLContextImpl$DefaultSSLContext",
-  "methods":[{"name":"<init>","parameterTypes":[] }]
-},
-{
-  "name":"sun.security.ssl.TrustManagerFactoryImpl$PKIXFactory",
-  "methods":[{"name":"<init>","parameterTypes":[] }]
-},
-{
-  "name":"sun.security.util.ObjectIdentifier"
-},
-{
-  "name":"sun.security.x509.AuthorityInfoAccessExtension",
-  "methods":[{"name":"<init>","parameterTypes":["java.lang.Boolean","java.lang.Object"] }]
-},
-{
-  "name":"sun.security.x509.AuthorityKeyIdentifierExtension",
-  "methods":[{"name":"<init>","parameterTypes":["java.lang.Boolean","java.lang.Object"] }]
-},
-{
-  "name":"sun.security.x509.BasicConstraintsExtension",
-  "methods":[{"name":"<init>","parameterTypes":["java.lang.Boolean","java.lang.Object"] }]
-},
-{
-  "name":"sun.security.x509.CRLDistributionPointsExtension",
-  "methods":[{"name":"<init>","parameterTypes":["java.lang.Boolean","java.lang.Object"] }]
-},
-{
-  "name":"sun.security.x509.CertificateExtensions"
-},
-{
-  "name":"sun.security.x509.CertificatePoliciesExtension",
-  "methods":[{"name":"<init>","parameterTypes":["java.lang.Boolean","java.lang.Object"] }]
-},
-{
-  "name":"sun.security.x509.ExtendedKeyUsageExtension",
-  "methods":[{"name":"<init>","parameterTypes":["java.lang.Boolean","java.lang.Object"] }]
-},
-{
-  "name":"sun.security.x509.IssuerAlternativeNameExtension",
-  "methods":[{"name":"<init>","parameterTypes":["java.lang.Boolean","java.lang.Object"] }]
-},
-{
-  "name":"sun.security.x509.KeyUsageExtension",
-  "methods":[{"name":"<init>","parameterTypes":["java.lang.Boolean","java.lang.Object"] }]
-},
-{
-  "name":"sun.security.x509.NetscapeCertTypeExtension",
-  "methods":[{"name":"<init>","parameterTypes":["java.lang.Boolean","java.lang.Object"] }]
-},
-{
-  "name":"sun.security.x509.PrivateKeyUsageExtension",
-  "methods":[{"name":"<init>","parameterTypes":["java.lang.Boolean","java.lang.Object"] }]
-},
-{
-  "name":"sun.security.x509.SubjectAlternativeNameExtension",
-  "methods":[{"name":"<init>","parameterTypes":["java.lang.Boolean","java.lang.Object"] }]
-},
-{
-  "name":"sun.security.x509.SubjectKeyIdentifierExtension",
-  "methods":[{"name":"<init>","parameterTypes":["java.lang.Boolean","java.lang.Object"] }]
+  "name":"sun.misc.Unsafe",
+  "fields":[{"name":"theUnsafe"}],
+  "queriedMethods":[{"name":"invokeCleaner","parameterTypes":["java.nio.ByteBuffer"] }]
 }
 ]

@@ -41,7 +41,7 @@ public class Main {
                 var objectMapper = new ObjectMapper();
                 var packs = new HashMap<Packs, List<String>>();
                 for (var fdoc : foundryDocs) {
-                    List<String> list = packs.computeIfAbsent(fdoc.pack(), o -> new ArrayList<>());
+                    List<String> list = packs.computeIfAbsent(fdoc.getPack(), o -> new ArrayList<>());
                     list.add(objectMapper.writeValueAsString(fdoc));
                 }
 
