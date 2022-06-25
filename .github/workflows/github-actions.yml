@@ -4,9 +4,21 @@ jobs:
   build:
     name: VTT WoD Book Parser on ${{ matrix.os }}
     runs-on: ${{ matrix.os }}
+    timeout-minutes: 90
     strategy:
+      fail-fast: false
       matrix:
         os: [macos-latest, windows-latest, ubuntu-latest]
+        include:
+          - os: ubuntu-latest
+            executable-suffix: ''
+            native-build-args: -Xmx10g
+          - os: macos-latest
+            executable-suffix: ''
+            native-build-args: -Xmx13g
+          - os: windows-latest
+            executable-suffix: '.exe'
+            native-build-args: -Xmx10g
     steps:
       - uses: actions/checkout@v2
 
@@ -17,11 +29,18 @@ jobs:
           components: 'native-image'
           github-token: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Maven - Package
-        run: mvn -P native package
-
-      - name: Upload binary
-        uses: actions/upload-artifact@v2
+      - name: Cache Maven dependencies
+        uses: actions/cache@v3
         with:
-          name: vtt-wod-book-parser-${{ matrix.os }}
-          path: target/vtt-wod-book-parser*
+          path: ~/.m2/repository
+          key: ${{ runner.os }}-maven-${{ hashFiles('**/pom.xml') }}
+          restore-keys: ${{ runner.os }}-maven
+
+      - name: Maven - Package
+        run: MAVEN_OPTS="${{ native-build-args }}" mvn -P native package
+#
+#      - name: Upload binary
+#        uses: actions/upload-artifact@v2
+#        with:
+#          name: vtt-wod-book-parser-${{ matrix.os }}
+#          path: target/vtt-wod-book-parser*
