@@ -37,7 +37,7 @@ jobs:
           restore-keys: ${{ runner.os }}-maven
 
       - name: Maven - Package
-        run: MAVEN_OPTS="${{ native-build-args }}" mvn -P native package
+        run: MAVEN_OPTS="${{ matrix.native-build-args }}" mvn -P native package
 #
 #      - name: Upload binary
 #        uses: actions/upload-artifact@v2
