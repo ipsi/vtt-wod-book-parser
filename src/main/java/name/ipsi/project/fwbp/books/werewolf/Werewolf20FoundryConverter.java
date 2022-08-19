@@ -16,6 +16,10 @@ public class Werewolf20FoundryConverter {
         for (var entry : entries) {
             if (entry instanceof Breed b) {
                 documents.add(processBreed(b));
+            } else if (entry instanceof Auspice a) {
+                documents.add(processAuspice(a));
+            } else if (entry instanceof Tribe t) {
+                documents.add(processTribe(t));
             } else if (entry instanceof Gift g) {
                 documents.add(processGift(g));
             } else if (entry instanceof MeleeWeapon mw) {
@@ -38,7 +42,7 @@ public class Werewolf20FoundryConverter {
                         false,
                         "",
                         "",
-                        "",
+                        meleeWeapon.description(),
                         false,
                         meleeWeapon.silver(),
                         new MeleeWeaponData.Attack(
@@ -108,6 +112,55 @@ public class Werewolf20FoundryConverter {
                 text.toString(),
                 null,
                 Packs.Breeds
+        );
+    }
+    private FoundryDocument processAuspice(Auspice a) {
+        var text = new StringBuilder();
+        text.append("<h1>").append(a.name().displayName()).append("</h1>\n");
+        text.append("<p>").append(String.join("</p><p>", a.description().split("\n"))).append("</p>\n");
+        text.append("<p><strong>Nicknames:</strong> ").append(a.altNames()).append("</p>\n");
+        text.append("<p><strong>Initial Rage:</strong> ").append(a.initialRage()).append("</p>\n");
+        text.append("<p><strong>Beginning Gifts:</strong> ").append(a.gifts().get(Rank.ONE).stream()
+                .map(g -> String.format("@Item[%s]{%s}", g.id(), g.name())).collect(Collectors.joining(", "))).append("</p>");
+
+        text.append("\n<h2>Gifts</h2>");
+        for (var f : a.gifts().entrySet().stream().sorted(Comparator.comparingInt(o -> o.getKey().sortKey())).toList()) {
+            text.append("\n<h3>Rank ").append(f.getKey().displayName()).append(" Gifts</h3>");
+            for (var g : f.getValue().stream().sorted(Comparator.comparing(Gift::name)).toList()) {
+                text.append("\n<p>").append(String.format("@Item[%s]{%s}", g.id(), g.name())).append("</p>");
+            }
+        }
+
+        return new Journal(
+                a.id(),
+                a.name().displayName(),
+                text.toString(),
+                null,
+                Packs.Auspices
+        );
+    }
+    private FoundryDocument processTribe(Tribe t) {
+        var text = new StringBuilder();
+        text.append("<h1>").append(t.name().displayName()).append("</h1>\n");
+        text.append("<p>").append(String.join("</p><p>", t.description().split("\n"))).append("</p>\n");
+        text.append("<p><strong>Initial Willpower:</strong> ").append(t.initialWillpower()).append("</p>\n");
+        text.append("<p><strong>Beginning Gifts:</strong> ").append(t.gifts().get(Rank.ONE).stream()
+                .map(g -> String.format("@Item[%s]{%s}", g.id(), g.name())).collect(Collectors.joining(", "))).append("</p>");
+
+        text.append("\n<h2>Gifts</h2>");
+        for (var f : t.gifts().entrySet().stream().sorted(Comparator.comparingInt(o -> o.getKey().sortKey())).toList()) {
+            text.append("\n<h3>Rank ").append(f.getKey().displayName()).append(" Gifts</h3>");
+            for (var g : f.getValue().stream().sorted(Comparator.comparing(Gift::name)).toList()) {
+                text.append("\n<p>").append(String.format("@Item[%s]{%s}", g.id(), g.name())).append("</p>");
+            }
+        }
+
+        return new Journal(
+                t.id(),
+                t.name().displayName(),
+                text.toString(),
+                null,
+                Packs.Tribes
         );
     }
 

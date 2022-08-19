@@ -2,15 +2,16 @@ package name.ipsi.project.fwbp;
 
 import com.fasterxml.jackson.core.util.DefaultPrettyPrinter;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.itextpdf.kernel.pdf.PdfDocument;
-import com.itextpdf.kernel.pdf.PdfReader;
 import com.itextpdf.kernel.pdf.canvas.parser.PdfDocumentContentParser;
 import name.ipsi.project.fwbp.books.werewolf.Werewolf20Extractor;
 import name.ipsi.project.fwbp.books.werewolf.Werewolf20FoundryConverter;
-import name.ipsi.project.fwbp.foundry.*;
+import name.ipsi.project.fwbp.dtrpg.Downloader;
+import name.ipsi.project.fwbp.foundry.DocumentTypes;
 import name.ipsi.project.fwbp.foundry.Module;
+import name.ipsi.project.fwbp.foundry.ModulePacks;
 import name.ipsi.project.fwbp.foundry.Packs;
 
+import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.StandardOpenOption;
@@ -33,8 +34,8 @@ public class Main {
         var selection = scanner.nextInt();
         switch (selection) {
             case 1:
-                var doc = new PdfDocument(new PdfReader("/Volumes/books/Roleplaying/Werewolf the Apocalypse/Werewolf the Apocalypse 20th Anniversary Edition.pdf"));
-//                var doc = Downloader.downloadFile(Werewolf20Extractor.BOOK_ID, token);
+//                var doc = new PdfDocument(new PdfReader("/Volumes/books/Roleplaying/Werewolf the Apocalypse/Werewolf the Apocalypse 20th Anniversary Edition.pdf"));
+                var doc = Downloader.downloadFile(Werewolf20Extractor.BOOK_ID, token);
                 var w20 = new Werewolf20Extractor(new PdfDocumentContentParser(doc));
                 var entries = w20.process();
                 var foundryDocs = new Werewolf20FoundryConverter().process(entries);
@@ -49,50 +50,13 @@ public class Main {
                 var basePath = Path.of("target", Werewolf20FoundryConverter.MODULE_NAME);
                 Files.createDirectories(basePath.resolve("packs"));
 
-                var journalsPath = "./packs/breeds.db";
-                var journalFile = basePath.resolve(journalsPath);
+                modulePacks.add(createPack(basePath, "Breeds (W20)", "breeds", DocumentTypes.JOURNAL_ENTRY, packs.get(Packs.Breeds)));
+                modulePacks.add(createPack(basePath, "Auspices (W20)", "auspices", DocumentTypes.JOURNAL_ENTRY, packs.get(Packs.Auspices)));
+                modulePacks.add(createPack(basePath, "Tribes (W20)", "tribes", DocumentTypes.JOURNAL_ENTRY, packs.get(Packs.Tribes)));
 
-                Files.createFile(journalFile);
-                for (var s : packs.get(Packs.Breeds)) {
-                    Files.writeString(journalFile, s + "\n", StandardOpenOption.APPEND);
-                }
-                modulePacks.add(new ModulePacks(
-                        "journals",
-                        "Breeds (W20)",
-                        journalsPath,
-                        Werewolf20FoundryConverter.MODULE_NAME,
-                        DocumentTypes.JOURNAL_ENTRY
-                ));
+                modulePacks.add(createPack(basePath, "Gifts (W20)", "gifts", DocumentTypes.ITEM, packs.get(Packs.Gifts)));
 
-                var itemsPath = "./packs/gifts.db";
-                var itemsFile = basePath.resolve(itemsPath);
-
-                Files.createFile(itemsFile);
-                for (var s : packs.get(Packs.Gifts)) {
-                    Files.writeString(itemsFile, s + "\n", StandardOpenOption.APPEND);
-                }
-                modulePacks.add(new ModulePacks(
-                        "gifts",
-                        "Gifts (W20)",
-                        itemsPath,
-                        Werewolf20FoundryConverter.MODULE_NAME,
-                        DocumentTypes.ITEM
-                ));
-
-                var weaponsPath = "./packs/weapons.db";
-                var weaponsFile = basePath.resolve(weaponsPath);
-
-                Files.createFile(weaponsFile);
-                for (var s : packs.get(Packs.Weapons)) {
-                    Files.writeString(weaponsFile, s + "\n", StandardOpenOption.APPEND);
-                }
-                modulePacks.add(new ModulePacks(
-                        "weapons",
-                        "Weapons (W20)",
-                        weaponsPath,
-                        Werewolf20FoundryConverter.MODULE_NAME,
-                        DocumentTypes.ITEM
-                ));
+                modulePacks.add(createPack(basePath, "Weapons (W20)", "weapons", DocumentTypes.ITEM, packs.get(Packs.Weapons)));
 
                 var module = new Module(
                         Werewolf20FoundryConverter.MODULE_NAME,
@@ -111,5 +75,22 @@ public class Main {
             default:
                 System.out.println("Unknown book " + selection);
         }
+    }
+
+    private static ModulePacks createPack(Path basePath, String label, String packName, DocumentTypes type, List<String> packs) throws IOException {
+        var path = String.format("./packs/%s.db", packName);
+        var moduleFile = basePath.resolve(path);
+
+        Files.createFile(moduleFile);
+        for (var s : packs) {
+            Files.writeString(moduleFile, s + "\n", StandardOpenOption.APPEND);
+        }
+        return new ModulePacks(
+                packName,
+                label,
+                path,
+                Werewolf20FoundryConverter.MODULE_NAME,
+                type
+        );
     }
 }

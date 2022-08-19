@@ -217,7 +217,7 @@ public class Werewolf20Extractor {
                         )),
                         new GiftLocations(new AuspiceGifts(Auspices.AHROUN), Arrays.asList(
                                 new Paragraph(171, makeRect(304, 691, 247, 37)),
-                                new Paragraph(172, makeRect(61, 200, 247, 695)),
+                                new Paragraph(172, makeRect(61, 45, 247, 695)),
                                 new Paragraph(172, makeRect(322, 45, 247, 695)),
                                 new Paragraph(173, makeRect(42, 45, 247, 695)),
                                 new Paragraph(173, makeRect(304, 45, 247, 475))
@@ -254,10 +254,67 @@ public class Werewolf20Extractor {
                                 new Paragraph(182, makeRect(322, 45, 247, 348)),
                                 new Paragraph(183, makeRect(42, 45, 247, 695)),
                                 new Paragraph(183, makeRect(304, 392, 247, 66))
-                        ))/*,
-                        new GiftTextLocations(new TribeGifts(Tribes.GLASS_WALKERS), Arrays.asList(
-
-                        ))*/
+                        )),
+                        new GiftLocations(new TribeGifts(Tribes.GLASS_WALKERS), Arrays.asList(
+                                new Paragraph(183, makeRect(304, 547, 247, 188)),
+                                new Paragraph(184, makeRect(61, 45, 247, 268)),
+                                new Paragraph(184, makeRect(322, 45, 247, 268)),
+                                new Paragraph(185, makeRect(42, 45, 247, 695)),
+                                new Paragraph(185, makeRect(304, 45, 247, 695)),
+                                new Paragraph(186, makeRect(61, 45, 247, 695))
+                        )),
+                        new GiftLocations(new TribeGifts(Tribes.RED_TALONS), Arrays.asList(
+                                new Paragraph(186, makeRect(322, 120, 247, 610)),
+                                new Paragraph(187, makeRect(42, 45, 247, 239)),
+                                new Paragraph(187, makeRect(304, 45, 247, 239)),
+                                new Paragraph(188, makeRect(61, 45, 247, 695)),
+                                new Paragraph(188, makeRect(322, 45, 247, 695)),
+                                new Paragraph(189, makeRect(322, 45, 247, 264))
+                        )),
+                        new GiftLocations(new TribeGifts(Tribes.SHADOW_LORDS), Arrays.asList(
+                                new Paragraph(189, makeRect(322, 385, 247, 352)),
+                                new Paragraph(190, makeRect(61, 45, 247, 211)),
+                                new Paragraph(190, makeRect(322, 45, 247, 211)),
+                                new Paragraph(191, makeRect(42, 45, 247, 695)),
+                                new Paragraph(191, makeRect(304, 45, 247, 695)),
+                                new Paragraph(192, makeRect(61, 45, 247, 278)),
+                                new Paragraph(192, makeRect(322, 45, 247, 224))
+                        )),
+                        new GiftLocations(new TribeGifts(Tribes.SILENT_STRIDERS), Arrays.asList(
+                                new Paragraph(192, makeRect(322, 319, 247, 415)),
+                                new Paragraph(193, makeRect(42, 45, 247, 695)),
+                                new Paragraph(193, makeRect(304, 45, 247, 695)),
+                                new Paragraph(194, makeRect(61, 167, 247, 695)),
+                                new Paragraph(194, makeRect(322, 167, 247, 118))
+                        )),
+                        new GiftLocations(new TribeGifts(Tribes.SILVER_FANGS), Arrays.asList(
+                                new Paragraph(194, makeRect(322, 227, 247, 509)),
+                                new Paragraph(195, makeRect(42, 45, 247, 481)),
+                                new Paragraph(195, makeRect(304, 45, 247, 695)),
+                                new Paragraph(196, makeRect(61, 45, 247, 423))
+                        )),
+                        new GiftLocations(new TribeGifts(Tribes.STARGAZERS), Arrays.asList(
+                                new Paragraph(196, makeRect(61, 557, 247, 171)),
+                                new Paragraph(196, makeRect(322, 45, 247, 695)),
+                                new Paragraph(197, makeRect(42, 45, 247, 695)),
+                                new Paragraph(197, makeRect(304, 45, 247, 571))
+                        )),
+                        new GiftLocations(new TribeGifts(Tribes.UKTENA), Arrays.asList(
+                                new Paragraph(197, makeRect(304, 691, 247, 40)),
+                                new Paragraph(198, makeRect(61, 45, 247, 695)),
+                                new Paragraph(198, makeRect(322, 45, 247, 695)),
+                                new Paragraph(199, makeRect(42, 45, 247, 695)),
+                                new Paragraph(199, makeRect(304, 45, 247, 695)),
+                                new Paragraph(200, makeRect(61, 45, 247, 424))
+                        )),
+                        new GiftLocations(new TribeGifts(Tribes.WENDIGO), Arrays.asList(
+                                new Paragraph(200, makeRect(61, 533, 247, 201)),
+                                new Paragraph(200, makeRect(322, 45, 247, 146)),
+                                new Paragraph(201, makeRect(42, 45, 247, 695)),
+                                new Paragraph(201, makeRect(304, 45, 247, 695)),
+                                new Paragraph(202, makeRect(61, 45, 247, 695)),
+                                new Paragraph(202, makeRect(322, 45, 247, 533))
+                        ))
                 ),
                 Collections.emptyList(),
                 Collections.emptyList(),
@@ -318,6 +375,8 @@ public class Werewolf20Extractor {
 
         public void process(GiftGroup group, List<Paragraph> text) {
             var definition = Pattern.compile("^• (.*) \\(Level (.*)\\) ?— ?(.*)");
+            var speedOfThoughtDefinition = Pattern.compile("^• Speed of Thought \\(Level\\s*");
+            var harmoniousDefinition = Pattern.compile("^• Harmonious Unity of the Emerald Mother \\(Level\\s*");
             var system = Pattern.compile("^System: .*");
             var altSystem = Pattern.compile("(.*) System: (.*)");
             String name = "";
@@ -325,10 +384,23 @@ public class Werewolf20Extractor {
             StringBuilder description = null;
             StringBuilder sys = null;
             for (var p : text) {
+                String appendNext = null;
                 for (var line : getTextAsLines(parser, p)) {
-                    line = line.trim();
+                        line = line.trim();
+                    if (appendNext != null) {
+                        line = appendNext + " " + line;
+                        appendNext = null;
+                    }
+
                     var definitionMatcher = definition.matcher(line);
                     var altSystemMatcher = altSystem.matcher(line);
+
+                    // The only two gift with the definition split across two lines :-/
+                    if (speedOfThoughtDefinition.matcher(line).matches() || harmoniousDefinition.matcher(line).matches()) {
+                        appendNext = line;
+                        continue;
+                    }
+
                     if (definitionMatcher.matches()) {
                         if (description != null) {
                             finaliseGift(group, name, level, description, sys);
@@ -452,12 +524,61 @@ public class Werewolf20Extractor {
                     restrictedAbilities,
                     giftProcessor.gifts.stream()
                             .filter(g -> g.availableFor(name))
+                            .sorted(Comparator.comparing(Gift::name))
                             .collect(Collectors.groupingBy(g -> g.availableTo().stream().filter(gl -> gl.group().name().equals(name)).map(gl -> Rank.from(gl.level())).findFirst().orElseThrow()))
             ));
         }
 
+        for (var a : Auspices.values()) {
+            entries.add(new Auspice(
+                    a,
+                    Collections.emptyList(),
+                    "",
+                    -1,
+                    "",
+                    "",
+                    giftProcessor.gifts.stream()
+                            .filter(g -> g.availableFor(a.displayName()))
+                            .sorted(Comparator.comparing(Gift::name))
+                            .collect(Collectors.groupingBy(g -> g.availableTo().stream().filter(gl -> gl.group().name().equals(a.displayName())).map(gl -> Rank.from(gl.level())).findFirst().orElseThrow()))
+            ));
+        }
+
+        for (var t : Tribes.values()) {
+            entries.add(new Tribe(
+                    t,
+                    "",
+                    "",
+                    "",
+                    "",
+                    "",
+                    -1,
+                    Collections.emptyList(),
+                    giftProcessor.gifts.stream()
+                            .filter(g -> g.availableFor(t.displayName()))
+                            .sorted(Comparator.comparing(Gift::name))
+                            .collect(Collectors.groupingBy(g -> g.availableTo().stream().filter(gl -> gl.group().name().equals(t.displayName())).map(gl -> Rank.from(gl.level())).findFirst().orElseThrow()))
+            ));
+        }
+
         entries.add(new MeleeWeapon(
-                "Claw",
+                "Bite - Crinos, Hispo, Lupus",
+                getText(parser, new Paragraph(297, makeRect(304, 213, 245, 77))).get(0).replaceAll("^\\s*•?\\s*Bite:\\s*", ""),
+                5,
+                1,
+                DamageTypes.AGGRAVATED,
+                WeaponConcealment.NONE,
+                false,
+                false,
+                false,
+                false,
+                false,
+                true
+        ));
+
+        entries.add(new MeleeWeapon(
+                "Claw - Crinos, Hispo",
+                getText(parser, new Paragraph(297, makeRect(304, 335, 246, 52))).get(0).replaceAll("^\\s*•?\\s*Claw:\\s*", ""),
                 6,
                 2,
                 DamageTypes.AGGRAVATED,
@@ -471,10 +592,11 @@ public class Werewolf20Extractor {
         ));
 
         entries.add(new MeleeWeapon(
-                "Bite",
-                5,
-                1,
-                DamageTypes.AGGRAVATED,
+                "Claw - Glabro, Lupus",
+                getText(parser, new Paragraph(297, makeRect(304, 335, 246, 52))).get(0).replaceAll("^\\s*•?\\s*Claw:\\s*", ""),
+                6,
+                2,
+                DamageTypes.BASHING,
                 WeaponConcealment.NONE,
                 false,
                 false,
@@ -490,6 +612,7 @@ public class Werewolf20Extractor {
             if (matcher.matches()) {
                 entries.add(new MeleeWeapon(
                         matcher.group(1).trim(),
+                        "",
                         Integer.parseInt(matcher.group(3).trim()),
                         matcher.group(6) == null ? 0 : Integer.parseInt(matcher.group(6).trim()),
                         DamageTypes.parse(matcher.group(7).trim()),

@@ -79,6 +79,14 @@ public class Utils {
                 .replaceAll("T roll", "Troll")
                 .replaceAll("V enom", "Venom")
                 .replaceAll("hareor", "hare or")
+                .replaceAll("Jam T echnology", "Jam Technology")
+                .replaceAll("T rackless Waste", "Trackless Waste")
+                .replaceAll("Sense W yrm", "Sense Wyrm")
+                .replaceAll("roadrunneror", "roadrunner- or")
+                .replaceAll("T read Sebek's Back", "Tread Sebek's Back")
+                .replaceAll("T alons of the Falcon", "Talons of the Falcon")
+                .replaceAll("Resist T emptation", "Resist Temptation")
+                .replaceAll("Banish T otem", "Banish Totem")
                 .replaceAll("hu- ?mankind", "humankind");
     }
 
