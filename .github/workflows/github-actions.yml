@@ -1,5 +1,5 @@
 name: GraalVM Native Image builds
-on: [push, pull_request]
+on: [push, pull_request, workflow_dispatch]
 jobs:
   build:
     name: VTT WoD Book Parser on ${{ matrix.os }}
