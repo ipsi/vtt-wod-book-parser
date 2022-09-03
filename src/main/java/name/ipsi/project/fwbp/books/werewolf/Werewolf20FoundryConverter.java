@@ -114,6 +114,7 @@ public class Werewolf20FoundryConverter {
                 Packs.Breeds
         );
     }
+
     private FoundryDocument processAuspice(Auspice a) {
         var text = new StringBuilder();
         text.append("<h1>").append(a.name().displayName()).append("</h1>\n");
@@ -139,6 +140,7 @@ public class Werewolf20FoundryConverter {
                 Packs.Auspices
         );
     }
+
     private FoundryDocument processTribe(Tribe t) {
         var text = new StringBuilder();
         text.append("<h1>").append(t.name().displayName()).append("</h1>\n");
