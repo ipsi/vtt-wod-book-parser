@@ -8,6 +8,7 @@ import name.ipsi.project.fwbp.foundry.WeaponConcealment;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.nio.charset.Charset;
 import java.util.*;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
@@ -425,6 +426,13 @@ public class Werewolf20Extractor {
                         log.trace("Found alternative system defintion line");
                         var d = altSystemMatcher.group(1);
                         var s = altSystemMatcher.group(2);
+                        if (description == null) {
+                            throw new RuntimeException(String.format(
+                                    "Found combined description + system line but not ready for description - text line is [%s]; Base64: [%s]",
+                                    line,
+                                    Base64.getEncoder().encodeToString(line.getBytes(Charset.defaultCharset()))
+                            ));
+                        }
                         description.append(" ").append(d);
                         sys = new StringBuilder(s);
                     }
@@ -434,6 +442,13 @@ public class Werewolf20Extractor {
                             sys.append(" ").append(line);
                         } else {
                             log.trace("Found description line");
+                            if (description == null) {
+                                throw new RuntimeException(String.format(
+                                        "Found description line but not ready for description - text line is [%s]; Base64: [%s]",
+                                        line,
+                                        Base64.getEncoder().encodeToString(line.getBytes(Charset.defaultCharset()))
+                                ));
+                            }
                             description.append(" ").append(line);
                         }
                     }
