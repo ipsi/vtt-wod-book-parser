@@ -85,7 +85,9 @@ jobs:
                 ;;
           esac
           RELEASE_VERSION=${GITHUB_REF#refs/tags/v}
-          cp target/vtt-wod-book-parser-${{ matrix.os }}/vtt-wod-book-parser$suffix $stage/vtt-wod-book-parser-$osName-$RELEASE_VERSION-x64$suffix
+          ls -la
+          ls -la target/
+          cp target/vtt-wod-book-parser$suffix $stage/vtt-wod-book-parser-$osName-$RELEASE_VERSION-x64$suffix
           cd $stage
           ARCHIVE_SUFFIX=""
           COMPRESSION_COMMAND=""
