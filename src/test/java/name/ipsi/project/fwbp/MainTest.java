@@ -19,7 +19,8 @@ class MainTest {
 
     @Test
     void testMainMethod() throws Exception {
-        System.setIn(new ByteArrayInputStream("1".getBytes(Charset.defaultCharset())));
+        // Tests are wonky on CI - trying this to see if it helps...
+        System.setIn(new ByteArrayInputStream("1\n1\n1\n1\n".getBytes(Charset.defaultCharset())));
 
         Main.main(new String[]{});
 
