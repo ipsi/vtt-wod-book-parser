@@ -41,6 +41,7 @@ jobs:
         env:
           DTRPG_TOKEN: "${{ secrets.DTRPG_TOKEN }}"
           MAVEN_OPTS: "${{ matrix.native-build-args }}"
+          LOG_LEVEL: "trace"
 
       - name: Upload binary
         uses: actions/upload-artifact@v2

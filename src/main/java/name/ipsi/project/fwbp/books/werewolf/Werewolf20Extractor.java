@@ -4,17 +4,19 @@ import com.itextpdf.kernel.pdf.canvas.parser.PdfDocumentContentParser;
 import name.ipsi.project.fwbp.books.*;
 import name.ipsi.project.fwbp.books.werewolf.locations.*;
 import name.ipsi.project.fwbp.foundry.DamageTypes;
-import name.ipsi.project.fwbp.foundry.Item;
 import name.ipsi.project.fwbp.foundry.WeaponConcealment;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.*;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 import static name.ipsi.project.fwbp.books.Utils.*;
-import static name.ipsi.project.fwbp.books.Utils.getText;
 
 public class Werewolf20Extractor {
+
+    public static final Logger log = LoggerFactory.getLogger(Werewolf20Extractor.class);
 
     public static final String BOOK_NAME = "Werewolf: The Apocalypse 20th Anniversary Edition";
     public static final String BOOK_ID = "112023";
@@ -383,10 +385,12 @@ public class Werewolf20Extractor {
             String level = "";
             StringBuilder description = null;
             StringBuilder sys = null;
+            log.trace("Starting to process text for gift");
             for (var p : text) {
+                log.trace("Processing partial text fragment for gift");
                 String appendNext = null;
                 for (var line : getTextAsLines(parser, p)) {
-                        line = line.trim();
+                    line = line.trim();
                     if (appendNext != null) {
                         line = appendNext + " " + line;
                         appendNext = null;
@@ -397,11 +401,13 @@ public class Werewolf20Extractor {
 
                     // The only two gift with the definition split across two lines :-/
                     if (speedOfThoughtDefinition.matcher(line).matches() || harmoniousDefinition.matcher(line).matches()) {
+                        log.trace("Gift has definition split across two lines - found first");
                         appendNext = line;
                         continue;
                     }
 
                     if (definitionMatcher.matches()) {
+                        log.trace("Found gift definition, finalising previous gift");
                         if (description != null) {
                             finaliseGift(group, name, level, description, sys);
                             description = null;
@@ -411,9 +417,12 @@ public class Werewolf20Extractor {
                         name = definitionMatcher.group(1);
                         level = definitionMatcher.group(2);
                         description = new StringBuilder(definitionMatcher.group(3));
+                        log.trace("Starting gift {}, {}, {}", name, level, description);
                     } else if (system.matcher(line).matches()) {
+                        log.trace("Found system definition line");
                         sys = new StringBuilder(line.replaceAll("^System: ", ""));
                     } else if (altSystemMatcher.matches()) {
+                        log.trace("Found alternative system defintion line");
                         var d = altSystemMatcher.group(1);
                         var s = altSystemMatcher.group(2);
                         description.append(" ").append(d);
@@ -421,13 +430,16 @@ public class Werewolf20Extractor {
                     }
                     else {
                         if (sys != null) {
+                            log.trace("Found system line");
                             sys.append(" ").append(line);
                         } else {
+                            log.trace("Found description line");
                             description.append(" ").append(line);
                         }
                     }
                 }
             }
+            log.trace("Finalising final gift in section");
             finaliseGift(group, name, level, description, sys);
         }
 
@@ -482,19 +494,31 @@ public class Werewolf20Extractor {
         //new Paragraph(odd, makeRect(42, 45, 247, 695)),
         //new Paragraph(odd, makeRect(304, 45, 247, 695))
 
+        log.debug("Extracting Gifts");
         var giftProcessor = new GiftProcessor(parser);
+
         for (var textLocations : BOOK_DETAILS.gifts()) {
+            log.trace("Extracting gift from {}", textLocations);
             giftProcessor.process(textLocations.group(), textLocations.locations());
+            log.trace("Extracted {} gifts", giftProcessor.gifts.size());
         }
 
         var entries = new ArrayList<BookEntry>(giftProcessor.gifts);
 
+        log.trace("Processing breeds");
         for (var breed : BOOK_DETAILS.breeds()) {
+            log.trace("Processing {}", breed);
+            log.trace("Getting name");
             var name = getText(parser, breed.nameLocation()).get(0);
+            log.trace("Getting description");
             var description = String.join("\n", getText(parser, breed.descriptionLocation()));
+            log.trace("Getting nicknames");
             var nicknames = getText(parser, breed.nicknamesLocation()).get(0);
+            log.trace("Getting initialGnosis");
             var initialGnosis = getText(parser, breed.initialGnosisLocation()).get(0);
+            log.trace("Getting beginningGifts");
             var beginningGifts = getText(parser, breed.beginningGiftsLocation()).get(0);
+            log.trace("Getting deformities");
             Deformities deformities = null;
             if (breed.deformityLocations() != null) {
                 String deformitiesDesc = getText(parser, breed.deformityLocations().descriptionLocation()).get(0);
@@ -505,6 +529,7 @@ public class Werewolf20Extractor {
                 deformities = new Deformities(deformitiesDesc, deformitiesList);
             }
 
+            log.trace("Getting restrictedAbilities");
             RestrictedAbilities restrictedAbilities = null;
             if (breed.restrictedAbilitiesLocations() != null) {
                 var desc = getText(parser, breed.restrictedAbilitiesLocations().descriptionLocation()).get(0);
@@ -513,6 +538,7 @@ public class Werewolf20Extractor {
                 restrictedAbilities = new RestrictedAbilities(desc, skills, knowledges);
             }
 
+            log.trace("Processing beginning gifts");
             var beginningGiftsList = Arrays.asList(beginningGifts.split("\\s*,\\s*"));
             entries.add(new Breed(
                     name,
@@ -529,7 +555,9 @@ public class Werewolf20Extractor {
             ));
         }
 
+        log.trace("Processing Auspices");
         for (var a : Auspices.values()) {
+            log.trace("Processing {}", a);
             entries.add(new Auspice(
                     a,
                     Collections.emptyList(),
@@ -544,7 +572,9 @@ public class Werewolf20Extractor {
             ));
         }
 
+        log.trace("Processing Tribes");
         for (var t : Tribes.values()) {
+            log.trace("Processing {}", t);
             entries.add(new Tribe(
                     t,
                     "",
@@ -606,10 +636,13 @@ public class Werewolf20Extractor {
                 true
         ));
 
+        log.trace("Processing Melee weapons");
         var meleeWeaponPattern = Pattern.compile("([\\w\\s]+)(\\**)?\\s*(\\d+)(\\**)?\\s*Strength(\\s*\\+\\s*(\\d+))?/([BLA])(\\**)?\\s*([PJTN])\\s*");
         for (var line : getTextAsLines(parser, BOOK_DETAILS.weapons().meleeWeapons())) {
+            log.trace("Processing weapon line");
             var matcher = meleeWeaponPattern.matcher(line);
             if (matcher.matches()) {
+                log.trace("Weapon matches");
                 entries.add(new MeleeWeapon(
                         matcher.group(1).trim(),
                         "",
@@ -624,8 +657,9 @@ public class Werewolf20Extractor {
                         matcher.group(8) != null && matcher.group(8).trim().equals("*****"),
                         false
                 ));
+                log.trace("Weapon processed");
             } else {
-                System.out.println("Line " + line + " doesn't match against weapon regex");
+                log.warn("Line {} doesn't match against weapon regex", line);
             }
         }
 
