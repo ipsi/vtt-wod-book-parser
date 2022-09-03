@@ -48,6 +48,7 @@ jobs:
           path: target/vtt-wod-book-parser*
   publish-to-github:
     name: Publish to Github
+    needs: [build]
     runs-on: ubuntu-latest
     if: startsWith(github.ref, 'refs/tags/')
     strategy:
