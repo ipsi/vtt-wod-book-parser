@@ -22,21 +22,21 @@ class MainTest {
 
         Main.main(new String[]{});
 
-        var expectedFiles = new ArrayList<String>();
-        expectedFiles.add("modules/wod-werewolf-20-core/module.json");
-        expectedFiles.add("modules/wod-werewolf-20-core/packs/auspices.db");
-        expectedFiles.add("modules/wod-werewolf-20-core/packs/breeds.db");
-        expectedFiles.add("modules/wod-werewolf-20-core/packs/gifts.db");
-        expectedFiles.add("modules/wod-werewolf-20-core/packs/tribes.db");
-        expectedFiles.add("modules/wod-werewolf-20-core/packs/weapons.db");
+        var expectedFiles = new ArrayList<Path>();
+        expectedFiles.add(Path.of("modules", "wod-werewolf-20-core", "module.json"));
+        expectedFiles.add(Path.of("modules", "wod-werewolf-20-core", "packs", "auspices.db"));
+        expectedFiles.add(Path.of("modules", "wod-werewolf-20-core", "packs", "breeds.db"));
+        expectedFiles.add(Path.of("modules", "wod-werewolf-20-core", "packs", "gifts.db"));
+        expectedFiles.add(Path.of("modules", "wod-werewolf-20-core", "packs", "tribes.db"));
+        expectedFiles.add(Path.of("modules", "wod-werewolf-20-core", "packs", "weapons.db"));
         expectedFiles.sort(Comparator.naturalOrder());
 
-        var actualFiles = new ArrayList<String>();
+        var actualFiles = new ArrayList<Path>();
 
         Files.walkFileTree(Path.of("modules", "wod-werewolf-20-core"), new SimpleFileVisitor<>() {
             @Override
             public FileVisitResult visitFile(Path file, BasicFileAttributes attrs) {
-                actualFiles.add(file.toString());
+                actualFiles.add(file);
                 return FileVisitResult.CONTINUE;
             }
         });
