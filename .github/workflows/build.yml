@@ -40,9 +40,9 @@ jobs:
         run: mvn -P native package
         env:
           MAVEN_OPTS: "${{ matrix.native-build-args }}"
-#
-#      - name: Upload binary
-#        uses: actions/upload-artifact@v2
-#        with:
-#          name: vtt-wod-book-parser-${{ matrix.os }}
-#          path: target/vtt-wod-book-parser*
+
+      - name: Upload binary
+        uses: actions/upload-artifact@v2
+        with:
+          name: vtt-wod-book-parser-${{ matrix.os }}
+          path: target/vtt-wod-book-parser*
