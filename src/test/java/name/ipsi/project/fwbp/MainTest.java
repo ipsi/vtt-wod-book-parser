@@ -19,8 +19,7 @@ class MainTest {
 
     @Test
     void testMainMethod() throws Exception {
-        // Tests are wonky on CI - trying this to see if it helps...
-        System.setIn(new ByteArrayInputStream("1\n1\n1\n1\n".getBytes(Charset.defaultCharset())));
+        System.setIn(new ByteArrayInputStream("1".getBytes(Charset.defaultCharset())));
 
         Main.main(new String[]{});
 
@@ -37,7 +36,7 @@ class MainTest {
 
         Files.walkFileTree(Path.of("modules", "wod-werewolf-20-core"), new SimpleFileVisitor<>() {
             @Override
-            public FileVisitResult visitFile(Path file, BasicFileAttributes attrs) throws IOException {
+            public FileVisitResult visitFile(Path file, BasicFileAttributes attrs) {
                 actualFiles.add(file.toString());
                 return FileVisitResult.CONTINUE;
             }

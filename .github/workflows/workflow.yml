@@ -39,6 +39,7 @@ jobs:
       - name: Maven - Package
         run: mvn -P native package
         env:
+          DTRPG_TOKEN: "${{ secrets.DTRPG_TOKEN }}"
           MAVEN_OPTS: "${{ matrix.native-build-args }}"
 
       - name: Upload binary
