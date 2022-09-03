@@ -50,7 +50,7 @@ jobs:
     name: Publish to Github
     needs: [build]
     runs-on: ubuntu-latest
-    if: startsWith(github.ref, 'refs/tags/')
+    if: startsWith(github.ref, 'refs/tags/v')
     strategy:
       matrix:
         include:
@@ -84,9 +84,9 @@ jobs:
                 suffix=".unknown"
                 ;;
           esac
-          cp target/* $stage/vtt-wod-book-parser-$osName-x64$suffix
+          RELEASE_VERSION=${GITHUB_REF#refs/tags/v}
+          cp target/vtt-wod-book-parser-${{ matrix.os }}/vtt-wod-book-parser$suffix $stage/vtt-wod-book-parser-$osName-$RELEASE_VERSION-x64$suffix
           cd $stage
-          RELEASE_VERSION=${GITHUB_REF#refs/tags/}
           ARCHIVE_SUFFIX=""
           COMPRESSION_COMMAND=""
           if [[ "$osName" == "windows" ]]; then
@@ -97,7 +97,7 @@ jobs:
             COMPRESSION_COMMAND="tar czf"
           fi
           
-          ASSET_NAME="vtt-wod-book-parser-$osName-$RELEASE_VERSION.$ARCHIVE_SUFFIX"
+          ASSET_NAME="vtt-wod-book-parser-$osName-$RELEASE_VERSION-x64.$ARCHIVE_SUFFIX"
           ASSET_PATH="$src/$ASSET_NAME"
           CHECKSUM_PATH="$ASSET_PATH.sha256"
           echo "ASSET_PATH=$ASSET_PATH" >> $GITHUB_ENV
