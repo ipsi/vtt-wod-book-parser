@@ -97,6 +97,7 @@ jobs:
             ARCHIVE_SUFFIX="zip"
             COMPRESSION_COMMAND="zip -r"
           else
+            chmod +x vtt-wod-book-parser-$osName-$RELEASE_VERSION-x64$suffix
             ARCHIVE_SUFFIX="tgz"
             COMPRESSION_COMMAND="tar czf"
           fi
