@@ -1,6 +1,7 @@
 package name.ipsi.project.fwbp.foundry.core;
 
 public enum Packs {
+    Adventures,
     Breeds,
     Auspices,
     Tribes,

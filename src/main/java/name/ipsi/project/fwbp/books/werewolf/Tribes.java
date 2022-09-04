@@ -28,6 +28,9 @@ public enum Tribes {
     public String displayName() {
         return displayName;
     }
+    public String urlName() {
+        return displayName.toLowerCase().replaceAll("\\s+", "-");
+    }
     public int imagePage() {
         return imagePage;
     }

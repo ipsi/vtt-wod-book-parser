@@ -3,7 +3,7 @@ package name.ipsi.project.fwbp.foundry.core;
 import com.fasterxml.jackson.core.util.DefaultIndenter;
 import com.fasterxml.jackson.core.util.DefaultPrettyPrinter;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import name.ipsi.project.fwbp.foundry.wod.werewolf.Werewolf20FoundryConverter;
+import name.ipsi.project.fwbp.books.werewolf.Tribes;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -14,6 +14,7 @@ import java.nio.file.attribute.BasicFileAttributes;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.stream.Stream;
 
 public final class ModuleGenerator {
@@ -27,10 +28,8 @@ public final class ModuleGenerator {
     private final String author;
     private final String minVersion;
     private final String compatibleVersion;
-    private final Collection<FoundryDocument> foundryDocuments;
 
-
-    public ModuleGenerator(ObjectMapper objectMapper, String name, String title, String description, String version, String author, String minVersion, String compatibleVersion, Collection<FoundryDocument> foundryDocuments) {
+    public ModuleGenerator(ObjectMapper objectMapper, String name, String title, String description, String version, String author, String minVersion, String compatibleVersion) {
         this.objectMapper = objectMapper;
         this.name = name;
         this.title = title;
@@ -39,27 +38,12 @@ public final class ModuleGenerator {
         this.author = author;
         this.minVersion = minVersion;
         this.compatibleVersion = compatibleVersion;
-        this.foundryDocuments = foundryDocuments;
 
         this.outputPath = Path.of("modules", name);
     }
 
-    public void createModule() throws IOException {
-        log.trace("Creating module directory");
-        if (!Files.isDirectory(outputPath)) {
-            log.info("Output directory [{}] does not exist - creating", outputPath);
-            Files.createDirectories(outputPath);
-        } else {
-            log.info("Output directory [{}] already exists - deleting", outputPath);
-            Files.walkFileTree(outputPath, new SimpleFileVisitor<>() {
-                @Override
-                public FileVisitResult visitFile(Path file, BasicFileAttributes attrs) throws IOException {
-                    log.debug("Deleting file {}", file);
-                    Files.delete(file);
-                    return FileVisitResult.CONTINUE;
-                }
-            });
-        }
+    public void createModule(Collection<FoundryDocument> foundryDocuments) throws IOException {
+        ensureModuleDirectory();
 
         var modulePacks = new ArrayList<ModulePack>();
         Files.createDirectories(outputPath.resolve("packs"));
@@ -102,6 +86,68 @@ public final class ModuleGenerator {
         Files.writeString(outputPath.resolve("module.json"), objectMapper.writer(prettyPrinter).writeValueAsString(module), StandardCharsets.UTF_8);
     }
 
+    public void createModule(Adventure adventure, HashMap<String, byte[]> images) throws IOException {
+        ensureModuleDirectory();
+
+        Files.createDirectories(outputPath.resolve("packs"));
+
+        log.trace("Creating pack - Adventure");
+        var pack = createPack("Werewolf: the Apocalypse 20th Anniversary Edition", "w20", DocumentTypes.ADVENTURE, Stream.of(adventure));
+
+        var module = new Module(
+                name,
+                title,
+                description,
+                version,
+                Collections.singletonList(new Author(
+                        "Andrew Thorburn",
+                        "",
+                        "ipsi#2461"
+                )),
+                new Compatibility(
+                        "10",
+                        "10",
+                        "10"
+                ),
+                Collections.singletonList(pack)
+        );
+
+        var imagesDirectory = outputPath.resolve("images");
+        if (!Files.isDirectory(imagesDirectory)) {
+            Files.createDirectories(imagesDirectory);
+        }
+
+        Files.write(imagesDirectory.resolve("adventure-cover.jpeg"), images.get("26:Im1"));
+
+        for(var t : Tribes.values()) {
+            Files.write(imagesDirectory.resolve(t.urlName() + "-splash.jpeg"), images.get(String.format("%d:%s", t.imagePage(), t.imageName())));
+        }
+
+        log.trace("Writing module data to file");
+        var prettyPrinter = new DefaultPrettyPrinter()
+                .withObjectIndenter(DefaultIndenter.SYSTEM_LINEFEED_INSTANCE.withLinefeed("\n"));
+
+        Files.writeString(outputPath.resolve("module.json"), objectMapper.writer(prettyPrinter).writeValueAsString(module), StandardCharsets.UTF_8);
+    }
+
+    private void ensureModuleDirectory() throws IOException {
+        log.trace("Creating module directory");
+        if (!Files.isDirectory(outputPath)) {
+            log.info("Output directory [{}] does not exist - creating", outputPath);
+            Files.createDirectories(outputPath);
+        } else {
+            log.info("Output directory [{}] already exists - deleting", outputPath);
+            Files.walkFileTree(outputPath, new SimpleFileVisitor<>() {
+                @Override
+                public FileVisitResult visitFile(Path file, BasicFileAttributes attrs) throws IOException {
+                    log.debug("Deleting file {}", file);
+                    Files.delete(file);
+                    return FileVisitResult.CONTINUE;
+                }
+            });
+        }
+    }
+
     private ModulePack createPack(String label, String packName, DocumentTypes type, Stream<FoundryDocument> foundryDocuments) throws IOException {
         var path = String.format("./packs/%s.db", packName);
         var packFile = outputPath.resolve(path);
@@ -121,8 +167,7 @@ public final class ModuleGenerator {
                 packName,
                 label,
                 path,
-                Werewolf20FoundryConverter.MODULE_NAME,
-                type == DocumentTypes.ITEM ? "worldofdarkness" : null,
+                type == DocumentTypes.ITEM || type == DocumentTypes.ADVENTURE ? "worldofdarkness" : null,
                 type
         );
     }

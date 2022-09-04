@@ -8,7 +8,7 @@ import java.util.Map;
 
 public record Auspice(
         String id,
-        Auspices name,
+        String name,
         List<String> altNames,
         String description,
         int initialRage,
@@ -16,7 +16,7 @@ public record Auspice(
         String quote,
         Map<Rank, List<Gift>> gifts
 ) implements BookEntry {
-    public Auspice(Auspices name, List<String> altNames, String description, int initialRage, String stereotype, String quote, Map<Rank, List<Gift>> gifts) {
-        this(FoundryUtils.generateId("auspice", name.displayName()), name, altNames, description, initialRage, stereotype, quote, gifts);
+    public Auspice(String name, List<String> altNames, String description, int initialRage, String stereotype, String quote, Map<Rank, List<Gift>> gifts) {
+        this(FoundryUtils.generateId("auspice", name), name, altNames, description, initialRage, stereotype, quote, gifts);
     }
 }

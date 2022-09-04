@@ -3,24 +3,20 @@ package name.ipsi.project.fwbp.foundry.wod.werewolf;
 import name.ipsi.project.fwbp.books.shared.BookEntry;
 import name.ipsi.project.fwbp.books.shared.MeleeWeapon;
 import name.ipsi.project.fwbp.books.werewolf.*;
-import name.ipsi.project.fwbp.foundry.core.FoundryDocument;
-import name.ipsi.project.fwbp.foundry.core.Item;
-import name.ipsi.project.fwbp.foundry.core.Journal;
-import name.ipsi.project.fwbp.foundry.core.Packs;
+import name.ipsi.project.fwbp.foundry.core.*;
 import name.ipsi.project.fwbp.foundry.wod.ItemTypes;
 import name.ipsi.project.fwbp.foundry.wod.MeleeWeaponData;
 import name.ipsi.project.fwbp.foundry.wod.PowerTypes;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.List;
+import java.util.*;
 import java.util.stream.Collectors;
 
 public class Werewolf20FoundryConverter {
     public static final Logger log = LoggerFactory.getLogger(Werewolf20FoundryConverter.class);
+
+    private Map<String, String> folderIdsByName;
 
     public static final String MODULE_NAME = "wod-werewolf-20-core";
 
@@ -45,7 +41,72 @@ public class Werewolf20FoundryConverter {
         return documents;
     }
 
-    private FoundryDocument processMeleeWeapon(MeleeWeapon meleeWeapon) {
+    public Adventure processAsAdventure(List<BookEntry> entries) {
+        log.trace("Converting book entries tp adventure");
+
+        folderIdsByName = new HashMap<>();
+        folderIdsByName.put("Garou", FoundryUtils.generateId("folder", "garou"));
+        folderIdsByName.put("Gifts - Garou", FoundryUtils.generateId("folder", "gifts-garou"));
+        folderIdsByName.put("Weapons - Melee", FoundryUtils.generateId("folder", "weapons-melee"));
+
+        var items = new ArrayList<Item>();
+        var journals = new ArrayList<Journal>();
+        var folders = new ArrayList<Folder>();
+        List<Page> breedJournalPages = new ArrayList<>();
+        var breedJournal = new Journal(FoundryUtils.generateId("journal", "breeds"), "Breeds", folderIdsByName.get("Garou"), 1.0, Collections.emptyMap(), breedJournalPages, DocumentOwnershipLevel.defaultObserver());
+        journals.add(breedJournal);
+        List<Page> auspiceJournalPages = new ArrayList<>();
+        var auspiceJournal = new Journal(FoundryUtils.generateId("journal", "auspices"), "Auspices", folderIdsByName.get("Garou"), 1.0, Collections.emptyMap(), auspiceJournalPages, DocumentOwnershipLevel.defaultObserver());
+        journals.add(auspiceJournal);
+        List<Page> tribeJournalPages = new ArrayList<>();
+        var tribeJournal = new Journal(FoundryUtils.generateId("journal", "tribes"), "Tribes", folderIdsByName.get("Garou"), 1.0, Collections.emptyMap(), tribeJournalPages, DocumentOwnershipLevel.defaultObserver());
+        journals.add(tribeJournal);
+
+        folders.add(new Folder(folderIdsByName.get("Garou"), "Garou", DocumentTypes.JOURNAL_ENTRY, FolderSortingModes.MANUAL, 1.0, null, Collections.emptyMap(), null, null));
+        folders.add(new Folder(folderIdsByName.get("Gifts - Garou"), "Gifts - Garou", DocumentTypes.ITEM, FolderSortingModes.ALPHABETICAL, 1.0, null, Collections.emptyMap(), null, null));
+        folders.add(new Folder(folderIdsByName.get("Weapons - Melee"), "Weapons - Melee", DocumentTypes.ITEM, FolderSortingModes.ALPHABETICAL, 2.0, null, Collections.emptyMap(), null, null));
+
+        for (var entry : entries) {
+            log.trace("Converting book entry {}", entry.getClass().getSimpleName());
+            if (entry instanceof Breed b) {
+                var j = processBreed(b);
+                breedJournalPages.add(Page.createTextPage(j.getId(), j.getName(), j.getContent()));
+            } else if (entry instanceof Auspice a) {
+                var j = processAuspice(a);
+                auspiceJournalPages.add(Page.createTextPage(j.getId(), j.getName(), j.getContent()));
+            } else if (entry instanceof Tribe t) {
+                var j = processTribe(t);
+                tribeJournalPages.add(Page.createTextPage(j.getId(), j.getName(), j.getContent()));
+            } else if (entry instanceof Gift g) {
+                items.add(processGift(g));
+            } else if (entry instanceof MeleeWeapon mw) {
+                items.add(processMeleeWeapon(mw));
+            }
+        }
+
+        return new Adventure(
+                FoundryUtils.generateId("adventure", "werewolf-20"),
+                "Werewolf: the Apocalypse 20th Anniversary Edition",
+                "modules/" + MODULE_NAME + "/images/adventure-cover.jpeg",
+                "<p>An automated conversion of the W:tA 20th Anniversary PDF into a Foundry Module</p>",
+                Collections.emptyList(),
+                Collections.emptyList(),
+                items,
+                Collections.emptyList(),
+                journals,
+                Collections.emptyList(),
+                Collections.emptyList(),
+                Collections.emptyList(),
+                Collections.emptyList(),
+                folders,
+                1.0,
+                Collections.emptyMap(),
+                "Automated conversion of W:tA 20 PDF",
+                null
+        );
+    }
+
+    private Item processMeleeWeapon(MeleeWeapon meleeWeapon) {
         log.trace("Converting melee weapon");
         return new Item(
                 meleeWeapon.id(),
@@ -83,7 +144,7 @@ public class Werewolf20FoundryConverter {
                         "wod.types.meleeweapon"
                 ),
                 "",
-                "",
+                folderIdsByName.get("Weapons - Melee"),
                 0,
                 Collections.singletonMap("default", 2),
                 Collections.emptyMap(),
@@ -91,20 +152,18 @@ public class Werewolf20FoundryConverter {
         );
     }
 
-    private FoundryDocument processBreed(Breed b) {
+    private Journal processBreed(Breed b) {
         log.trace("Converting Breed {}", b.name());
         var text = new StringBuilder();
-        log.trace("Adding name");
-        text.append("<h1>").append(b.name()).append("</h1>\n");
         log.trace("Adding description");
         text.append("<p>").append(String.join("</p><p>", b.description().split("\n"))).append("</p>\n");
         log.trace("Adding nicknames");
         text.append("<p><strong>Nicknames:</strong> ").append(b.nicknames()).append("</p>\n");
         log.trace("Adding initial gnosis");
         text.append("<p><strong>Initial Gnosis:</strong> ").append(b.initialGnosis()).append("</p>\n");
-        log.trace("Adding beginning gifts");
-        text.append("<p><strong>Beginning Gifts:</strong> ").append(b.beginningGifts().stream()
-                .map(g -> String.format("@Item[%s]{%s}", g.id(), g.name())).collect(Collectors.joining(", "))).append("</p>");
+
+        appendBeginningGifts(text, b.beginningGifts());
+
         log.trace("Adding deformities");
         if (b.deformities() != null) {
             text.append("\n<h2>Deformities</h2>");
@@ -122,14 +181,7 @@ public class Werewolf20FoundryConverter {
             text.append("\n<p><strong>Knowledges:</strong> ").append(b.restrictedAbilities().knowledges()).append("</p>");
         }
 
-        log.trace("Adding gifts");
-        text.append("\n<h2>Gifts</h2>");
-        for (var f : b.gifts().entrySet().stream().sorted(Comparator.comparingInt(o -> o.getKey().sortKey())).toList()) {
-            text.append("\n<h3>Rank ").append(f.getKey().displayName()).append(" Gifts</h3>");
-            for (var g : f.getValue().stream().sorted(Comparator.comparing(Gift::name)).toList()) {
-                text.append("\n<p>").append(String.format("@Item[%s]{%s}", g.id(), g.name())).append("</p>");
-            }
-        }
+        appendAllGifts(text, b.gifts());
 
         return new Journal(
                 b.id(),
@@ -140,60 +192,43 @@ public class Werewolf20FoundryConverter {
         );
     }
 
-    private FoundryDocument processAuspice(Auspice a) {
+    private Journal processAuspice(Auspice a) {
         log.trace("Converting Auspice {}", a.name());
         var text = new StringBuilder();
-        log.trace("Adding name");
-        text.append("<h1>").append(a.name().displayName()).append("</h1>\n");
+        log.trace("Adding titles");
+        text.append("<p><em>").append(String.join(", ", a.altNames())).append("</em></p>\n");
         log.trace("Adding description");
         text.append("<p>").append(String.join("</p><p>", a.description().split("\n"))).append("</p>\n");
-        log.trace("Adding nicknames");
-        text.append("<p><strong>Nicknames:</strong> ").append(a.altNames()).append("</p>\n");
         log.trace("Adding initial rage");
         text.append("<p><strong>Initial Rage:</strong> ").append(a.initialRage()).append("</p>\n");
-        log.trace("Adding beginning gifts");
-        text.append("<p><strong>Beginning Gifts:</strong> ").append(a.gifts().get(Rank.ONE).stream()
-                .map(g -> String.format("@Item[%s]{%s}", g.id(), g.name())).collect(Collectors.joining(", "))).append("</p>");
+        log.trace("Adding stereotype");
+        text.append("<p><strong>Stereotype:</strong> <em>").append(a.stereotype()).append("</em></p>\n");
+        log.trace("Adding quote");
+        text.append("<p><strong>Quote:</strong> <em>").append(a.quote()).append("</em></p>\n");
 
-        log.trace("Adding gifts");
-        text.append("\n<h2>Gifts</h2>");
-        for (var f : a.gifts().entrySet().stream().sorted(Comparator.comparingInt(o -> o.getKey().sortKey())).toList()) {
-            text.append("\n<h3>Rank ").append(f.getKey().displayName()).append(" Gifts</h3>");
-            for (var g : f.getValue().stream().sorted(Comparator.comparing(Gift::name)).toList()) {
-                text.append("\n<p>").append(String.format("@Item[%s]{%s}", g.id(), g.name())).append("</p>");
-            }
-        }
+        appendGifts(text, a.gifts());
 
         return new Journal(
                 a.id(),
-                a.name().displayName(),
+                a.name(),
                 text.toString(),
                 null,
                 Packs.Auspices
         );
     }
 
-    private FoundryDocument processTribe(Tribe t) {
+    private Journal processTribe(Tribe t) {
         log.trace("Converting Tribe {}", t.name());
         var text = new StringBuilder();
-        log.trace("Adding name");
-        text.append("<h1>").append(t.name().displayName()).append("</h1>\n");
+        log.trace("Adding image");
+        text.append("<img src=\"modules/").append(MODULE_NAME).append("/images/").append(t.name().urlName())
+                .append("-splash.jpeg\" height=\"400\" alt=\"").append(t.name().displayName()).append(" Splash Image\">\n");
         log.trace("Adding description");
         text.append("<p>").append(String.join("</p><p>", t.description().split("\n"))).append("</p>\n");
         log.trace("Adding initial willpower");
         text.append("<p><strong>Initial Willpower:</strong> ").append(t.initialWillpower()).append("</p>\n");
-        log.trace("Adding beginning gifts");
-        text.append("<p><strong>Beginning Gifts:</strong> ").append(t.gifts().get(Rank.ONE).stream()
-                .map(g -> String.format("@Item[%s]{%s}", g.id(), g.name())).collect(Collectors.joining(", "))).append("</p>");
 
-        log.trace("Adding gifts");
-        text.append("\n<h2>Gifts</h2>");
-        for (var f : t.gifts().entrySet().stream().sorted(Comparator.comparingInt(o -> o.getKey().sortKey())).toList()) {
-            text.append("\n<h3>Rank ").append(f.getKey().displayName()).append(" Gifts</h3>");
-            for (var g : f.getValue().stream().sorted(Comparator.comparing(Gift::name)).toList()) {
-                text.append("\n<p>").append(String.format("@Item[%s]{%s}", g.id(), g.name())).append("</p>");
-            }
-        }
+        appendGifts(text, t.gifts());
 
         return new Journal(
                 t.id(),
@@ -204,7 +239,30 @@ public class Werewolf20FoundryConverter {
         );
     }
 
-    private FoundryDocument processGift(Gift g) {
+    private void appendGifts(StringBuilder text, Map<Rank, List<Gift>> gifts) {
+        appendBeginningGifts(text, gifts.get(Rank.ONE));
+
+        appendAllGifts(text, gifts);
+    }
+
+    private void appendBeginningGifts(StringBuilder text, List<Gift> gifts) {
+        log.trace("Adding beginning gifts");
+        text.append("<p><strong>Beginning Gifts:</strong> ").append(gifts.stream()
+                .map(g -> String.format("@Item[%s]{%s}", g.id(), g.name())).collect(Collectors.joining(", "))).append("</p>");
+    }
+
+    private void appendAllGifts(StringBuilder text, Map<Rank, List<Gift>> gifts) {
+        log.trace("Adding gifts");
+        text.append("\n<h2>Gifts</h2>");
+        for (var f : gifts.entrySet().stream().sorted(Comparator.comparingInt(o -> o.getKey().sortKey())).toList()) {
+            text.append("\n<h3>Rank ").append(f.getKey().displayName()).append(" Gifts</h3>");
+            for (var g : f.getValue().stream().sorted(Comparator.comparing(Gift::name)).toList()) {
+                text.append("\n<p>").append(String.format("@Item[%s]{%s}", g.id(), g.name())).append("</p>");
+            }
+        }
+    }
+
+    private Item processGift(Gift g) {
         log.trace("Converting Gift {}", g.name());
         log.trace("Adding description");
         var description = new StringBuilder(g.description());
@@ -239,7 +297,7 @@ public class Werewolf20FoundryConverter {
                         g.system()
                 ),
                 "",
-                null,
+                folderIdsByName.get("Gifts - Garou"),
                 0,
                 Collections.singletonMap("default", 2),
                 Collections.emptyMap(),

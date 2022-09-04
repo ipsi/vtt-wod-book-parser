@@ -3,12 +3,14 @@ package name.ipsi.project.fwbp;
 import ch.qos.logback.classic.Level;
 import ch.qos.logback.classic.LoggerContext;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.itextpdf.kernel.pdf.PdfName;
+import com.itextpdf.kernel.pdf.PdfStream;
 import com.itextpdf.kernel.pdf.canvas.parser.PdfDocumentContentParser;
 import name.ipsi.project.fwbp.books.werewolf.Werewolf20Extractor;
-import name.ipsi.project.fwbp.foundry.wod.werewolf.Werewolf20FoundryConverter;
 import name.ipsi.project.fwbp.dtrpg.Downloader;
 import name.ipsi.project.fwbp.foundry.core.FoundryUtils;
 import name.ipsi.project.fwbp.foundry.core.ModuleGenerator;
+import name.ipsi.project.fwbp.foundry.wod.werewolf.Werewolf20FoundryConverter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -17,6 +19,8 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.StandardOpenOption;
+import java.util.Arrays;
+import java.util.HashMap;
 import java.util.Scanner;
 import java.util.stream.Collectors;
 
@@ -45,12 +49,30 @@ public class Main {
                 var doc = Downloader.downloadFile(Werewolf20Extractor.BOOK_ID, token);
                 log.debug("File downloaded");
 
+                var images = new HashMap<String, byte[]>();
+
+                for (int i = 1; i <= doc.getNumberOfPages(); i++) {
+                    var p = doc.getPage(i);
+                    for (var rn : Arrays.asList(PdfName.ExtGState, PdfName.Pattern, PdfName.XObject)) {
+                        var r = p.getResources().getResource(rn);
+                        if (r != null) {
+                            for (var a : r.entrySet()) {
+                                if (a.getValue() instanceof PdfStream pdfStream) {
+                                    images.put(String.format("%d:%s", i, a.getKey().getValue()), pdfStream.getBytes());
+                                }
+                            }
+                        }
+                    }
+                }
+
                 log.debug("Extracting data from PDF");
                 var w20 = new Werewolf20Extractor(new PdfDocumentContentParser(doc));
                 var rawBookEntries = w20.process();
                 log.debug("Extracted data from PDF, creating {} book entries", rawBookEntries.size());
-                var foundryDocs = new Werewolf20FoundryConverter().process(rawBookEntries);
-                log.debug("Converted entries to Foundry docs, creating {} documents", foundryDocs.size());
+//                var foundryDocs = new Werewolf20FoundryConverter().process(rawBookEntries);
+//                log.debug("Converted entries to Foundry docs, creating {} documents", foundryDocs.size());
+                log.debug("Generating Adventure");
+                var adventure = new Werewolf20FoundryConverter().processAsAdventure(rawBookEntries);
 
                 log.debug("Generating module");
                 var moduleGenerator = new ModuleGenerator(
@@ -61,10 +83,10 @@ public class Main {
                         "0.0.1",
                         "ipsi",
                         "9",
-                        "9",
-                        foundryDocs
+                        "9"
                 );
-                moduleGenerator.createModule();
+//                moduleGenerator.createModule(foundryDocs);
+                moduleGenerator.createModule(adventure, images);
                 log.info("Module {} generated at {}", Werewolf20FoundryConverter.MODULE_NAME, moduleGenerator.getOutputPath().toAbsolutePath());
 
                 break;
@@ -94,6 +116,8 @@ public class Main {
         } else {
             context.getLogger(Logger.ROOT_LOGGER_NAME).setLevel(Level.INFO);
         }
+
+        context.getLogger("com.itextpdf").setLevel(Level.WARN);
     }
 
     private static void writeIds() throws IOException {

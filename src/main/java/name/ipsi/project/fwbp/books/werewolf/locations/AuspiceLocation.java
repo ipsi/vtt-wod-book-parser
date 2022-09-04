@@ -6,9 +6,9 @@ public record AuspiceLocation(
         NameLocation nameLocation,
         TitleLocation titleLocation,
         DescriptionLocation descriptionLocation,
-        InitialRage initialRage,
+        InitialRage initialRageLocation,
         BeginningGiftsLocation beginningGiftsLocation,
-        StereotypeLocation stereotype,
-        QuoteLocation quote
+        StereotypeLocation stereotypeLocation,
+        QuoteLocation quoteLocation
 ) {
 }

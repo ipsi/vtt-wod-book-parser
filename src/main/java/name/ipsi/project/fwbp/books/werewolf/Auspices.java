@@ -3,7 +3,7 @@ package name.ipsi.project.fwbp.books.werewolf;
 public enum Auspices {
     RAGABASH("Ragabash"),
     THEURGE("Theurge"),
-    PHILADOX("Philadox"),
+    PHILODOX("Philodox"),
     GALLIARD("Galliard"),
     AHROUN("Ahroun");
 
