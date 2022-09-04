@@ -7,6 +7,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.*;
 import java.nio.file.attribute.BasicFileAttributes;
 import java.util.ArrayList;
@@ -86,7 +87,7 @@ public final class ModuleGenerator {
         );
 
         log.trace("Writing module data to file");
-        Files.writeString(outputPath.resolve("module.json"), objectMapper.writer(new DefaultPrettyPrinter()).writeValueAsString(module));
+        Files.writeString(outputPath.resolve("module.json"), objectMapper.writer(new DefaultPrettyPrinter()).writeValueAsString(module), StandardCharsets.UTF_8);
     }
 
     private ModulePack createPack(String label, String packName, DocumentTypes type, Stream<FoundryDocument> foundryDocuments) throws IOException {
@@ -98,7 +99,7 @@ public final class ModuleGenerator {
         foundryDocuments.forEach(doc -> {
             try {
                 log.trace("Writing document to pack file");
-                Files.writeString(packFile, objectMapper.writeValueAsString(doc) + "\n", StandardOpenOption.APPEND);
+                Files.writeString(packFile, objectMapper.writeValueAsString(doc) + "\n", StandardCharsets.UTF_8, StandardOpenOption.APPEND);
             } catch (IOException e) {
                 throw new RuntimeException(e);
             }
