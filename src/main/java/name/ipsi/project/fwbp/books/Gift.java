@@ -15,7 +15,7 @@ public record Gift(
         List<GiftLevel> availableTo
 ) implements BookEntry {
     public Gift(String name, String description, String system, GiftRoll giftRoll, List<GiftLevel> availableTo) {
-        this(FoundryUtils.generateId(), name, description, system, giftRoll, availableTo);
+        this(FoundryUtils.generateId("gift", name), name, description, system, giftRoll, availableTo);
     }
 
     public boolean availableFor(String groupName) {

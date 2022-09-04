@@ -7,11 +7,18 @@ import com.itextpdf.kernel.pdf.canvas.parser.PdfDocumentContentParser;
 import name.ipsi.project.fwbp.books.werewolf.Werewolf20Extractor;
 import name.ipsi.project.fwbp.books.werewolf.Werewolf20FoundryConverter;
 import name.ipsi.project.fwbp.dtrpg.Downloader;
+import name.ipsi.project.fwbp.foundry.FoundryUtils;
 import name.ipsi.project.fwbp.foundry.ModuleGenerator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.io.IOException;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.StandardOpenOption;
 import java.util.Scanner;
+import java.util.stream.Collectors;
 
 public class Main {
 
@@ -64,6 +71,8 @@ public class Main {
             default:
                 System.out.println("Unknown book " + selection);
         }
+
+        writeIds();
     }
 
     private static void configureLogging() {
@@ -84,6 +93,19 @@ public class Main {
             context.getLogger(Logger.ROOT_LOGGER_NAME).setLevel(level);
         } else {
             context.getLogger(Logger.ROOT_LOGGER_NAME).setLevel(Level.INFO);
+        }
+    }
+
+    private static void writeIds() throws IOException {
+        var ids = FoundryUtils.getIds();
+        var outputFile = Path.of("src", "main", "resources", "id-list.txt");
+        if (Files.exists(outputFile)) {
+            var fileContents = ids.entrySet().stream()
+                    .map(e -> String.format("%s,%s", e.getKey(), e.getValue()))
+                    .collect(Collectors.joining("\n"));
+            Files.writeString(outputFile, fileContents, StandardCharsets.UTF_8, StandardOpenOption.TRUNCATE_EXISTING, StandardOpenOption.WRITE);
+        } else {
+            log.debug("Cannot find IDs file [{}] - assuming not running in dev environment", outputFile);
         }
     }
 }

@@ -20,6 +20,6 @@ public record MeleeWeapon(
         boolean natural
 ) implements BookEntry {
     public MeleeWeapon(String name, String description, int difficulty, int damageBonus, DamageTypes damageType, WeaponConcealment concealment, boolean canEntangle, boolean breaksAfterUse, boolean twoHanded, boolean silver, boolean selfDamage, boolean natural) {
-        this(FoundryUtils.generateId(), name, description, difficulty, damageBonus, damageType, concealment, canEntangle, breaksAfterUse, twoHanded, silver, selfDamage, natural);
+        this(FoundryUtils.generateId("melee-weapon", name), name, description, difficulty, damageBonus, damageType, concealment, canEntangle, breaksAfterUse, twoHanded, silver, selfDamage, natural);
     }
 }

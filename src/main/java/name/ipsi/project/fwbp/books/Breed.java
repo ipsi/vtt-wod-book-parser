@@ -20,6 +20,6 @@ public record Breed(
         Map<Rank, List<Gift>> gifts
 ) implements BookEntry {
     public Breed(String name, String description, String nicknames, int initialGnosis, List<Gift> beginningGifts, Deformities deformities, RestrictedAbilities restrictedAbilities, Map<Rank, List<Gift>> gifts) {
-        this(FoundryUtils.generateId(), name, description, nicknames, initialGnosis, beginningGifts, deformities, restrictedAbilities, gifts);
+        this(FoundryUtils.generateId("breed", name), name, description, nicknames, initialGnosis, beginningGifts, deformities, restrictedAbilities, gifts);
     }
 }
