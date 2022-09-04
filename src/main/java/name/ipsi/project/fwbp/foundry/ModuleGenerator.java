@@ -1,5 +1,6 @@
 package name.ipsi.project.fwbp.foundry;
 
+import com.fasterxml.jackson.core.util.DefaultIndenter;
 import com.fasterxml.jackson.core.util.DefaultPrettyPrinter;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import name.ipsi.project.fwbp.books.werewolf.Werewolf20FoundryConverter;
@@ -87,7 +88,10 @@ public final class ModuleGenerator {
         );
 
         log.trace("Writing module data to file");
-        Files.writeString(outputPath.resolve("module.json"), objectMapper.writer(new DefaultPrettyPrinter()).writeValueAsString(module), StandardCharsets.UTF_8);
+        var prettyPrinter = new DefaultPrettyPrinter()
+                .withObjectIndenter(DefaultIndenter.SYSTEM_LINEFEED_INSTANCE.withLinefeed("\n"));
+
+        Files.writeString(outputPath.resolve("module.json"), objectMapper.writer(prettyPrinter).writeValueAsString(module), StandardCharsets.UTF_8);
     }
 
     private ModulePack createPack(String label, String packName, DocumentTypes type, Stream<FoundryDocument> foundryDocuments) throws IOException {
