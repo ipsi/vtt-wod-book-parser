@@ -51,14 +51,14 @@ public final class ModuleGenerator {
             Files.walkFileTree(outputPath, new SimpleFileVisitor<>() {
                 @Override
                 public FileVisitResult visitFile(Path file, BasicFileAttributes attrs) throws IOException {
-                    log.info("Deleting file {}", file);
+                    log.debug("Deleting file {}", file);
                     Files.delete(file);
                     return FileVisitResult.CONTINUE;
                 }
             });
         }
 
-        var modulePacks = new ArrayList<ModulePacks>();
+        var modulePacks = new ArrayList<ModulePack>();
         Files.createDirectories(outputPath.resolve("packs"));
 
         log.trace("Creating pack - Breeds");
@@ -89,7 +89,7 @@ public final class ModuleGenerator {
         Files.writeString(outputPath.resolve("module.json"), objectMapper.writer(new DefaultPrettyPrinter()).writeValueAsString(module));
     }
 
-    private ModulePacks createPack(String label, String packName, DocumentTypes type, Stream<FoundryDocument> foundryDocuments) throws IOException {
+    private ModulePack createPack(String label, String packName, DocumentTypes type, Stream<FoundryDocument> foundryDocuments) throws IOException {
         var path = String.format("./packs/%s.db", packName);
         var packFile = outputPath.resolve(path);
         log.trace("Creating pack {}, {}, {} at {}", label, packName, type, packFile);
@@ -104,11 +104,12 @@ public final class ModuleGenerator {
             }
         });
         log.trace("Returning module pack");
-        return new ModulePacks(
+        return new ModulePack(
                 packName,
                 label,
                 path,
                 Werewolf20FoundryConverter.MODULE_NAME,
+                type == DocumentTypes.ITEM ? "worldofdarkness" : null,
                 type
         );
     }

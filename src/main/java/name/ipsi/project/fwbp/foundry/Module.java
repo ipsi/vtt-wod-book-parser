@@ -11,7 +11,7 @@ public final class Module {
     private final String author;
     private final String minimumCoreVersion;
     private final String compatibleCoreVersion;
-    private final List<ModulePacks> packs;
+    private final List<ModulePack> packs;
 
     public Module(
             String name,
@@ -21,7 +21,7 @@ public final class Module {
             String author,
             String minimumCoreVersion,
             String compatibleCoreVersion,
-            List<ModulePacks> packs
+            List<ModulePack> packs
     ) {
         this.name = name;
         this.title = title;
@@ -61,7 +61,7 @@ public final class Module {
         return compatibleCoreVersion;
     }
 
-    public List<ModulePacks> getPacks() {
+    public List<ModulePack> getPacks() {
         return packs;
     }
 
