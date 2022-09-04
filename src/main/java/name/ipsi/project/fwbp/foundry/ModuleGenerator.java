@@ -13,6 +13,7 @@ import java.nio.file.*;
 import java.nio.file.attribute.BasicFileAttributes;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.stream.Stream;
 
 public final class ModuleGenerator {
@@ -81,9 +82,16 @@ public final class ModuleGenerator {
                 title,
                 description,
                 version,
-                author,
-                minVersion,
-                compatibleVersion,
+                Collections.singletonList(new Author(
+                        "Andrew Thorburn",
+                        "",
+                        "ipsi#2461"
+                )),
+                new Compatibility(
+                        "10",
+                        "10",
+                        "10"
+                ),
                 modulePacks
         );
 

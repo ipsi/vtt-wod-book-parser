@@ -25,7 +25,7 @@ class MainTest {
         Main.main(new String[]{});
 
         var expectedFiles = new TreeMap<Path, String>();
-        expectedFiles.put(Path.of("modules", "wod-werewolf-20-core", "module.json"), "f8f7a74891abea8ba9c649aa97223ac18f94173218a9902cf0a4541e1c96e9a6870c2fb98a3917db79bddad2e4a334ca234100ca4936b6ba2009529d83503bde");
+        expectedFiles.put(Path.of("modules", "wod-werewolf-20-core", "module.json"), "f79bddaadad4b45444b91ffab880eacfe091dc49edc4e5b92d9641a66dca321d5ab32460ae1204d1905186bf2d6f90903a1e6088fba4b60cb679b3eecf661dec");
         expectedFiles.put(Path.of("modules", "wod-werewolf-20-core", "packs", "auspices.db"), "614157c2c41b18a9ce7d16405c48c3dc0e814690eca875fc3b0635ff599682ca622e26fbc8a0a00c406c9ce469a0efee88aeb903e83d42b31c892745185e2f0c");
         expectedFiles.put(Path.of("modules", "wod-werewolf-20-core", "packs", "breeds.db"), "845067b391529bb99dd30f3676ee84534faf4b92d8907f8be880c990c7c442a63c2c057fe1e7132b9a7bc95999282b57412717cfa5a6d715e608836cb994aa86");
         expectedFiles.put(Path.of("modules", "wod-werewolf-20-core", "packs", "gifts.db"), "dcceddf58db10eb31339bf6ee2e3c6494361039d3b3026bf2204942691718a1c9cf3fd6391632601d933689b1484a4a5cce6c2ded8607f5a2c53ad57e0d3828c");
