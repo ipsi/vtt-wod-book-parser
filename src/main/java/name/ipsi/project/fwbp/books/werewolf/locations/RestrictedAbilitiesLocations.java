@@ -1,7 +1,7 @@
 package name.ipsi.project.fwbp.books.werewolf.locations;
 
-import name.ipsi.project.fwbp.books.Records;
+import name.ipsi.project.fwbp.books.shared.locations.DescriptionLocation;
 
-public record RestrictedAbilitiesLocations(Records.DescriptionLocation descriptionLocation, RestrictedSkillsLocation restrictedSkillsLocation,
+public record RestrictedAbilitiesLocations(DescriptionLocation descriptionLocation, RestrictedSkillsLocation restrictedSkillsLocation,
                                            RestrictedKnowledgesLocation restrictedKnowledgesLocation) {
 }

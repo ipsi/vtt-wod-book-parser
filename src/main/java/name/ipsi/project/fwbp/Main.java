@@ -5,10 +5,10 @@ import ch.qos.logback.classic.LoggerContext;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.itextpdf.kernel.pdf.canvas.parser.PdfDocumentContentParser;
 import name.ipsi.project.fwbp.books.werewolf.Werewolf20Extractor;
-import name.ipsi.project.fwbp.books.werewolf.Werewolf20FoundryConverter;
+import name.ipsi.project.fwbp.foundry.wod.werewolf.Werewolf20FoundryConverter;
 import name.ipsi.project.fwbp.dtrpg.Downloader;
-import name.ipsi.project.fwbp.foundry.FoundryUtils;
-import name.ipsi.project.fwbp.foundry.ModuleGenerator;
+import name.ipsi.project.fwbp.foundry.core.FoundryUtils;
+import name.ipsi.project.fwbp.foundry.core.ModuleGenerator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

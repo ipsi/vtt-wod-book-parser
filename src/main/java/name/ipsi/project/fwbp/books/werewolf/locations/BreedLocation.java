@@ -1,11 +1,13 @@
 package name.ipsi.project.fwbp.books.werewolf.locations;
 
-import name.ipsi.project.fwbp.books.Records;
+import name.ipsi.project.fwbp.books.shared.locations.DescriptionLocation;
+import name.ipsi.project.fwbp.books.shared.locations.NameLocation;
+import name.ipsi.project.fwbp.books.shared.locations.NicknamesLocation;
 
 public record BreedLocation(
-        Records.NameLocation nameLocation,
-        Records.DescriptionLocation descriptionLocation,
-        Records.NicknamesLocation nicknamesLocation,
+        NameLocation nameLocation,
+        DescriptionLocation descriptionLocation,
+        NicknamesLocation nicknamesLocation,
         InitialGnosisLocation initialGnosisLocation,
         BeginningGiftsLocation beginningGiftsLocation,
         DeformityLocations deformityLocations,

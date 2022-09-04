@@ -1,7 +1,6 @@
 package name.ipsi.project.fwbp.books.werewolf.locations;
 
-import name.ipsi.project.fwbp.books.Paragraph;
-import name.ipsi.project.fwbp.books.werewolf.GiftGroup;
+import name.ipsi.project.fwbp.books.shared.locations.Paragraph;
 
 import java.util.List;
 

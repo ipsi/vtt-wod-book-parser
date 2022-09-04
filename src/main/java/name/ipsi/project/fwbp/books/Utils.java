@@ -5,6 +5,8 @@ import com.itextpdf.kernel.pdf.canvas.parser.PdfDocumentContentParser;
 import com.itextpdf.kernel.pdf.canvas.parser.filter.TextRegionEventFilter;
 import com.itextpdf.kernel.pdf.canvas.parser.listener.FilteredTextEventListener;
 import com.itextpdf.kernel.pdf.canvas.parser.listener.SimpleTextExtractionStrategy;
+import name.ipsi.project.fwbp.books.shared.locations.Content;
+import name.ipsi.project.fwbp.books.shared.locations.TextArea;
 
 import java.util.ArrayList;
 import java.util.Arrays;
