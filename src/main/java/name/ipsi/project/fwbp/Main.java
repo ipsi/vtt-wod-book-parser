@@ -28,8 +28,26 @@ public class Main {
 
     public static final Logger log = LoggerFactory.getLogger(Main.class);
 
+    public enum OutputType {
+        LEGACY,
+        ADVENTURE
+    }
+
     public static void main(String[] args) throws Exception {
         configureLogging();
+
+        OutputType outputType;
+        if (args.length == 0) {
+            outputType = OutputType.ADVENTURE;
+        } else if(args[0].equals("--legacy")) {
+            outputType = OutputType.LEGACY;
+        } else if (args[0].equals("--adventure")) {
+            outputType = OutputType.ADVENTURE;
+        } else {
+            log.warn("Unknown output type - defaulting to adventure");
+            outputType = OutputType.ADVENTURE;
+        }
+
         var scanner = new Scanner(System.in);
         var token = System.getenv("DTRPG_TOKEN");
         if (token == null) {
@@ -69,12 +87,7 @@ public class Main {
                 var w20 = new Werewolf20Extractor(new PdfDocumentContentParser(doc));
                 var rawBookEntries = w20.process();
                 log.debug("Extracted data from PDF, creating {} book entries", rawBookEntries.size());
-//                var foundryDocs = new Werewolf20FoundryConverter().process(rawBookEntries);
-//                log.debug("Converted entries to Foundry docs, creating {} documents", foundryDocs.size());
-                log.debug("Generating Adventure");
-                var adventure = new Werewolf20FoundryConverter().processAsAdventure(rawBookEntries);
 
-                log.debug("Generating module");
                 var moduleGenerator = new ModuleGenerator(
                         new ObjectMapper(),
                         Werewolf20FoundryConverter.MODULE_NAME,
@@ -83,10 +96,22 @@ public class Main {
                         "0.0.1",
                         "ipsi",
                         "9",
-                        "9"
+                        "9",
+                        images
                 );
-//                moduleGenerator.createModule(foundryDocs);
-                moduleGenerator.createModule(adventure, images);
+
+                if (outputType == OutputType.ADVENTURE) {
+                    log.debug("Generating Adventure");
+                    var adventure = new Werewolf20FoundryConverter().processAsAdventure(rawBookEntries);
+                    log.debug("Generating module");
+                    moduleGenerator.createModule(adventure);
+                } else {
+                    var foundryDocs = new Werewolf20FoundryConverter().process(rawBookEntries);
+                    log.debug("Converted entries to Foundry docs, creating {} documents", foundryDocs.size());
+                    log.debug("Generating module");
+                    moduleGenerator.createModule(foundryDocs);
+                }
+
                 log.info("Module {} generated at {}", Werewolf20FoundryConverter.MODULE_NAME, moduleGenerator.getOutputPath().toAbsolutePath());
 
                 break;

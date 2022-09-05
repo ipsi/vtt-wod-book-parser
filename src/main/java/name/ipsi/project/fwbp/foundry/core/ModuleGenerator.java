@@ -14,7 +14,7 @@ import java.nio.file.attribute.BasicFileAttributes;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.HashMap;
+import java.util.Map;
 import java.util.stream.Stream;
 
 public final class ModuleGenerator {
@@ -28,8 +28,9 @@ public final class ModuleGenerator {
     private final String author;
     private final String minVersion;
     private final String compatibleVersion;
+    private final Map<String, byte[]> images;
 
-    public ModuleGenerator(ObjectMapper objectMapper, String name, String title, String description, String version, String author, String minVersion, String compatibleVersion) {
+    public ModuleGenerator(ObjectMapper objectMapper, String name, String title, String description, String version, String author, String minVersion, String compatibleVersion, Map<String, byte[]> images) {
         this.objectMapper = objectMapper;
         this.name = name;
         this.title = title;
@@ -38,6 +39,7 @@ public final class ModuleGenerator {
         this.author = author;
         this.minVersion = minVersion;
         this.compatibleVersion = compatibleVersion;
+        this.images = images;
 
         this.outputPath = Path.of("modules", name);
     }
@@ -79,6 +81,8 @@ public final class ModuleGenerator {
                 modulePacks
         );
 
+        writeImages();
+
         log.trace("Writing module data to file");
         var prettyPrinter = new DefaultPrettyPrinter()
                 .withObjectIndenter(DefaultIndenter.SYSTEM_LINEFEED_INSTANCE.withLinefeed("\n"));
@@ -86,7 +90,7 @@ public final class ModuleGenerator {
         Files.writeString(outputPath.resolve("module.json"), objectMapper.writer(prettyPrinter).writeValueAsString(module), StandardCharsets.UTF_8);
     }
 
-    public void createModule(Adventure adventure, HashMap<String, byte[]> images) throws IOException {
+    public void createModule(Adventure adventure) throws IOException {
         ensureModuleDirectory();
 
         Files.createDirectories(outputPath.resolve("packs"));
@@ -112,6 +116,16 @@ public final class ModuleGenerator {
                 Collections.singletonList(pack)
         );
 
+        writeImages();
+
+        log.trace("Writing module data to file");
+        var prettyPrinter = new DefaultPrettyPrinter()
+                .withObjectIndenter(DefaultIndenter.SYSTEM_LINEFEED_INSTANCE.withLinefeed("\n"));
+
+        Files.writeString(outputPath.resolve("module.json"), objectMapper.writer(prettyPrinter).writeValueAsString(module), StandardCharsets.UTF_8);
+    }
+
+    private void writeImages() throws IOException {
         var imagesDirectory = outputPath.resolve("images");
         if (!Files.isDirectory(imagesDirectory)) {
             Files.createDirectories(imagesDirectory);
@@ -122,12 +136,6 @@ public final class ModuleGenerator {
         for(var t : Tribes.values()) {
             Files.write(imagesDirectory.resolve(t.urlName() + "-splash.jpeg"), images.get(String.format("%d:%s", t.imagePage(), t.imageName())));
         }
-
-        log.trace("Writing module data to file");
-        var prettyPrinter = new DefaultPrettyPrinter()
-                .withObjectIndenter(DefaultIndenter.SYSTEM_LINEFEED_INSTANCE.withLinefeed("\n"));
-
-        Files.writeString(outputPath.resolve("module.json"), objectMapper.writer(prettyPrinter).writeValueAsString(module), StandardCharsets.UTF_8);
     }
 
     private void ensureModuleDirectory() throws IOException {

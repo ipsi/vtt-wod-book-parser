@@ -28,13 +28,14 @@ public final class Journal implements FoundryDocument {
             String name,
             String content,
             String folder,
+            double sort,
             Packs pack
     ) {
         this.id = id;
         this.name = name;
         this.content = content;
         this.folder = folder;
-        this.sort = 0;
+        this.sort = sort;
         this.flags = Collections.emptyMap();
         this.pages = null;
         this.ownership = null;

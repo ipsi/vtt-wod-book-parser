@@ -17,6 +17,9 @@ public class Werewolf20FoundryConverter {
     public static final Logger log = LoggerFactory.getLogger(Werewolf20FoundryConverter.class);
 
     private Map<String, String> folderIdsByName;
+    private double breedSort;
+    private double auspiceSort;
+    private double tribeSort;
 
     public static final String MODULE_NAME = "wod-werewolf-20-core";
 
@@ -32,9 +35,9 @@ public class Werewolf20FoundryConverter {
             } else if (entry instanceof Tribe t) {
                 documents.add(processTribe(t));
             } else if (entry instanceof Gift g) {
-                documents.add(processGift(g));
+                documents.add(processGift(g, null));
             } else if (entry instanceof MeleeWeapon mw) {
-                documents.add(processMeleeWeapon(mw));
+                documents.add(processMeleeWeapon(mw, null));
             }
         }
 
@@ -56,10 +59,10 @@ public class Werewolf20FoundryConverter {
         var breedJournal = new Journal(FoundryUtils.generateId("journal", "breeds"), "Breeds", folderIdsByName.get("Garou"), 1.0, Collections.emptyMap(), breedJournalPages, DocumentOwnershipLevel.defaultObserver());
         journals.add(breedJournal);
         List<Page> auspiceJournalPages = new ArrayList<>();
-        var auspiceJournal = new Journal(FoundryUtils.generateId("journal", "auspices"), "Auspices", folderIdsByName.get("Garou"), 1.0, Collections.emptyMap(), auspiceJournalPages, DocumentOwnershipLevel.defaultObserver());
+        var auspiceJournal = new Journal(FoundryUtils.generateId("journal", "auspices"), "Auspices", folderIdsByName.get("Garou"), 2.0, Collections.emptyMap(), auspiceJournalPages, DocumentOwnershipLevel.defaultObserver());
         journals.add(auspiceJournal);
         List<Page> tribeJournalPages = new ArrayList<>();
-        var tribeJournal = new Journal(FoundryUtils.generateId("journal", "tribes"), "Tribes", folderIdsByName.get("Garou"), 1.0, Collections.emptyMap(), tribeJournalPages, DocumentOwnershipLevel.defaultObserver());
+        var tribeJournal = new Journal(FoundryUtils.generateId("journal", "tribes"), "Tribes", folderIdsByName.get("Garou"), 3.0, Collections.emptyMap(), tribeJournalPages, DocumentOwnershipLevel.defaultObserver());
         journals.add(tribeJournal);
 
         folders.add(new Folder(folderIdsByName.get("Garou"), "Garou", DocumentTypes.JOURNAL_ENTRY, FolderSortingModes.MANUAL, 1.0, null, Collections.emptyMap(), null, null));
@@ -78,9 +81,9 @@ public class Werewolf20FoundryConverter {
                 var j = processTribe(t);
                 tribeJournalPages.add(Page.createTextPage(j.getId(), j.getName(), j.getContent()));
             } else if (entry instanceof Gift g) {
-                items.add(processGift(g));
+                items.add(processGift(g, folderIdsByName.get("Gifts - Garou")));
             } else if (entry instanceof MeleeWeapon mw) {
-                items.add(processMeleeWeapon(mw));
+                items.add(processMeleeWeapon(mw, folderIdsByName.get("Weapons - Melee")));
             }
         }
 
@@ -106,7 +109,7 @@ public class Werewolf20FoundryConverter {
         );
     }
 
-    private Item processMeleeWeapon(MeleeWeapon meleeWeapon) {
+    private Item processMeleeWeapon(MeleeWeapon meleeWeapon, String folder) {
         log.trace("Converting melee weapon");
         return new Item(
                 meleeWeapon.id(),
@@ -144,7 +147,7 @@ public class Werewolf20FoundryConverter {
                         "wod.types.meleeweapon"
                 ),
                 "",
-                folderIdsByName.get("Weapons - Melee"),
+                folder,
                 0,
                 Collections.singletonMap("default", 2),
                 Collections.emptyMap(),
@@ -188,6 +191,7 @@ public class Werewolf20FoundryConverter {
                 b.name(),
                 text.toString(),
                 null,
+                breedSort++,
                 Packs.Breeds
         );
     }
@@ -213,6 +217,7 @@ public class Werewolf20FoundryConverter {
                 a.name(),
                 text.toString(),
                 null,
+                auspiceSort++,
                 Packs.Auspices
         );
     }
@@ -235,6 +240,7 @@ public class Werewolf20FoundryConverter {
                 t.name().displayName(),
                 text.toString(),
                 null,
+                tribeSort++,
                 Packs.Tribes
         );
     }
@@ -262,7 +268,7 @@ public class Werewolf20FoundryConverter {
         }
     }
 
-    private Item processGift(Gift g) {
+    private Item processGift(Gift g, String folder) {
         log.trace("Converting Gift {}", g.name());
         log.trace("Adding description");
         var description = new StringBuilder(g.description());
@@ -297,7 +303,7 @@ public class Werewolf20FoundryConverter {
                         g.system()
                 ),
                 "",
-                folderIdsByName.get("Gifts - Garou"),
+                folder,
                 0,
                 Collections.singletonMap("default", 2),
                 Collections.emptyMap(),
