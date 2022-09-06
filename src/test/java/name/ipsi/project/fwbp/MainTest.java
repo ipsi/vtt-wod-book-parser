@@ -26,7 +26,7 @@ class MainTest {
 
         var expectedFiles = new TreeMap<Path, String>();
         expectedFiles.put(Path.of("modules", "wod-werewolf-20-core", "module.json"), "2fd8faa0ff39629fa42a18a65503a504170e678c995667375767753f30fc49f5da0f8888b05eae8426439be5c66bcca0b01e7ead3833b7b89cebf0b6427a1917");
-        expectedFiles.put(Path.of("modules", "wod-werewolf-20-core", "packs", "w20.db"), "5d7c5d283777826f5b046bc260aa749b539de4d8621a01d030346c2d2d6a90b0d797f8c6465c49288220fcf67e42a2ef32ca99c896259af2180288acb7c6d565");
+        expectedFiles.put(Path.of("modules", "wod-werewolf-20-core", "packs", "w20.db"), "0ba70470e30e5dd910b43612e6df18e04152246d4639caff865714aec05c0b104a2a82294e1905afa8719a7d7a1281bfeab865ce006ff447c473c63a02ad1168");
         expectedFiles.put(Path.of("modules", "wod-werewolf-20-core", "images", "adventure-cover.jpeg"), "17d71cdd62f4c930b803fbcf1fab02a3d0244eb7fa1d4359ab088381b1288f1bb191117ec60d3075528732ff9ce4888545e6b66b0d681b00b68b79a214daee1c");
         expectedFiles.put(Path.of("modules", "wod-werewolf-20-core", "images", "black-furies-splash.jpeg"), "0c2f71fba6238336509d84672af71bee9344c477e0696ddd2f4dcf7d53193a1df4726f59f78135d653411f9e44dddbb08f54c65cb552a3ae3ce358dc1e2a4dea");
         expectedFiles.put(Path.of("modules", "wod-werewolf-20-core", "images", "black-spiral-dancers-splash.jpeg"), "10c193572ee8f878ce800f3e4bd6db12e3971714f9f69bda1ca15ee8edb64b9540f6638aacefdafdeef07d7027dc9c6f44d0423ca9c75caa492bcc752feaa372");
@@ -80,7 +80,7 @@ class MainTest {
         expectedFiles.put(Path.of("modules", "wod-werewolf-20-core", "packs", "breeds.db"), "d74995c9a31694a85aa809124b945fe00bd700264dacd827eb9bbba289d59a1a30feb47165832d9dad1f9502b1844641949662527b42edc5f8030f360227e3ba");
         expectedFiles.put(Path.of("modules", "wod-werewolf-20-core", "packs", "gifts.db"), "e5a42f4d09db94bf65f22baa783856261aaa2bb780b951e77267fe6179daf9f626cc307361b3ebd87d219fc9f2a27687edc7a9d5b0528088b5b4cfe1f5c6d7ac");
         expectedFiles.put(Path.of("modules", "wod-werewolf-20-core", "packs", "tribes.db"), "bf3d57a40718a692f2a81cf7cdf86899146662c01db1eb46f0ad04158b86fcf4fc5a847c88c2396c64639825e63db70fce3b2269ea644f0e2370992919e22fe7");
-        expectedFiles.put(Path.of("modules", "wod-werewolf-20-core", "packs", "weapons.db"), "ffc52ed2922f62931ec31295ca6112bd973c93134af0b45da3691a12bdcdc26fb8f364a4b97a663eb507ff7c6dcd71849f85993394671d68dd8ec7d1166338e4");
+        expectedFiles.put(Path.of("modules", "wod-werewolf-20-core", "packs", "weapons.db"), "37c23c2dc9dd1ffff45dee067e657c84b68dffb6f6d2d5fb5ed1ee80dbc02a82e7d5ab93329d27b8d1d375b8e15a57ed6c6a988a5d1097e32cd36a8d57aa2cdd");
         expectedFiles.put(Path.of("modules", "wod-werewolf-20-core", "images", "adventure-cover.jpeg"), "17d71cdd62f4c930b803fbcf1fab02a3d0244eb7fa1d4359ab088381b1288f1bb191117ec60d3075528732ff9ce4888545e6b66b0d681b00b68b79a214daee1c");
         expectedFiles.put(Path.of("modules", "wod-werewolf-20-core", "images", "black-furies-splash.jpeg"), "0c2f71fba6238336509d84672af71bee9344c477e0696ddd2f4dcf7d53193a1df4726f59f78135d653411f9e44dddbb08f54c65cb552a3ae3ce358dc1e2a4dea");
         expectedFiles.put(Path.of("modules", "wod-werewolf-20-core", "images", "black-spiral-dancers-splash.jpeg"), "10c193572ee8f878ce800f3e4bd6db12e3971714f9f69bda1ca15ee8edb64b9540f6638aacefdafdeef07d7027dc9c6f44d0423ca9c75caa492bcc752feaa372");
