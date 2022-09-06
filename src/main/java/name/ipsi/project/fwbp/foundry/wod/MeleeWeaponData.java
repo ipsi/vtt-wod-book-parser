@@ -1,69 +1,65 @@
 package name.ipsi.project.fwbp.foundry.wod;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import name.ipsi.project.fwbp.foundry.core.ItemData;
 
 import java.util.Objects;
 
 public final class MeleeWeaponData implements ItemData {
+    @JsonProperty("iscreated")
     private final boolean created;
-    private final boolean iscreated;
     private final String version;
     private final String worldanvil;
     private final String description;
-    private final boolean isEquipped;
-    private final boolean isMagical;
+    @JsonProperty("isequipped")
+    private final boolean equipped;
+    @JsonProperty("ismagical")
+    private final boolean magical;
     private final Attack attack;
     private final Damage damage;
     private final String diff;
     private final int difficulty;
     private final WeaponConcealment conceal;
+    @JsonProperty("istwohanded")
     private final boolean twohanded;
-    private final boolean istwohanded;
+    @JsonProperty("isnatural")
     private final boolean natural;
     private final String label;
 
     public MeleeWeaponData(
             boolean created,
-            boolean iscreated,
             String version,
             String worldanvil,
             String description,
-            boolean isEquipped,
-            boolean isMagical,
+            boolean equipped,
+            boolean magical,
             Attack attack,
             Damage damage,
             String diff,
             int difficulty,
             WeaponConcealment conceal,
             boolean twohanded,
-            boolean istwohanded,
             boolean natural,
             String label
     ) {
         this.created = created;
-        this.iscreated = iscreated;
         this.version = version;
         this.worldanvil = worldanvil;
         this.description = description;
-        this.isEquipped = isEquipped;
-        this.isMagical = isMagical;
+        this.equipped = equipped;
+        this.magical = magical;
         this.attack = attack;
         this.damage = damage;
         this.diff = diff;
         this.difficulty = difficulty;
         this.conceal = conceal;
         this.twohanded = twohanded;
-        this.istwohanded = istwohanded;
         this.natural = natural;
         this.label = label;
     }
 
     public boolean isCreated() {
         return created;
-    }
-
-    public boolean isIscreated() {
-        return iscreated;
     }
 
     public String getVersion() {
@@ -79,11 +75,11 @@ public final class MeleeWeaponData implements ItemData {
     }
 
     public boolean isIsEquipped() {
-        return isEquipped;
+        return equipped;
     }
 
     public boolean isIsMagical() {
-        return isMagical;
+        return magical;
     }
 
     public Attack getAttack() {
@@ -110,10 +106,6 @@ public final class MeleeWeaponData implements ItemData {
         return twohanded;
     }
 
-    public boolean isIstwohanded() {
-        return istwohanded;
-    }
-
     public boolean isNatural() {
         return natural;
     }
@@ -128,45 +120,41 @@ public final class MeleeWeaponData implements ItemData {
         if (obj == null || obj.getClass() != this.getClass()) return false;
         var that = (MeleeWeaponData) obj;
         return this.created == that.created &&
-                this.iscreated == that.iscreated &&
                 Objects.equals(this.version, that.version) &&
                 Objects.equals(this.worldanvil, that.worldanvil) &&
                 Objects.equals(this.description, that.description) &&
-                this.isEquipped == that.isEquipped &&
-                this.isMagical == that.isMagical &&
+                this.equipped == that.equipped &&
+                this.magical == that.magical &&
                 Objects.equals(this.attack, that.attack) &&
                 Objects.equals(this.damage, that.damage) &&
                 Objects.equals(this.diff, that.diff) &&
                 this.difficulty == that.difficulty &&
                 Objects.equals(this.conceal, that.conceal) &&
                 this.twohanded == that.twohanded &&
-                this.istwohanded == that.istwohanded &&
                 this.natural == that.natural &&
                 Objects.equals(this.label, that.label);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(created, iscreated, version, worldanvil, description, isEquipped, isMagical, attack, damage, diff, difficulty, conceal, twohanded, istwohanded, natural, label);
+        return Objects.hash(created, version, worldanvil, description, equipped, magical, attack, damage, diff, difficulty, conceal, twohanded, natural, label);
     }
 
     @Override
     public String toString() {
         return "MeleeWeaponData[" +
                 "created=" + created + ", " +
-                "iscreated=" + iscreated + ", " +
                 "version=" + version + ", " +
                 "worldanvil=" + worldanvil + ", " +
                 "description=" + description + ", " +
-                "isEquipped=" + isEquipped + ", " +
-                "isMagical=" + isMagical + ", " +
+                "equipped=" + equipped + ", " +
+                "magical=" + magical + ", " +
                 "attack=" + attack + ", " +
                 "damage=" + damage + ", " +
                 "diff=" + diff + ", " +
                 "difficulty=" + difficulty + ", " +
                 "conceal=" + conceal + ", " +
                 "twohanded=" + twohanded + ", " +
-                "istwohanded=" + istwohanded + ", " +
                 "natural=" + natural + ", " +
                 "label=" + label + ']';
     }
@@ -174,8 +162,7 @@ public final class MeleeWeaponData implements ItemData {
     public record Attack(
             String attribute,
             String ability,
-            boolean roll,
-            boolean isRollable
+            @JsonProperty("isrollable") boolean rollable
     ) {
     }
 
@@ -183,8 +170,7 @@ public final class MeleeWeaponData implements ItemData {
             String attribute,
             int bonus,
             DamageTypes type,
-            boolean roll,
-            boolean isRollable
+            @JsonProperty("isrollable") boolean rollable
     ) {
     }
 }

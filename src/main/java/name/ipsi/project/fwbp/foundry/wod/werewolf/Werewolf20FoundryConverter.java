@@ -11,6 +11,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.*;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
 public class Werewolf20FoundryConverter {
@@ -33,7 +34,13 @@ public class Werewolf20FoundryConverter {
             } else if (entry instanceof Auspice a) {
                 documents.add(processAuspice(a));
             } else if (entry instanceof Tribe t) {
-                documents.add(processTribe(t));
+                documents.add(processTribe(t, e -> String.format(
+                        "@UUID[JournalEntry.%s.JournalEntryPage.%s]{%s}: %s",
+                        FoundryUtils.generateId("journal", "tribes"),
+                        FoundryUtils.generateId("tribe", e.getKey().displayName()),
+                        e.getKey().displayName(),
+                        e.getValue()
+                )));
             } else if (entry instanceof Gift g) {
                 documents.add(processGift(g, null));
             } else if (entry instanceof MeleeWeapon mw) {
@@ -78,8 +85,20 @@ public class Werewolf20FoundryConverter {
                 var j = processAuspice(a);
                 auspiceJournalPages.add(Page.createTextPage(j.getId(), j.getName(), j.getContent()));
             } else if (entry instanceof Tribe t) {
-                var j = processTribe(t);
-                tribeJournalPages.add(Page.createTextPage(j.getId(), j.getName(), j.getContent()));
+                var j = processTribe(t, e -> String.format(
+                        "@UUID[JournalEntry.%s.JournalEntryPage.%s]{%s}: %s",
+                        FoundryUtils.generateId("journal", "tribes"),
+                        FoundryUtils.generateId("tribe", e.getKey().displayName()),
+                        e.getKey().displayName(),
+                        e.getValue()
+                ));
+                tribeJournalPages.add(Page.createTextPage(
+                        j.getId(),
+                        j.getName(),
+                        j.getContent(),
+                        // BSDs are technically ST-only so hide from players
+                        t.name() == Tribes.BLACK_SPIRAL_DANCERS ? DocumentOwnershipLevel.defaultNone() : DocumentOwnershipLevel.defaultInherit()
+                ));
             } else if (entry instanceof Gift g) {
                 items.add(processGift(g, folderIdsByName.get("Gifts - Garou")));
             } else if (entry instanceof MeleeWeapon mw) {
@@ -104,7 +123,7 @@ public class Werewolf20FoundryConverter {
                 folders,
                 1.0,
                 Collections.emptyMap(),
-                "Automated conversion of W:tA 20 PDF",
+                "Werewolf: the Apocalypse 20th Anniversary Edition",
                 null
         );
     }
@@ -119,7 +138,6 @@ public class Werewolf20FoundryConverter {
                         : "systems/worldofdarkness/assets/img/items/meleeweapons.svg",
                 new MeleeWeaponData(
                         false,
-                        false,
                         "",
                         "",
                         meleeWeapon.description(),
@@ -128,20 +146,17 @@ public class Werewolf20FoundryConverter {
                         new MeleeWeaponData.Attack(
                                 "dexterity",
                                 "brawl",
-                                true,
                                 true
                         ),
                         new MeleeWeaponData.Damage(
                                 "strength",
                                 meleeWeapon.damageBonus(),
                                 meleeWeapon.damageType(),
-                                true,
                                 true
                         ),
                         String.valueOf(meleeWeapon.difficulty()),
                         meleeWeapon.difficulty(),
                         meleeWeapon.concealment(),
-                        meleeWeapon.twoHanded(),
                         meleeWeapon.twoHanded(),
                         meleeWeapon.natural(),
                         "wod.types.meleeweapon"
@@ -222,18 +237,55 @@ public class Werewolf20FoundryConverter {
         );
     }
 
-    private Journal processTribe(Tribe t) {
+    private Journal processTribe(Tribe t, Function<Map.Entry<Tribes, String>, String> stereotypeMapper) {
         log.trace("Converting Tribe {}", t.name());
         var text = new StringBuilder();
         log.trace("Adding image");
-        text.append("<img src=\"modules/").append(MODULE_NAME).append("/images/").append(t.name().urlName())
-                .append("-splash.jpeg\" height=\"400\" alt=\"").append(t.name().displayName()).append(" Splash Image\">\n");
+        text.append("<div style=\"text-align: center;\">\n<img src=\"modules/").append(MODULE_NAME).append("/images/").append(t.name().urlName())
+                .append("-splash.jpeg\" height=\"400\" alt=\"").append(t.name().displayName()).append(" Splash Image\"></div>\n");
+        log.trace("Adding quote");
+        text.append("<p class=\"tribal-quote\" style=\"text-align: center; font-style: italic;\">").append(String.join("<br>\n", t.quote().split("\n"))).append("</p>\n");
         log.trace("Adding description");
-        text.append("<p>").append(String.join("</p><p>", t.description().split("\n"))).append("</p>\n");
+        text.append("<p>").append(String.join("</p>\n<p>", t.description().split("\n"))).append("</p>\n");
+        log.trace("Adding appearance");
+        text.append("<p><strong>Appearance:</strong> ").append(t.appearance()).append("</p>\n");
+        log.trace("Adding kinfolkAndTerritory");
+        text.append("<p><strong>Kinfolk & Territory:</strong> ").append(t.kinfolkAndTerritory()).append("</p>\n");
+        log.trace("Adding totem");
+        text.append("<p><strong>Tribal Totem:</strong> ").append(t.totem()).append("</p>\n");
+
+        var characterCreation = t.characterCreation();
+        if (characterCreation != null) {
+            log.trace("Adding characterCreation");
+            text.append("<p><strong>Character Creation:</strong> ").append(characterCreation).append("</p>\n");
+        }
+
         log.trace("Adding initial willpower");
         text.append("<p><strong>Initial Willpower:</strong> ").append(t.initialWillpower()).append("</p>\n");
+        var br = t.backgroundRestrictions();
+        if (br != null) {
+            log.trace("Adding Background Restrictions");
+            text.append("<p><strong>Background Restrictions:</strong> ").append(br).append("</p>\n");
+        }
+        var derangement = t.derangement();
+        if (derangement != null) {
+            log.trace("Adding derangement");
+            text.append("<p><strong>Derangement:</strong> ").append(derangement).append("</p>\n");
+        }
 
-        appendGifts(text, t.gifts());
+        appendBeginningGifts(text, t.gifts().get(Rank.ONE));
+
+        var stereotypes = t.stereotypes();
+        if (stereotypes != null) {
+            log.trace("Adding stereotypes");
+            text.append("<div>\n<h4>Stereotypes</h4>\n<p>")
+                    .append(stereotypes.entrySet().stream()
+                            .map(stereotypeMapper)
+                            .collect(Collectors.joining("</p>\n<p>")))
+                    .append("</p>\n</div>\n");
+        }
+
+        appendAllGifts(text, t.gifts());
 
         return new Journal(
                 t.id(),
@@ -261,10 +313,11 @@ public class Werewolf20FoundryConverter {
         log.trace("Adding gifts");
         text.append("\n<h2>Gifts</h2>");
         for (var f : gifts.entrySet().stream().sorted(Comparator.comparingInt(o -> o.getKey().sortKey())).toList()) {
-            text.append("\n<h3>Rank ").append(f.getKey().displayName()).append(" Gifts</h3>");
-            for (var g : f.getValue().stream().sorted(Comparator.comparing(Gift::name)).toList()) {
-                text.append("\n<p>").append(String.format("@Item[%s]{%s}", g.id(), g.name())).append("</p>");
-            }
+            text.append("\n<h4>").append(f.getKey().loreName()).append("</h4>\n")
+                    .append(f.getValue().stream()
+                            .sorted(Comparator.comparing(Gift::name))
+                            .map(g -> String.format("@Item[%s]{%s}", g.id(), g.name()))
+                            .collect(Collectors.joining(" ")));
         }
     }
 
@@ -273,7 +326,7 @@ public class Werewolf20FoundryConverter {
         log.trace("Adding description");
         var description = new StringBuilder(g.description());
         log.trace("Adding available to");
-        description.append("\n<h2>Available To</h2>");
+        description.append("\n<h3>Available To</h3>");
         for (var at : g.availableTo()) {
             description.append("\n<p>").append(at.group().name()).append(" @ Rank ").append(at.level()).append("</p>");
         }

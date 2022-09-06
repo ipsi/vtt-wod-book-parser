@@ -6,11 +6,11 @@ import java.util.HashMap;
 import java.util.Map;
 
 public enum DocumentOwnershipLevel {
-    INHERIT(-1.0),
-    NONE(0.0),
-    LIMITED(1.0),
-    OBSERVER(2.0),
-    OWNER(3.0);
+    INHERIT(-1),
+    NONE(0),
+    LIMITED(1),
+    OBSERVER(2),
+    OWNER(3);
 
     public static Map<String, DocumentOwnershipLevel> defaultInherit() {
         var value = new HashMap<String, DocumentOwnershipLevel>();
@@ -37,9 +37,9 @@ public enum DocumentOwnershipLevel {
     }
 
     @JsonValue
-    private final double jsonValue;
+    private final int jsonValue;
 
-    DocumentOwnershipLevel(double jsonValue) {
+    DocumentOwnershipLevel(int jsonValue) {
         this.jsonValue = jsonValue;
     }
 }

@@ -31,6 +31,17 @@ public enum Rank {
         };
     }
 
+    public String loreName() {
+        return switch (this) {
+            case ONE -> "Cliath";
+            case TWO -> "Fostern";
+            case THREE -> "Adren";
+            case FOUR -> "Athro";
+            case FIVE -> "Elder";
+            case SIX -> "Legend";
+        };
+    }
+
     public int sortKey() {
         return switch (this) {
             case ONE -> 1;

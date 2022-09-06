@@ -22,6 +22,10 @@ public class Page {
     private final Map<String, DocumentOwnershipLevel> ownership;
 
     public static Page createTextPage(String id, String name, String content) {
+        return createTextPage(id, name, content, DocumentOwnershipLevel.defaultInherit());
+    }
+
+    public static Page createTextPage(String id, String name, String content, Map<String, DocumentOwnershipLevel> ownership) {
         return new Page(
                 id,
                 name,
@@ -34,7 +38,7 @@ public class Page {
                 null,
                 0.0,
                 Collections.emptyMap(),
-                DocumentOwnershipLevel.defaultInherit()
+                ownership
         );
     }
 
