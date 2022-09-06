@@ -1,7 +1,10 @@
 package name.ipsi.project.fwbp.foundry.core;
 
+import com.fasterxml.jackson.annotation.JsonPropertyOrder;
+
 import java.util.Objects;
 
+@JsonPropertyOrder(alphabetic = true)
 public class Compatibility {
     private final String minimum;
     private final String verified;

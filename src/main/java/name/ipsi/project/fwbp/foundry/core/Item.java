@@ -2,11 +2,13 @@ package name.ipsi.project.fwbp.foundry.core;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 import name.ipsi.project.fwbp.foundry.wod.ItemTypes;
 
 import java.util.Map;
 import java.util.Objects;
 
+@JsonPropertyOrder(alphabetic = true)
 public final class Item implements FoundryDocument {
     @JsonProperty("_id")
     private final String id;

@@ -1,9 +1,12 @@
 package name.ipsi.project.fwbp.foundry.core;
 
+import com.fasterxml.jackson.annotation.JsonPropertyOrder;
+
 import java.util.Collections;
 import java.util.Map;
 import java.util.Objects;
 
+@JsonPropertyOrder(alphabetic = true)
 public class Author {
     private final String name;
     private final String url;

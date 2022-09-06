@@ -6,24 +6,7 @@ import name.ipsi.project.fwbp.foundry.core.ItemData;
 
 import java.util.Objects;
 
-@JsonPropertyOrder(
-        value = {
-                "iscreated",
-                "version",
-                "worldanvil",
-                "description",
-                "isequipped",
-                "ismagical",
-                "attack",
-                "damage",
-                "diff",
-                "difficulty",
-                "conceal",
-                "istwohanded",
-                "isnatural",
-                "label",
-        }
-)
+@JsonPropertyOrder(alphabetic = true)
 public final class MeleeWeaponData implements ItemData {
     @JsonProperty("iscreated")
     private final boolean created;

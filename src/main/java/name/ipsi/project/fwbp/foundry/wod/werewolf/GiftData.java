@@ -1,13 +1,16 @@
 package name.ipsi.project.fwbp.foundry.wod.werewolf;
 
-import name.ipsi.project.fwbp.foundry.wod.PowerTypes;
+import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 import name.ipsi.project.fwbp.foundry.core.ItemData;
+import name.ipsi.project.fwbp.foundry.wod.PowerTypes;
 
 import java.util.Objects;
 
+@JsonPropertyOrder(alphabetic = true)
 public final class GiftData implements ItemData {
+    @JsonProperty("iscreated")
     private final boolean created;
-    private final boolean iscreated;
     private final String version;
     private final String worldAnvil;
     private final String description;
@@ -17,16 +20,15 @@ public final class GiftData implements ItemData {
     private final String dice2;
     private final int bonus;
     private final String difficulty;
+    @JsonProperty("isrollable")
     private final boolean rollable;
-    private final boolean isRollable;
+    @JsonProperty("isactive")
     private final boolean active;
-    private final boolean isactive;
     private final String groupName;
     private final String system;
 
     public GiftData(
             boolean created,
-            boolean iscreated,
             String version,
             String worldAnvil,
             String description,
@@ -37,14 +39,11 @@ public final class GiftData implements ItemData {
             int bonus,
             String difficulty,
             boolean rollable,
-            boolean isRollable,
             boolean active,
-            boolean isactive,
             String groupName,
             String system
     ) {
         this.created = created;
-        this.iscreated = iscreated;
         this.version = version;
         this.worldAnvil = worldAnvil;
         this.description = description;
@@ -55,19 +54,13 @@ public final class GiftData implements ItemData {
         this.bonus = bonus;
         this.difficulty = difficulty;
         this.rollable = rollable;
-        this.isRollable = isRollable;
         this.active = active;
-        this.isactive = isactive;
         this.groupName = groupName;
         this.system = system;
     }
 
     public boolean isCreated() {
         return created;
-    }
-
-    public boolean isIscreated() {
-        return iscreated;
     }
 
     public String getVersion() {
@@ -110,16 +103,8 @@ public final class GiftData implements ItemData {
         return rollable;
     }
 
-    public boolean isIsRollable() {
-        return isRollable;
-    }
-
     public boolean isActive() {
         return active;
-    }
-
-    public boolean isIsactive() {
-        return isactive;
     }
 
     public String groupName() {
@@ -136,7 +121,6 @@ public final class GiftData implements ItemData {
         if (obj == null || obj.getClass() != this.getClass()) return false;
         var that = (GiftData) obj;
         return this.created == that.created &&
-                this.iscreated == that.iscreated &&
                 Objects.equals(this.version, that.version) &&
                 Objects.equals(this.worldAnvil, that.worldAnvil) &&
                 Objects.equals(this.description, that.description) &&
@@ -147,23 +131,20 @@ public final class GiftData implements ItemData {
                 this.bonus == that.bonus &&
                 Objects.equals(this.difficulty, that.difficulty) &&
                 this.rollable == that.rollable &&
-                this.isRollable == that.isRollable &&
                 this.active == that.active &&
-                this.isactive == that.isactive &&
                 Objects.equals(this.groupName, that.groupName) &&
                 Objects.equals(this.system, that.system);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(created, iscreated, version, worldAnvil, description, type, level, dice1, dice2, bonus, difficulty, rollable, isRollable, active, isactive, groupName, system);
+        return Objects.hash(created, version, worldAnvil, description, type, level, dice1, dice2, bonus, difficulty, rollable, active, groupName, system);
     }
 
     @Override
     public String toString() {
         return "GiftData[" +
                 "created=" + created + ", " +
-                "iscreated=" + iscreated + ", " +
                 "version=" + version + ", " +
                 "worldAnvil=" + worldAnvil + ", " +
                 "description=" + description + ", " +
@@ -174,9 +155,7 @@ public final class GiftData implements ItemData {
                 "bonus=" + bonus + ", " +
                 "difficulty=" + difficulty + ", " +
                 "rollable=" + rollable + ", " +
-                "isRollable=" + isRollable + ", " +
                 "active=" + active + ", " +
-                "isactive=" + isactive + ", " +
                 "groupName=" + groupName + ", " +
                 "system=" + system + ']';
     }

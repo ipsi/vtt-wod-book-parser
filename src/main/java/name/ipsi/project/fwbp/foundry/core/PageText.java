@@ -1,7 +1,9 @@
 package name.ipsi.project.fwbp.foundry.core;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 
+@JsonPropertyOrder(alphabetic = true)
 public class PageText implements PageContent {
 
     private final PageTextFormat format;

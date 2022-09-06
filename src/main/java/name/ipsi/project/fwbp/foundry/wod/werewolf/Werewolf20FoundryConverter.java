@@ -338,7 +338,6 @@ public class Werewolf20FoundryConverter {
                 "systems/worldofdarkness/assets/img/items/power.svg",
                 new GiftData(
                         false,
-                        false,
                         "",
                         "",
                         description.toString(),
@@ -349,8 +348,6 @@ public class Werewolf20FoundryConverter {
                         0,
                         gr != null ? gr.difficulty() : "",
                         gr != null,
-                        gr != null,
-                        false,
                         false,
                         "",
                         g.system()

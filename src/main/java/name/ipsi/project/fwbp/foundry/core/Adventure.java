@@ -1,11 +1,13 @@
 package name.ipsi.project.fwbp.foundry.core;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 
+@JsonPropertyOrder(alphabetic = true)
 public class Adventure implements FoundryDocument {
 
     @JsonProperty("_id")

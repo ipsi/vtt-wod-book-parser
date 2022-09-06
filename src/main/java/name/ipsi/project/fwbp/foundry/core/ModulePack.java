@@ -1,10 +1,12 @@
 package name.ipsi.project.fwbp.foundry.core;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 
 import java.util.Objects;
 
 @JsonInclude(JsonInclude.Include.NON_NULL)
+@JsonPropertyOrder(alphabetic = true)
 public final class ModulePack {
     private final String name;
     private final String label;
