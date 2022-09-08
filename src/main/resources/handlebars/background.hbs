@@ -1,0 +1,30 @@
+<div>
+    {{#each (split description)}}
+    <p>{{.}}</p>
+    {{/each}}
+</div>
+{{#with ratings}}
+<div>
+    <table>
+        {{#if header}}
+        <tr>
+            {{#each header.columns}}
+                <th>{{data}}</th>
+            {{/each}}
+        </tr>
+        {{/if}}
+        {{#each rows}}
+        <tr>
+            {{#each columns}}
+                <td{{#if @first}} style="vertical-align: top; min-width: 40px;"{{/if}}>{{data}}</td>
+            {{/each}}
+        </tr>
+        {{/each}}
+    </table>
+</div>
+{{/with}}
+{{#with ratings.trailer}}
+<div>
+    <p>{{.}}</p>
+</div>
+{{/with}}

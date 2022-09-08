@@ -1,5 +1,7 @@
 package name.ipsi.project.fwbp;
 
+import name.ipsi.project.fwbp.books.shared.Background;
+import name.ipsi.project.fwbp.books.shared.Table;
 import name.ipsi.project.fwbp.books.werewolf.Auspice;
 import name.ipsi.project.fwbp.books.werewolf.Breed;
 import name.ipsi.project.fwbp.books.werewolf.Gift;
@@ -10,6 +12,9 @@ import name.ipsi.project.fwbp.books.werewolf.locations.TribeGifts;
 import name.ipsi.project.fwbp.dtrpg.Downloader;
 import name.ipsi.project.fwbp.foundry.core.Module;
 import name.ipsi.project.fwbp.foundry.core.*;
+import name.ipsi.project.fwbp.foundry.wod.FeatureData;
+import name.ipsi.project.fwbp.foundry.wod.MeleeWeaponData;
+import name.ipsi.project.fwbp.foundry.wod.werewolf.GiftData;
 import org.junit.jupiter.api.Test;
 
 import java.io.ByteArrayInputStream;
@@ -40,6 +45,8 @@ class MainTest {
         invokeAllMethodsWithReflection(Tribe.class);
         invokeAllMethodsWithReflection(TribeGifts.class);
         invokeAllMethodsWithReflection(Gift.class);
+        invokeAllMethodsWithReflection(Background.class);
+        invokeAllMethodsWithReflection(Table.class);
         invokeAllMethodsWithReflection(Downloader.DtrpgTokenMessage.class);
         invokeAllMethodsWithReflection(Downloader.DtrpgTokenResponse.class);
         invokeAllMethodsWithReflection(Downloader.DtrpgFileMessage.class);
@@ -48,8 +55,13 @@ class MainTest {
         invokeAllMethodsWithReflection(Author.class);
         invokeAllMethodsWithReflection(Compatibility.class);
         invokeAllMethodsWithReflection(Folder.class);
+        invokeAllMethodsWithReflection(GiftData.class);
+        invokeAllMethodsWithReflection(FeatureData.class);
         invokeAllMethodsWithReflection(Item.class);
         invokeAllMethodsWithReflection(Journal.class);
+        invokeAllMethodsWithReflection(MeleeWeaponData.class);
+        invokeAllMethodsWithReflection(MeleeWeaponData.Attack.class);
+        invokeAllMethodsWithReflection(MeleeWeaponData.Damage.class);
         invokeAllMethodsWithReflection(Module.class);
         invokeAllMethodsWithReflection(ModulePack.class);
         invokeAllMethodsWithReflection(Page.class);
@@ -63,7 +75,7 @@ class MainTest {
 
         var expectedFiles = new TreeMap<Path, String>();
         expectedFiles.put(Path.of("modules", "wod-werewolf-20-core", "module.json"), "ea943ceeccbee074da951c163e65d71d9f7bca8bed0a3b7bd7665418d09cfe6a07eafea0fb9990e854976df003fccae480881c676b42267567e564ad043e7dac");
-        expectedFiles.put(Path.of("modules", "wod-werewolf-20-core", "packs", "w20.db"), "d896bccce4b8b5b3f1757071d0e906b6db3dd912b31c477998c22ec120fba466a6c881fcf5a82580d5214e37ba1e876da28e303165811010a29bd4e18ff89de8");
+        expectedFiles.put(Path.of("modules", "wod-werewolf-20-core", "packs", "w20.db"), "534f2f148d90e0c9b5068eaabd70b0b1df84710dc1590a731612b0c67d6a213d27591683ee510da6ddbc18547c5f7406e15a53974d495be14d93fe6889a8cf9e");
         expectedFiles.put(Path.of("modules", "wod-werewolf-20-core", "images", "adventure-cover.jpeg"), "17d71cdd62f4c930b803fbcf1fab02a3d0244eb7fa1d4359ab088381b1288f1bb191117ec60d3075528732ff9ce4888545e6b66b0d681b00b68b79a214daee1c");
         expectedFiles.put(Path.of("modules", "wod-werewolf-20-core", "images", "black-furies-splash.jpeg"), "0c2f71fba6238336509d84672af71bee9344c477e0696ddd2f4dcf7d53193a1df4726f59f78135d653411f9e44dddbb08f54c65cb552a3ae3ce358dc1e2a4dea");
         expectedFiles.put(Path.of("modules", "wod-werewolf-20-core", "images", "black-spiral-dancers-splash.jpeg"), "10c193572ee8f878ce800f3e4bd6db12e3971714f9f69bda1ca15ee8edb64b9540f6638aacefdafdeef07d7027dc9c6f44d0423ca9c75caa492bcc752feaa372");

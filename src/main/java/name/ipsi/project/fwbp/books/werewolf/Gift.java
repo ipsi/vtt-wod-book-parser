@@ -1,6 +1,7 @@
 package name.ipsi.project.fwbp.books.werewolf;
 
 import name.ipsi.project.fwbp.books.shared.BookEntry;
+import name.ipsi.project.fwbp.books.shared.Table;
 import name.ipsi.project.fwbp.foundry.core.FoundryUtils;
 
 import java.util.List;
@@ -11,10 +12,11 @@ public record Gift(
         String description,
         String system,
         GiftRoll giftRoll,
-        List<GiftAvailability> availableTo
+        List<GiftAvailability> availableTo,
+        Table chart
 ) implements BookEntry, Comparable<Gift> {
-    public Gift(String name, String description, String system, GiftRoll giftRoll, List<GiftAvailability> availableTo) {
-        this(FoundryUtils.generateId("gift", name), name, description, system, giftRoll, availableTo);
+    public Gift(String name, String description, String system, GiftRoll giftRoll, List<GiftAvailability> availableTo, Table chart) {
+        this(FoundryUtils.generateId("gift", name), name, description, system, giftRoll, availableTo, chart);
     }
 
     public boolean availableFor(String groupName) {

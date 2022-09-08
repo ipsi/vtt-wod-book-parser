@@ -2,10 +2,7 @@ package name.ipsi.project.fwbp.books.werewolf;
 
 import com.itextpdf.kernel.geom.Rectangle;
 import com.itextpdf.kernel.pdf.canvas.parser.PdfDocumentContentParser;
-import name.ipsi.project.fwbp.books.shared.BookEntry;
-import name.ipsi.project.fwbp.books.shared.MeleeWeapon;
-import name.ipsi.project.fwbp.books.shared.PowerCollection;
-import name.ipsi.project.fwbp.books.shared.Stereotype;
+import name.ipsi.project.fwbp.books.shared.*;
 import name.ipsi.project.fwbp.books.shared.locations.*;
 import name.ipsi.project.fwbp.books.werewolf.locations.*;
 import name.ipsi.project.fwbp.foundry.wod.DamageTypes;
@@ -659,17 +656,73 @@ public class Werewolf20Extractor {
                                 new QuoteLocation(new Paragraph(426, makeRect(98, 600, 435, 122)))
                         )
                 ),
-                Collections.emptyList(),
+                Arrays.asList(
+                        new BackgroundLocation(
+                                "Allies",
+                                new DescriptionLocation(
+                                        new Paragraph(
+                                                new TextArea(136, makeRectEvenRight(704, 26)),
+                                                new TextArea(137, makeRectOddLeft(45, 169))
+                                        ),
+                                        new Paragraph(137, makeRectOddLeft(215, 103)),
+                                        new Paragraph(137, makeRectOddLeft(320, 65)),
+                                        new Paragraph(137, makeRectOddLeft(388, 11))
+                                ),
+                                new TableParagraph(new Paragraph(137, makeRectOddLeft(402, 136)))
+                        ),
+                        new BackgroundLocation(
+                                "Ancestors",
+                                new DescriptionLocation(
+                                        new Paragraph(137, makeRectOddLeft(566, 63)),
+                                        new Paragraph(
+                                                new TextArea(137, makeRectOddLeft(632, 103)),
+                                                new TextArea(137, makeRectOddRight(45, 116))
+                                        ),
+                                        new Paragraph(137, makeRectOddRight(163, 38)),
+                                        new Paragraph(137, makeRectOddRight(204, 77))
+                                ),
+                                new TableParagraph(new Paragraph(137, makeRectOddRight(285, 94)))
+                        ),
+                        new BackgroundLocation(
+                                "Contacts",
+                                new DescriptionLocation(
+                                        new Paragraph(137, makeRectOddRight(407, 116)),
+                                        new Paragraph(137, makeRectOddRight(526, 117)),
+                                        new Paragraph(137, makeRectOddRight(645, 12))
+                                ),
+                                new TableParagraph(new Paragraph(137, makeRectOddRight(661, 68)))
+                        ),
+                        new BackgroundLocation(
+                                "Totem",
+                                new DescriptionLocation(
+                                        new Paragraph(141, makeRectOddLeft(70, 64)),
+                                        new Paragraph(141, makeRectOddLeft(136, 209)),
+                                        new Paragraph(141, makeRectOddLeft(346, 90))
+                                ),
+                                new TableParagraph(
+                                        new Paragraph(141, makeRectOddLeft(441, 232)),
+                                        new Paragraph(
+                                                new TextArea(141, makeRectOddLeft(681, 54)),
+                                                new TextArea(141, makeRectOddRight(432, 102))
+                                        )
+                                )
+                        )
+                ),
                 Arrays.asList(
                         new GiftLocations(new BreedGifts(Breeds.HOMID), Arrays.asList(
                                 new Paragraph(153, makeRectOddRight(363, 370)),
                                 new Paragraph(154, makeRectEvenLeft(404, 329)),
                                 new Paragraph(154, makeRectEvenRight(404, 329)),
-                                new Paragraph(155, makeRectOddLeft(45, 695)),
+                                new Paragraph(155, makeRectOddLeft(135, 597)),
                                 new Paragraph(155, makeRectOddRight(45, 695)),
-                                new Paragraph(156, makeRectEvenLeft(45, 695)),
+                                new Paragraph(156, makeRectEvenLeft(45, 115)),
+                                new Paragraph(156, makeRectEvenLeft(257, 473)),
                                 new Paragraph(156, makeRectEvenRight(45, 512))
-                        )),
+                        ), new GiftChart("Jam Technology", new TableParagraph(
+                                new Paragraph(155, makeRectOddLeft(45, 85))
+                        )), new GiftChart("Bury the Wolf", new TableParagraph(
+                                new Paragraph(156, makeRectOddLeft(165, 87))
+                        ))),
                         new GiftLocations(new BreedGifts(Breeds.METIS), Arrays.asList(
                                 new Paragraph(156, makeRectEvenRight(663, 77)),
                                 new Paragraph(157, makeRectOddLeft(45, 695)),
@@ -689,12 +742,15 @@ public class Werewolf20Extractor {
                         new GiftLocations(new AuspiceGifts(Auspices.RAGABASH), Arrays.asList(
                                 new Paragraph(162, makeRectEvenLeft(253, 474)),
                                 new Paragraph(162, makeRectEvenRight(45, 695)),
-                                new Paragraph(163, makeRectOddLeft(45, 695)),
+                                new Paragraph(163, makeRectOddLeft(45, 277)),
+                                new Paragraph(163, makeRectOddLeft(416, 320)),
                                 new Paragraph(163, makeRectOddRight(45, 695)),
                                 new Paragraph(164, makeRectEvenLeft(45, 327)),
                                 new Paragraph(164, makeRectEvenRight(45, 327)),
                                 new Paragraph(165, makeRectOddLeft(45, 155))
-                        )),
+                        ), new GiftChart("Gremlins", new TableParagraph(
+                                new Paragraph(163, makeRectOddLeft(325, 86))
+                        ))),
                         new GiftLocations(new AuspiceGifts(Auspices.THEURGE), Arrays.asList(
                                 new Paragraph(165, makeRectOddLeft(265, 467)),
                                 new Paragraph(165, makeRectOddRight(45, 695)),
@@ -913,7 +969,7 @@ public class Werewolf20Extractor {
             this.parser = parser;
         }
 
-        public void process(GiftGroup group, List<Paragraph> text) {
+        public void process(GiftGroup group, List<Paragraph> text, GiftChart[] giftCharts) {
             var definition = Pattern.compile("^• (.*) \\(Level (.*)\\):? ?—? ?(.*)");
             var speedOfThoughtDefinition = Pattern.compile("^• Speed of Thought \\(Level\\s*");
             var harmoniousDefinition = Pattern.compile("^• Harmonious Unity of the Emerald Mother \\(Level\\s*");
@@ -954,7 +1010,7 @@ public class Werewolf20Extractor {
                     if (bsdDefinitionMatcher.matches()) {
                         log.trace("Found BSD gift definition, finalising previous gift");
                         if (description != null) {
-                            finaliseGift(group, name, level, description, sys);
+                            finaliseGift(group, name, level, description, sys, giftCharts);
                             description = null;
                             sys = null;
                         }
@@ -968,7 +1024,7 @@ public class Werewolf20Extractor {
                     else if (definitionMatcher.matches()) {
                         log.trace("Found gift definition, finalising previous gift");
                         if (description != null) {
-                            finaliseGift(group, name, level, description, sys);
+                            finaliseGift(group, name, level, description, sys, giftCharts);
                             description = null;
                             sys = null;
                         }
@@ -1012,11 +1068,12 @@ public class Werewolf20Extractor {
                     }
                 }
             }
+
             log.trace("Finalising final gift in section");
-            finaliseGift(group, name, level, description, sys);
+            finaliseGift(group, name, level, description, sys, giftCharts);
         }
 
-        private void finaliseGift(GiftGroup group, String name, String level, StringBuilder description, StringBuilder sys) {
+        private void finaliseGift(GiftGroup group, String name, String level, StringBuilder description, StringBuilder sys, GiftChart[] giftCharts) {
             var fixedName = fixText(name);
             var fixedDesc = fixText(description.toString());
             var fixedSys = sys == null ? null : fixText(sys.toString());
@@ -1051,7 +1108,12 @@ public class Werewolf20Extractor {
                             // Absurd, but the only Gift without a "System:" label which is *not* an "As the..." Gift.
                             fixedName.equals("Grandmother's Touch") ? "" : fixedSys,
                             gr,
-                            new ArrayList<>(Collections.singletonList(giftLevel))
+                            new ArrayList<>(Collections.singletonList(giftLevel)),
+                            Arrays.stream(giftCharts)
+                                    .filter(gc -> gc.name().equals(name))
+                                    .findFirst()
+                                    .map(this::processGiftChart)
+                                    .orElse(null)
                     ));
             if (optionalGift.isEmpty()) {
                 gifts.add(gift);
@@ -1059,26 +1121,38 @@ public class Werewolf20Extractor {
             giftsByGroup.putIfAbsent(giftLevel, new ArrayList<>());
             giftsByGroup.get(giftLevel).add(gift);
         }
+
+        private Table processGiftChart(GiftChart gc) {
+            int rowCount = 0;
+            Table.HeaderRow header = null;
+            List<Table.Row> rows = new ArrayList<>();
+            for (var line : getTextAsLines(parser, gc.tableParagraph().paragraphLocation())) {
+                var colA = fixText(line.split(" ")[0]);
+                var colB = fixText(line.substring(line.indexOf(" ") + 1));
+                if (rowCount == 0) {
+                    header = new Table.HeaderRow(new Table.Column(colA), new Table.Column(colB));
+                } else {
+                    rows.add(new Table.Row(new Table.Column(colA), new Table.Column(colB)));
+                }
+                rowCount++;
+            }
+            return new Table(header, null, rows.toArray(rows.toArray(new Table.Row[0])));
+        }
     }
 
     public List<BookEntry> process() {
-        //new Paragraph(even, makeRect(61, 45, 247, 695)),
-        //new Paragraph(even, makeRect(322, 45, 247, 695)),
-        //new Paragraph(odd, makeRect(42, 45, 247, 695)),
-        //new Paragraph(odd, makeRect(304, 45, 247, 695))
-
         log.debug("Extracting Gifts");
         var giftProcessor = new GiftProcessor(parser);
 
         for (var textLocations : BOOK_DETAILS.gifts()) {
             log.trace("Extracting gift from {}", textLocations);
-            giftProcessor.process(textLocations.group(), textLocations.locations());
+            giftProcessor.process(textLocations.group(), textLocations.locations(), textLocations.giftCharts());
             log.trace("Extracted {} gifts", giftProcessor.gifts.size());
         }
 
         var entries = new ArrayList<BookEntry>(giftProcessor.gifts);
 
-        log.trace("Processing breeds");
+        log.debug("Extracting breeds");
         for (var breed : BOOK_DETAILS.breeds()) {
             log.trace("Processing {}", breed);
             log.trace("Getting name");
@@ -1123,7 +1197,7 @@ public class Werewolf20Extractor {
             ));
         }
 
-        log.trace("Processing Auspices");
+        log.debug("Extracting Auspices");
         for (var a : BOOK_DETAILS.auspices()) {
             log.trace("Processing {}", a);
             log.trace("Getting name");
@@ -1150,7 +1224,7 @@ public class Werewolf20Extractor {
             ));
         }
 
-        log.trace("Processing Tribes");
+        log.debug("Extracting Tribes");
         for (var t : BOOK_DETAILS.tribes()) {
             log.trace("Processing {}", t);
             log.trace("Getting description");
@@ -1207,7 +1281,7 @@ public class Werewolf20Extractor {
                     backgroundRestrictions,
                     derangement,
                     stereotype == null ? null : parseTribalStereotypes(stereotype),
-                    String.join("\n", quote),
+                    fixText(String.join("\n", quote)),
                     collectGifts(t.tribe().displayName(), giftProcessor.gifts)
             ));
         }
@@ -1257,7 +1331,7 @@ public class Werewolf20Extractor {
                 true
         ));
 
-        log.trace("Processing Melee weapons");
+        log.debug("Extracting Melee weapons");
         var meleeWeaponPattern = Pattern.compile("([\\w\\s]+)(\\**)?\\s*(\\d+)(\\**)?\\s*Strength(\\s*\\+\\s*(\\d+))?/([BLA])(\\**)?\\s*([PJTN])\\s*");
         for (var line : getTextAsLines(parser, BOOK_DETAILS.weapons().meleeWeapons())) {
             log.trace("Processing weapon line");
@@ -1284,6 +1358,63 @@ public class Werewolf20Extractor {
             }
         }
 
+        log.debug("Extracting backgrounds");
+        var dotPattern = Pattern.compile("(•+)\\s*(.*)");
+        var totemHeaderPattern = Pattern.compile("(Cost)\\s*(Power)");
+        var totemPattern = Pattern.compile("(\\d+)\\s*(.*)");
+        for (var background : BOOK_DETAILS.backgrounds()) {
+            var name = background.name();
+            var description = String.join("\n", getText(parser, background.descriptionLocation()));
+            if(!name.equals("Totem")) {
+                List<Table.Row> rows = new ArrayList<>();
+                var rating = new StringBuilder();
+                var ratingDescription = new StringBuilder();
+                for (String line : getTextAsLines(parser, background.tableParagraph().paragraphLocation())) {
+                    var matcher = dotPattern.matcher(line);
+                    if (matcher.matches()) {
+                        if (rating.length() > 0) {
+                            rows.add(new Table.Row(new Table.Column(fixText(rating.toString())), new Table.Column(fixText(ratingDescription.toString()))));
+                            rating = new StringBuilder();
+                            ratingDescription = new StringBuilder();
+                        }
+
+                        rating.append(matcher.group(1));
+                        ratingDescription.append(matcher.group(2));
+                    } else {
+                        ratingDescription.append(line);
+                    }
+                }
+                rows.add(new Table.Row(new Table.Column(fixText(rating.toString())), new Table.Column(fixText(ratingDescription.toString()))));
+                entries.add(new Background(name, description, new Table(null, null, rows.toArray(new Table.Row[0])), "werewolf"));
+            } else {
+                var trailer = String.join("\n", getText(parser, background.tableParagraph().trailer()));
+                Table.HeaderRow headerRow = new Table.HeaderRow(new Table.Column("Cost"), new Table.Column("Power"));
+                List<Table.Row> rows = new ArrayList<>();
+                var cost = new StringBuilder();
+                var power = new StringBuilder();
+                for (String line : getTextAsLines(parser, background.tableParagraph().paragraphLocation())) {
+                    var headerMatcher = totemHeaderPattern.matcher(line);
+                    var matcher = totemPattern.matcher(line);
+                    if (headerMatcher.matches()) {
+                        continue;
+                    } else if (matcher.matches()) {
+                        if (cost.length() > 0) {
+                            rows.add(new Table.Row(new Table.Column(fixText(cost.toString())), new Table.Column(fixText(power.toString().replaceAll("Cost Power {2}", "")))));
+                            cost = new StringBuilder();
+                            power = new StringBuilder();
+                        }
+
+                        cost.append(matcher.group(1));
+                        power.append(matcher.group(2));
+                    } else {
+                        power.append(line);
+                    }
+                }
+                rows.add(new Table.Row(new Table.Column(fixText(cost.toString())), new Table.Column(fixText(power.toString()))));
+                entries.add(new Background(name, description, new Table(headerRow, trailer, rows.toArray(new Table.Row[0])), "werewolf"));
+            }
+        }
+
         return entries;
     }
 
@@ -1304,7 +1435,7 @@ public class Werewolf20Extractor {
         for(String line : stereotypes) {
             var stereotypeMatcher = stereotypePattern.matcher(line);
             if (stereotypeMatcher.matches()) {
-                var tribeName = stereotypeMatcher.group(1);
+                var tribeName = fixText(stereotypeMatcher.group(1));
                 var restOfLine = stereotypeMatcher.group(2);
 
                 Optional<Tribes> tribesOptional = Tribes.findByDisplayName(tribeName);
@@ -1324,7 +1455,7 @@ public class Werewolf20Extractor {
             }
         }
 
-        rv.add(new Stereotype<>(currentTribe, sb.toString()));
+        rv.add(new Stereotype<>(currentTribe, fixText(sb.toString())));
 
         return rv;
     }

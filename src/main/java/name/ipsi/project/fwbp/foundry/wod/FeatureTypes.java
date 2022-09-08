@@ -1,4 +1,4 @@
-package name.ipsi.project.fwbp.foundry.core;
+package name.ipsi.project.fwbp.foundry.wod;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 

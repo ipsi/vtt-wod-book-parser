@@ -4,5 +4,9 @@ import name.ipsi.project.fwbp.books.shared.locations.Paragraph;
 
 import java.util.List;
 
-public record GiftLocations(GiftGroup group, List<Paragraph> locations) {
+public record GiftLocations(
+        GiftGroup group,
+        List<Paragraph> locations,
+        GiftChart... giftCharts
+) {
 }

@@ -1,13 +1,12 @@
 package name.ipsi.project.fwbp.foundry.wod.werewolf;
 
+import name.ipsi.project.fwbp.books.shared.Background;
 import name.ipsi.project.fwbp.books.shared.BookEntry;
 import name.ipsi.project.fwbp.books.shared.MeleeWeapon;
 import name.ipsi.project.fwbp.books.werewolf.*;
 import name.ipsi.project.fwbp.foundry.core.*;
 import name.ipsi.project.fwbp.foundry.templating.Templater;
-import name.ipsi.project.fwbp.foundry.wod.ItemTypes;
-import name.ipsi.project.fwbp.foundry.wod.MeleeWeaponData;
-import name.ipsi.project.fwbp.foundry.wod.PowerTypes;
+import name.ipsi.project.fwbp.foundry.wod.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -30,6 +29,7 @@ public class Werewolf20FoundryConverter {
         folderIdsByName = new HashMap<>();
         folderIdsByName.put("Garou", FoundryUtils.generateId("folder", "garou"));
         folderIdsByName.put("Gifts - Garou", FoundryUtils.generateId("folder", "gifts-garou"));
+        folderIdsByName.put("Backgrounds - Garou", FoundryUtils.generateId("folder", "backgrounds-garou"));
         folderIdsByName.put("Weapons - Melee", FoundryUtils.generateId("folder", "weapons-melee"));
 
         var items = new ArrayList<Item>();
@@ -48,6 +48,7 @@ public class Werewolf20FoundryConverter {
 
         folders.add(new Folder(folderIdsByName.get("Garou"), "Garou", DocumentTypes.JOURNAL_ENTRY, FolderSortingModes.MANUAL, 1.0, null, Collections.emptyMap(), null, null));
         folders.add(new Folder(folderIdsByName.get("Gifts - Garou"), "Gifts - Garou", DocumentTypes.ITEM, FolderSortingModes.ALPHABETICAL, 1.0, null, Collections.emptyMap(), null, null));
+        folders.add(new Folder(folderIdsByName.get("Backgrounds - Garou"), "Backgrounds - Garou", DocumentTypes.ITEM, FolderSortingModes.ALPHABETICAL, 1.0, null, Collections.emptyMap(), null, null));
         folders.add(new Folder(folderIdsByName.get("Weapons - Melee"), "Weapons - Melee", DocumentTypes.ITEM, FolderSortingModes.ALPHABETICAL, 2.0, null, Collections.emptyMap(), null, null));
 
         for (var entry : entries) {
@@ -71,6 +72,8 @@ public class Werewolf20FoundryConverter {
                 items.add(processGift(g, folderIdsByName.get("Gifts - Garou")));
             } else if (entry instanceof MeleeWeapon mw) {
                 items.add(processMeleeWeapon(mw, folderIdsByName.get("Weapons - Melee")));
+            } else if (entry instanceof Background b) {
+                items.add(processBackground(b));
             }
         }
 
@@ -132,7 +135,7 @@ public class Werewolf20FoundryConverter {
                 "",
                 folder,
                 0,
-                Collections.singletonMap("default", 2),
+                DocumentOwnershipLevel.defaultObserver(),
                 Collections.emptyMap(),
                 Packs.Weapons
         );
@@ -209,9 +212,31 @@ public class Werewolf20FoundryConverter {
                 "",
                 folder,
                 0,
-                Collections.singletonMap("default", 2),
+                DocumentOwnershipLevel.defaultObserver(),
                 Collections.emptyMap(),
                 Packs.Gifts
+        );
+    }
+
+    private Item processBackground(Background b) throws IOException {
+        log.debug("Running templates for background {}", b.name());
+        var description = Templater.instance().compile("background").apply(b);
+        return new Item(
+                b.id(),
+                b.name(),
+                ItemTypes.FEATURE,
+                "systems/worldofdarkness/assets/img/items/feature.svg",
+                new FeatureData(
+                        description,
+                        null,
+                        FeatureTypes.BACKGROUND
+                ),
+                null,
+                folderIdsByName.get("Backgrounds - Garou"),
+                0,
+                DocumentOwnershipLevel.defaultObserver(),
+                Collections.emptyMap(),
+                null
         );
     }
 

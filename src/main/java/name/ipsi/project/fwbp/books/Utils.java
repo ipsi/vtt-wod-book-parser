@@ -73,7 +73,7 @@ public class Utils {
                                 new TextRegionEventFilter(textArea.location()))
                         ).getResultantText()
                         .trim()
-                        .split("[\n\r]+")).map(Utils::fixText).toList()
+                        .split("[\n\r]+")).toList()
                 );
             }
         }
@@ -90,6 +90,7 @@ public class Utils {
                 .replaceAll("(\\w)\\.(\\w)", "$1. $2")
                 .replaceAll("andyet", "and yet")
                 .replaceAll("Likehomids", "Like homids")
+                .replaceAll("justas", "just as")
                 .replaceAll("thought,and", "thought, and")
                 .replaceAll("(\\w+)- (\\w+)", "$1-$2")
                 .replaceAll("hareor", "hare or")

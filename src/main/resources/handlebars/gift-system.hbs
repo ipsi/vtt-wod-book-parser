@@ -1,1 +1,19 @@
 <p>{{system}}</p>
+{{#with chart}}
+<div>
+    <table>
+        <tr>
+        {{#each header.columns}}
+            <th>{{data}}</th>
+        {{/each}}
+        </tr>
+        {{#each rows}}
+        <tr>
+            {{#each columns}}
+            <td>{{data}}</td>
+            {{/each}}
+        </tr>
+        {{/each}}
+    </table>
+</div>
+{{/with}}
