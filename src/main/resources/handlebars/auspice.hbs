@@ -1,0 +1,11 @@
+<p><em>{{~#each altNames~}}{{.}}{{#unless @last}}, {{/unless}}{{/each~}}</em></p>
+<div>
+{{#each (split description)}}
+    <p>{{.}}</p>
+{{/each}}
+</div>
+<p><strong>Initial Rage:</strong> {{initialRage}}</p>
+<p><strong>Stereotype:</strong> <em>{{stereotype}}</em></p>
+<p><strong>Quote:</strong> <em>{{quote}}</em></p>
+
+{{>gifts}}

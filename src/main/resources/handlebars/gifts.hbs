@@ -1,9 +1,13 @@
-<h2>Gifts</h2>
-{{#each gifts}}
-<h4>{{group.loreName}}</h4>
-<p>
-    {{#each powers}}
-    <span>@Item[{{id}}]{ {{~name~}} } </span>
+<div>
+    <h2>Gifts</h2>
+    {{#each gifts}}
+    <div>
+        <h4>{{group.loreName}}</h4>
+        <p>
+            {{#each powers}}
+            <span>@Item[{{id}}]{ {{~name~}} } </span>
+            {{/each}}
+        </p>
+    </div>
     {{/each}}
-</p>
-{{/each}}
+</div>

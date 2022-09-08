@@ -7,4 +7,14 @@ public record TribeGifts(Tribes tribe) implements GiftGroup {
     public String name() {
         return tribe.displayName();
     }
+
+    @Override
+    public String journalIdName() {
+        return "tribes";
+    }
+
+    @Override
+    public String pageIdGroup() {
+        return "tribe";
+    }
 }

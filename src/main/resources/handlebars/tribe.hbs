@@ -3,9 +3,9 @@
          height="400" alt="{{name.displayName}} Splash Image">
 </div>
 <p class="tribal-quote" style="text-align: center; font-style: italic;">
-    {{~#each (split quote)}}
+    {{#each (split quote)}}
     <span>{{.}}</span>{{#unless @last}}<br>{{/unless}}
-    {{~/each}}
+    {{/each}}
 </p>
 <div>
 {{~#each (split description)}}

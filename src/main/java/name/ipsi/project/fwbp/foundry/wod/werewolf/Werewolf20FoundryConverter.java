@@ -13,7 +13,6 @@ import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.util.*;
-import java.util.stream.Collectors;
 
 public class Werewolf20FoundryConverter {
     public static final Logger log = LoggerFactory.getLogger(Werewolf20FoundryConverter.class);
@@ -25,28 +24,7 @@ public class Werewolf20FoundryConverter {
 
     public static final String MODULE_NAME = "wod-werewolf-20-core";
 
-    public List<FoundryDocument> process(List<BookEntry> entries) {
-        log.trace("Converting book entries");
-        var documents = new ArrayList<FoundryDocument>();
-        for (var entry : entries) {
-            log.trace("Converting book entry {}", entry.getClass().getSimpleName());
-            if (entry instanceof Breed b) {
-                documents.add(processBreed(b));
-            } else if (entry instanceof Auspice a) {
-                documents.add(processAuspice(a));
-            } else if (entry instanceof Tribe t) {
-                documents.add(processTribe(t));
-            } else if (entry instanceof Gift g) {
-                documents.add(processGift(g, null));
-            } else if (entry instanceof MeleeWeapon mw) {
-                documents.add(processMeleeWeapon(mw, null));
-            }
-        }
-
-        return documents;
-    }
-
-    public Adventure processAsAdventure(List<BookEntry> entries) {
+    public Adventure processAsAdventure(List<BookEntry> entries) throws IOException {
         log.trace("Converting book entries tp adventure");
 
         folderIdsByName = new HashMap<>();
@@ -57,6 +35,7 @@ public class Werewolf20FoundryConverter {
         var items = new ArrayList<Item>();
         var journals = new ArrayList<Journal>();
         var folders = new ArrayList<Folder>();
+
         List<Page> breedJournalPages = new ArrayList<>();
         var breedJournal = new Journal(FoundryUtils.generateId("journal", "breeds"), "Breeds", folderIdsByName.get("Garou"), 1.0, Collections.emptyMap(), breedJournalPages, DocumentOwnershipLevel.defaultObserver());
         journals.add(breedJournal);
@@ -75,16 +54,16 @@ public class Werewolf20FoundryConverter {
             log.trace("Converting book entry {}", entry.getClass().getSimpleName());
             if (entry instanceof Breed b) {
                 var j = processBreed(b);
-                breedJournalPages.add(Page.createTextPage(j.getId(), j.getName(), j.getContent()));
+                breedJournalPages.add(Page.createTextPage(j.id(), j.name(), j.content()));
             } else if (entry instanceof Auspice a) {
                 var j = processAuspice(a);
-                auspiceJournalPages.add(Page.createTextPage(j.getId(), j.getName(), j.getContent()));
+                auspiceJournalPages.add(Page.createTextPage(j.id(), j.name(), j.content()));
             } else if (entry instanceof Tribe t) {
                 var j = processTribe(t);
                 tribeJournalPages.add(Page.createTextPage(
-                        j.getId(),
-                        j.getName(),
-                        j.getContent(),
+                        j.id(),
+                        j.name(),
+                        j.content(),
                         // BSDs are technically ST-only so hide from players
                         t.name() == Tribes.BLACK_SPIRAL_DANCERS ? DocumentOwnershipLevel.defaultNone() : DocumentOwnershipLevel.defaultInherit()
                 ));
@@ -159,105 +138,52 @@ public class Werewolf20FoundryConverter {
         );
     }
 
-    private Journal processBreed(Breed b) {
-        log.trace("Converting Breed {}", b.name());
-        String html;
-        try {
-            log.debug("Running template for breed {}", b.name());
-            html = Templater.instance().compile("breed").apply(b);
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
+    private Journal processBreed(Breed b) throws IOException {
+        log.debug("Running template for breed {}", b.name());
+        var html = Templater.instance().compile("breed").apply(b);
 
         return new Journal(
                 b.id(),
                 b.name(),
-                html,
+                html.replaceAll("\r\n", "\n"),
                 null,
                 breedSort++,
                 Packs.Breeds
         );
     }
 
-    private Journal processAuspice(Auspice a) {
-        log.trace("Converting Auspice {}", a.name());
-        var text = new StringBuilder();
-        log.trace("Adding titles");
-        text.append("<p><em>").append(String.join(", ", a.altNames())).append("</em></p>\n");
-        log.trace("Adding description");
-        text.append("<p>").append(String.join("</p><p>", a.description().split("\n"))).append("</p>\n");
-        log.trace("Adding initial rage");
-        text.append("<p><strong>Initial Rage:</strong> ").append(a.initialRage()).append("</p>\n");
-        log.trace("Adding stereotype");
-        text.append("<p><strong>Stereotype:</strong> <em>").append(a.stereotype()).append("</em></p>\n");
-        log.trace("Adding quote");
-        text.append("<p><strong>Quote:</strong> <em>").append(a.quote()).append("</em></p>\n");
-
-//        appendGifts(text, a.gifts());
+    private Journal processAuspice(Auspice a) throws IOException {
+        log.debug("Running template for Auspice {}", a.name());
+        var html = Templater.instance().compile("auspice").apply(a);
 
         return new Journal(
                 a.id(),
                 a.name(),
-                text.toString(),
+                html.replaceAll("\r\n", "\n"),
                 null,
                 auspiceSort++,
                 Packs.Auspices
         );
     }
 
-    private Journal processTribe(Tribe t) {
-        log.trace("Converting Tribe {}", t.name());
-        String html;
-        try {
-            log.debug("Running template for tribe {}", t.name());
-            html = Templater.instance().compile("tribe").apply(t);
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
+    private Journal processTribe(Tribe t) throws IOException {
+        log.debug("Running template for tribe {}", t.name());
+        var html = Templater.instance().compile("tribe").apply(t);
 
         return new Journal(
                 t.id(),
                 t.name().displayName(),
-                html,
+                html.replaceAll("\r\n", "\n"),
                 null,
                 tribeSort++,
                 Packs.Tribes
         );
     }
 
-    private void appendGifts(StringBuilder text, Map<Rank, List<Gift>> gifts) {
-        appendBeginningGifts(text, gifts.get(Rank.ONE));
-
-        appendAllGifts(text, gifts);
-    }
-
-    private void appendBeginningGifts(StringBuilder text, List<Gift> gifts) {
-        log.trace("Adding beginning gifts");
-        text.append("<p><strong>Beginning Gifts:</strong> ").append(gifts.stream()
-                .map(g -> String.format("@Item[%s]{%s}", g.id(), g.name())).collect(Collectors.joining(", "))).append("</p>");
-    }
-
-    private void appendAllGifts(StringBuilder text, Map<Rank, List<Gift>> gifts) {
-        log.trace("Adding gifts");
-        text.append("\n<h2>Gifts</h2>");
-        for (var f : gifts.entrySet().stream().sorted(Comparator.comparingInt(o -> o.getKey().sortKey())).toList()) {
-            text.append("\n<h4>").append(f.getKey().loreName()).append("</h4>\n")
-                    .append(f.getValue().stream()
-                            .sorted(Comparator.comparing(Gift::name))
-                            .map(g -> String.format("@Item[%s]{%s}", g.id(), g.name()))
-                            .collect(Collectors.joining(" ")));
-        }
-    }
-
-    private Item processGift(Gift g, String folder) {
-        log.trace("Converting Gift {}", g.name());
-        log.trace("Adding description");
-        var description = new StringBuilder(g.description());
-        log.trace("Adding available to");
-        description.append("\n<h3>Available To</h3>");
-        for (var at : g.availableTo()) {
-            description.append("\n<p>").append(at.group().name()).append(" @ Rank ").append(at.level()).append("</p>");
-        }
+    private Item processGift(Gift g, String folder) throws IOException {
+        log.debug("Running templates for gift {}", g.name());
+        var description = Templater.instance().compile("gift-description").apply(g);
+        var system = Templater.instance().compile("gift-system").apply(g);
         var gr = g.giftRoll();
         return new Item(
                 g.id(),
@@ -268,7 +194,7 @@ public class Werewolf20FoundryConverter {
                         false,
                         "",
                         "",
-                        description.toString(),
+                        description.replaceAll("\r\n", "\n"),
                         PowerTypes.GIFT,
                         g.availableTo().get(0).level(),
                         gr != null ? convertCharacteristic(gr.characteristicOne()) : "",
@@ -278,7 +204,7 @@ public class Werewolf20FoundryConverter {
                         gr != null,
                         false,
                         "",
-                        g.system()
+                        system.replaceAll("\r\n", "\n")
                 ),
                 "",
                 folder,

@@ -1,0 +1,7 @@
+<p>{{description}}</p>
+<div>
+    <h3>Available To:</h3>
+    {{#each availableTo}}
+    <p>@UUID[JournalEntry.{{generate-id group.journalIdName group='journal'}}.JournalEntryPage.{{generate-id group.name group=group.pageIdGroup}}]{ {{~group.name~}} } @ Rank {{level}}</p>
+    {{/each}}
+</div>

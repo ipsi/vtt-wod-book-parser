@@ -7,4 +7,14 @@ public record BreedGifts(Breeds breed) implements GiftGroup {
     public String name() {
         return breed.displayName();
     }
+
+    @Override
+    public String journalIdName() {
+        return "breeds";
+    }
+
+    @Override
+    public String pageIdGroup() {
+        return "breed";
+    }
 }

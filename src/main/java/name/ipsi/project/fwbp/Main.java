@@ -106,11 +106,6 @@ public class Main {
                     var adventure = new Werewolf20FoundryConverter().processAsAdventure(rawBookEntries);
                     log.debug("Generating module");
                     moduleGenerator.createModule(adventure);
-                } else {
-                    var foundryDocs = new Werewolf20FoundryConverter().process(rawBookEntries);
-                    log.debug("Converted entries to Foundry docs, creating {} documents", foundryDocs.size());
-                    log.debug("Generating module");
-                    moduleGenerator.createModule(foundryDocs);
                 }
 
                 log.info("Module {} generated at {}", Werewolf20FoundryConverter.MODULE_NAME, moduleGenerator.getOutputPath().toAbsolutePath());

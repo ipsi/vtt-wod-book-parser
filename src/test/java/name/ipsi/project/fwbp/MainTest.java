@@ -4,7 +4,12 @@ import name.ipsi.project.fwbp.books.werewolf.Auspice;
 import name.ipsi.project.fwbp.books.werewolf.Breed;
 import name.ipsi.project.fwbp.books.werewolf.Gift;
 import name.ipsi.project.fwbp.books.werewolf.Tribe;
+import name.ipsi.project.fwbp.books.werewolf.locations.AuspiceGifts;
+import name.ipsi.project.fwbp.books.werewolf.locations.BreedGifts;
+import name.ipsi.project.fwbp.books.werewolf.locations.TribeGifts;
 import name.ipsi.project.fwbp.dtrpg.Downloader;
+import name.ipsi.project.fwbp.foundry.core.Module;
+import name.ipsi.project.fwbp.foundry.core.*;
 import org.junit.jupiter.api.Test;
 
 import java.io.ByteArrayInputStream;
@@ -29,20 +34,36 @@ class MainTest {
     @Test
     void testAdventure() throws Exception {
         invokeAllMethodsWithReflection(Breed.class);
+        invokeAllMethodsWithReflection(BreedGifts.class);
         invokeAllMethodsWithReflection(Auspice.class);
+        invokeAllMethodsWithReflection(AuspiceGifts.class);
         invokeAllMethodsWithReflection(Tribe.class);
+        invokeAllMethodsWithReflection(TribeGifts.class);
         invokeAllMethodsWithReflection(Gift.class);
         invokeAllMethodsWithReflection(Downloader.DtrpgTokenMessage.class);
         invokeAllMethodsWithReflection(Downloader.DtrpgTokenResponse.class);
         invokeAllMethodsWithReflection(Downloader.DtrpgFileMessage.class);
         invokeAllMethodsWithReflection(Downloader.DtrpgFileResponse.class);
+        invokeAllMethodsWithReflection(Adventure.class);
+        invokeAllMethodsWithReflection(Author.class);
+        invokeAllMethodsWithReflection(Compatibility.class);
+        invokeAllMethodsWithReflection(Folder.class);
+        invokeAllMethodsWithReflection(Item.class);
+        invokeAllMethodsWithReflection(Journal.class);
+        invokeAllMethodsWithReflection(Module.class);
+        invokeAllMethodsWithReflection(ModulePack.class);
+        invokeAllMethodsWithReflection(Page.class);
+        invokeAllMethodsWithReflection(PageImage.class);
+        invokeAllMethodsWithReflection(PageText.class);
+        invokeAllMethodsWithReflection(PageTitle.class);
+        invokeAllMethodsWithReflection(PageVideo.class);
 
         System.setIn(new ByteArrayInputStream("1".getBytes(Charset.defaultCharset())));
         Main.main(new String[]{"--adventure"});
 
         var expectedFiles = new TreeMap<Path, String>();
         expectedFiles.put(Path.of("modules", "wod-werewolf-20-core", "module.json"), "ea943ceeccbee074da951c163e65d71d9f7bca8bed0a3b7bd7665418d09cfe6a07eafea0fb9990e854976df003fccae480881c676b42267567e564ad043e7dac");
-        expectedFiles.put(Path.of("modules", "wod-werewolf-20-core", "packs", "w20.db"), "a7fc11de582fd78b08a7ce44c8e9f43db69c2dc3f7a0a0f391da3ec0651acdf1894075f1b3dffcea9b94bb98bfcae0ff310b1d8c58862685230463c82e4395f8");
+        expectedFiles.put(Path.of("modules", "wod-werewolf-20-core", "packs", "w20.db"), "d896bccce4b8b5b3f1757071d0e906b6db3dd912b31c477998c22ec120fba466a6c881fcf5a82580d5214e37ba1e876da28e303165811010a29bd4e18ff89de8");
         expectedFiles.put(Path.of("modules", "wod-werewolf-20-core", "images", "adventure-cover.jpeg"), "17d71cdd62f4c930b803fbcf1fab02a3d0244eb7fa1d4359ab088381b1288f1bb191117ec60d3075528732ff9ce4888545e6b66b0d681b00b68b79a214daee1c");
         expectedFiles.put(Path.of("modules", "wod-werewolf-20-core", "images", "black-furies-splash.jpeg"), "0c2f71fba6238336509d84672af71bee9344c477e0696ddd2f4dcf7d53193a1df4726f59f78135d653411f9e44dddbb08f54c65cb552a3ae3ce358dc1e2a4dea");
         expectedFiles.put(Path.of("modules", "wod-werewolf-20-core", "images", "black-spiral-dancers-splash.jpeg"), "10c193572ee8f878ce800f3e4bd6db12e3971714f9f69bda1ca15ee8edb64b9540f6638aacefdafdeef07d7027dc9c6f44d0423ca9c75caa492bcc752feaa372");

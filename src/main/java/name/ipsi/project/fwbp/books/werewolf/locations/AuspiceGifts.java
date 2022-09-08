@@ -7,4 +7,14 @@ public record AuspiceGifts(Auspices auspice) implements GiftGroup {
     public String name() {
         return auspice.displayName();
     }
+
+    @Override
+    public String journalIdName() {
+        return "auspices";
+    }
+
+    @Override
+    public String pageIdGroup() {
+        return "auspice";
+    }
 }

@@ -51,17 +51,17 @@ public final class ModuleGenerator {
         Files.createDirectories(outputPath.resolve("packs"));
 
         log.trace("Creating pack - Breeds");
-        modulePacks.add(createPack("Breeds (W20)", "breeds", DocumentTypes.JOURNAL_ENTRY, foundryDocuments.stream().filter(d -> d.getPack().equals(Packs.Breeds))));
+        modulePacks.add(createPack("Breeds (W20)", "breeds", DocumentTypes.JOURNAL_ENTRY, foundryDocuments.stream().filter(d -> d.pack().equals(Packs.Breeds))));
         log.trace("Creating pack - Auspices");
-        modulePacks.add(createPack("Auspices (W20)", "auspices", DocumentTypes.JOURNAL_ENTRY, foundryDocuments.stream().filter(d -> d.getPack().equals(Packs.Auspices))));
+        modulePacks.add(createPack("Auspices (W20)", "auspices", DocumentTypes.JOURNAL_ENTRY, foundryDocuments.stream().filter(d -> d.pack().equals(Packs.Auspices))));
         log.trace("Creating pack - Tribes");
-        modulePacks.add(createPack("Tribes (W20)", "tribes", DocumentTypes.JOURNAL_ENTRY, foundryDocuments.stream().filter(d -> d.getPack().equals(Packs.Tribes))));
+        modulePacks.add(createPack("Tribes (W20)", "tribes", DocumentTypes.JOURNAL_ENTRY, foundryDocuments.stream().filter(d -> d.pack().equals(Packs.Tribes))));
 
         log.trace("Creating pack - Gifts");
-        modulePacks.add(createPack("Gifts (W20)", "gifts", DocumentTypes.ITEM, foundryDocuments.stream().filter(d -> d.getPack().equals(Packs.Gifts))));
+        modulePacks.add(createPack("Gifts (W20)", "gifts", DocumentTypes.ITEM, foundryDocuments.stream().filter(d -> d.pack().equals(Packs.Gifts))));
 
         log.trace("Creating pack - Weapons");
-        modulePacks.add(createPack("Weapons (W20)", "weapons", DocumentTypes.ITEM, foundryDocuments.stream().filter(d -> d.getPack().equals(Packs.Weapons))));
+        modulePacks.add(createPack("Weapons (W20)", "weapons", DocumentTypes.ITEM, foundryDocuments.stream().filter(d -> d.pack().equals(Packs.Weapons))));
 
         var module = new Module(
                 name,
