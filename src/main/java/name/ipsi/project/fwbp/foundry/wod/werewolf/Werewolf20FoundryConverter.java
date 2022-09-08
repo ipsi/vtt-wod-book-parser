@@ -227,7 +227,7 @@ public class Werewolf20FoundryConverter {
                 ItemTypes.FEATURE,
                 "systems/worldofdarkness/assets/img/items/feature.svg",
                 new FeatureData(
-                        description,
+                        description.replaceAll("\r\n", "\n"),
                         null,
                         FeatureTypes.BACKGROUND
                 ),
