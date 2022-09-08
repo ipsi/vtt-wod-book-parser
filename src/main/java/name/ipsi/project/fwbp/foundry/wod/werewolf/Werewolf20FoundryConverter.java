@@ -4,14 +4,15 @@ import name.ipsi.project.fwbp.books.shared.BookEntry;
 import name.ipsi.project.fwbp.books.shared.MeleeWeapon;
 import name.ipsi.project.fwbp.books.werewolf.*;
 import name.ipsi.project.fwbp.foundry.core.*;
+import name.ipsi.project.fwbp.foundry.templating.Templater;
 import name.ipsi.project.fwbp.foundry.wod.ItemTypes;
 import name.ipsi.project.fwbp.foundry.wod.MeleeWeaponData;
 import name.ipsi.project.fwbp.foundry.wod.PowerTypes;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.io.IOException;
 import java.util.*;
-import java.util.function.Function;
 import java.util.stream.Collectors;
 
 public class Werewolf20FoundryConverter {
@@ -34,13 +35,7 @@ public class Werewolf20FoundryConverter {
             } else if (entry instanceof Auspice a) {
                 documents.add(processAuspice(a));
             } else if (entry instanceof Tribe t) {
-                documents.add(processTribe(t, e -> String.format(
-                        "@UUID[JournalEntry.%s.JournalEntryPage.%s]{%s}: %s",
-                        FoundryUtils.generateId("journal", "tribes"),
-                        FoundryUtils.generateId("tribe", e.getKey().displayName()),
-                        e.getKey().displayName(),
-                        e.getValue()
-                )));
+                documents.add(processTribe(t));
             } else if (entry instanceof Gift g) {
                 documents.add(processGift(g, null));
             } else if (entry instanceof MeleeWeapon mw) {
@@ -85,13 +80,7 @@ public class Werewolf20FoundryConverter {
                 var j = processAuspice(a);
                 auspiceJournalPages.add(Page.createTextPage(j.getId(), j.getName(), j.getContent()));
             } else if (entry instanceof Tribe t) {
-                var j = processTribe(t, e -> String.format(
-                        "@UUID[JournalEntry.%s.JournalEntryPage.%s]{%s}: %s",
-                        FoundryUtils.generateId("journal", "tribes"),
-                        FoundryUtils.generateId("tribe", e.getKey().displayName()),
-                        e.getKey().displayName(),
-                        e.getValue()
-                ));
+                var j = processTribe(t);
                 tribeJournalPages.add(Page.createTextPage(
                         j.getId(),
                         j.getName(),
@@ -172,39 +161,18 @@ public class Werewolf20FoundryConverter {
 
     private Journal processBreed(Breed b) {
         log.trace("Converting Breed {}", b.name());
-        var text = new StringBuilder();
-        log.trace("Adding description");
-        text.append("<p>").append(String.join("</p><p>", b.description().split("\n"))).append("</p>\n");
-        log.trace("Adding nicknames");
-        text.append("<p><strong>Nicknames:</strong> ").append(b.nicknames()).append("</p>\n");
-        log.trace("Adding initial gnosis");
-        text.append("<p><strong>Initial Gnosis:</strong> ").append(b.initialGnosis()).append("</p>\n");
-
-        appendBeginningGifts(text, b.beginningGifts());
-
-        log.trace("Adding deformities");
-        if (b.deformities() != null) {
-            text.append("\n<h2>Deformities</h2>");
-            text.append("\n<p>").append(b.deformities().description()).append("</p>");
-            for (var d : b.deformities().deformities()) {
-                text.append("\n<p><strong>").append(d.name()).append(":</strong> ").append(d.description());
-            }
+        String html;
+        try {
+            log.debug("Running template for breed {}", b.name());
+            html = Templater.instance().compile("breed").apply(b);
+        } catch (IOException e) {
+            throw new RuntimeException(e);
         }
-
-        log.trace("Adding restricted abilities");
-        if (b.restrictedAbilities() != null) {
-            text.append("\n<h2>Restricted Abilities</h2>");
-            text.append("\n<p>").append(b.restrictedAbilities().description()).append("</p>");
-            text.append("\n<p><strong>Skills:</strong> ").append(b.restrictedAbilities().skills()).append("</p>");
-            text.append("\n<p><strong>Knowledges:</strong> ").append(b.restrictedAbilities().knowledges()).append("</p>");
-        }
-
-        appendAllGifts(text, b.gifts());
 
         return new Journal(
                 b.id(),
                 b.name(),
-                text.toString(),
+                html,
                 null,
                 breedSort++,
                 Packs.Breeds
@@ -225,7 +193,7 @@ public class Werewolf20FoundryConverter {
         log.trace("Adding quote");
         text.append("<p><strong>Quote:</strong> <em>").append(a.quote()).append("</em></p>\n");
 
-        appendGifts(text, a.gifts());
+//        appendGifts(text, a.gifts());
 
         return new Journal(
                 a.id(),
@@ -237,60 +205,20 @@ public class Werewolf20FoundryConverter {
         );
     }
 
-    private Journal processTribe(Tribe t, Function<Map.Entry<Tribes, String>, String> stereotypeMapper) {
+    private Journal processTribe(Tribe t) {
         log.trace("Converting Tribe {}", t.name());
-        var text = new StringBuilder();
-        log.trace("Adding image");
-        text.append("<div style=\"text-align: center;\">\n<img src=\"modules/").append(MODULE_NAME).append("/images/").append(t.name().urlName())
-                .append("-splash.jpeg\" height=\"400\" alt=\"").append(t.name().displayName()).append(" Splash Image\"></div>\n");
-        log.trace("Adding quote");
-        text.append("<p class=\"tribal-quote\" style=\"text-align: center; font-style: italic;\">").append(String.join("<br>\n", t.quote().split("\n"))).append("</p>\n");
-        log.trace("Adding description");
-        text.append("<p>").append(String.join("</p>\n<p>", t.description().split("\n"))).append("</p>\n");
-        log.trace("Adding appearance");
-        text.append("<p><strong>Appearance:</strong> ").append(t.appearance()).append("</p>\n");
-        log.trace("Adding kinfolkAndTerritory");
-        text.append("<p><strong>Kinfolk & Territory:</strong> ").append(t.kinfolkAndTerritory()).append("</p>\n");
-        log.trace("Adding totem");
-        text.append("<p><strong>Tribal Totem:</strong> ").append(t.totem()).append("</p>\n");
-
-        var characterCreation = t.characterCreation();
-        if (characterCreation != null) {
-            log.trace("Adding characterCreation");
-            text.append("<p><strong>Character Creation:</strong> ").append(characterCreation).append("</p>\n");
+        String html;
+        try {
+            log.debug("Running template for tribe {}", t.name());
+            html = Templater.instance().compile("tribe").apply(t);
+        } catch (IOException e) {
+            throw new RuntimeException(e);
         }
-
-        log.trace("Adding initial willpower");
-        text.append("<p><strong>Initial Willpower:</strong> ").append(t.initialWillpower()).append("</p>\n");
-        var br = t.backgroundRestrictions();
-        if (br != null) {
-            log.trace("Adding Background Restrictions");
-            text.append("<p><strong>Background Restrictions:</strong> ").append(br).append("</p>\n");
-        }
-        var derangement = t.derangement();
-        if (derangement != null) {
-            log.trace("Adding derangement");
-            text.append("<p><strong>Derangement:</strong> ").append(derangement).append("</p>\n");
-        }
-
-        appendBeginningGifts(text, t.gifts().get(Rank.ONE));
-
-        var stereotypes = t.stereotypes();
-        if (stereotypes != null) {
-            log.trace("Adding stereotypes");
-            text.append("<div>\n<h4>Stereotypes</h4>\n<p>")
-                    .append(stereotypes.entrySet().stream()
-                            .map(stereotypeMapper)
-                            .collect(Collectors.joining("</p>\n<p>")))
-                    .append("</p>\n</div>\n");
-        }
-
-        appendAllGifts(text, t.gifts());
 
         return new Journal(
                 t.id(),
                 t.name().displayName(),
-                text.toString(),
+                html,
                 null,
                 tribeSort++,
                 Packs.Tribes

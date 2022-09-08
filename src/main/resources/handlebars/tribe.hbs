@@ -1,0 +1,40 @@
+<div style="text-align: center;">
+    <img src="modules/wod-werewolf-20-core/images/{{name.urlName}}-splash.jpeg"
+         height="400" alt="{{name.displayName}} Splash Image">
+</div>
+<p class="tribal-quote" style="text-align: center; font-style: italic;">
+    {{~#each (split quote)}}
+    <span>{{.}}</span>{{#unless @last}}<br>{{/unless}}
+    {{~/each}}
+</p>
+<div>
+{{~#each (split description)}}
+    <p>{{.}}</p>
+{{~/each}}
+</div>
+<p><strong>Appearance:</strong> {{appearance}}</p>
+<p><strong>Kinfolk & Territory:</strong> {{kinfolkAndTerritory}}</p>
+<p><strong>Tribal Totem:</strong> {{totem}}</p>
+{{#with characterCreation}}
+<p><strong>Character Creation:</strong> {{.}}
+{{/with}}
+<p><strong>Initial Willpower:</strong> {{initialWillpower}}</p>
+{{#with backgroundRestrictions}}
+<p><strong>Background Restrictions:</strong> {{.}}</p>
+{{/with}}
+{{#with derangement}}
+<p><strong>Derangement:</strong> {{.}}</p>
+{{/with}}
+
+{{>beginningGifts}}
+
+{{#with stereotypes}}
+<div>
+    <h4>Stereotypes</h4>
+    {{#each .}}
+    <p>@UUID[JournalEntry.{{generate-id 'tribes' group='journal'}}.JournalEntryPage.{{generate-id source.displayName group='tribe'}}]{ {{~source.displayName~}} }: {{text}}</p>
+    {{/each}}
+</div>
+{{/with}}
+
+{{>gifts}}

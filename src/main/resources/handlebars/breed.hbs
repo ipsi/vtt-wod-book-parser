@@ -1,0 +1,32 @@
+<div>
+{{~#each (split description)}}
+    <p>{{.}}</p>
+{{~/each}}
+</div>
+<p><strong>Nicknames:</strong> {{nicknames}}</p>
+<p><strong>Initial Gnosis:</strong> {{initialGnosis}}</p>
+
+{{>beginningGifts}}
+
+{{#with deformities}}
+<div>
+    <h2>Deformities</h2>
+    <p>{{description}}</p>
+    <div>
+    {{#each deformities}}
+        <p><strong>{{name}}:</strong> {{description}}</p>
+    {{/each}}
+    </div>
+</div>
+{{/with}}
+
+{{#with restrictedAbilities}}
+<div>
+    <h2>Restricted Abilities</h2>
+    <p>{{description}}</p>
+    <p><strong>Skills:</strong> {{skills}}</p>
+    <p><strong>Knowledges:</strong> {{knowledges}}</p>
+</div>
+{{/with}}
+
+{{>gifts}}

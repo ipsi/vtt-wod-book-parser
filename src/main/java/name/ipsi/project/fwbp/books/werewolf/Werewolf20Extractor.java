@@ -4,6 +4,8 @@ import com.itextpdf.kernel.geom.Rectangle;
 import com.itextpdf.kernel.pdf.canvas.parser.PdfDocumentContentParser;
 import name.ipsi.project.fwbp.books.shared.BookEntry;
 import name.ipsi.project.fwbp.books.shared.MeleeWeapon;
+import name.ipsi.project.fwbp.books.shared.PowerCollection;
+import name.ipsi.project.fwbp.books.shared.Stereotype;
 import name.ipsi.project.fwbp.books.shared.locations.*;
 import name.ipsi.project.fwbp.books.werewolf.locations.*;
 import name.ipsi.project.fwbp.foundry.wod.DamageTypes;
@@ -1110,19 +1112,14 @@ public class Werewolf20Extractor {
             }
 
             log.trace("Processing beginning gifts");
-            var beginningGiftsList = Arrays.asList(beginningGifts.split("\\s*,\\s*"));
             entries.add(new Breed(
                     name,
                     description,
                     nicknames,
                     Integer.parseInt(initialGnosis),
-                    giftProcessor.gifts.stream().filter(g -> beginningGiftsList.stream().anyMatch(s -> s.equals(g.name()))).collect(Collectors.toList()),
                     deformities,
                     restrictedAbilities,
-                    giftProcessor.gifts.stream()
-                            .filter(g -> g.availableFor(name))
-                            .sorted(Comparator.comparing(Gift::name))
-                            .collect(Collectors.groupingBy(g -> g.availableTo().stream().filter(gl -> gl.group().name().equals(name)).map(gl -> Rank.from(gl.level())).findFirst().orElseThrow()))
+                    collectGifts(name, giftProcessor.gifts)
             ));
         }
 
@@ -1149,10 +1146,7 @@ public class Werewolf20Extractor {
                     Integer.parseInt(initialRage),
                     stereotype,
                     quote,
-                    giftProcessor.gifts.stream()
-                            .filter(g -> g.availableFor(name))
-                            .sorted(Comparator.comparing(Gift::name))
-                            .collect(Collectors.groupingBy(g -> g.availableTo().stream().filter(gl -> gl.group().name().equals(name)).map(gl -> Rank.from(gl.level())).findFirst().orElseThrow()))
+                    collectGifts(name, giftProcessor.gifts)
             ));
         }
 
@@ -1214,10 +1208,7 @@ public class Werewolf20Extractor {
                     derangement,
                     stereotype == null ? null : parseTribalStereotypes(stereotype),
                     String.join("\n", quote),
-                    giftProcessor.gifts.stream()
-                            .filter(g -> g.availableFor(t.tribe().displayName()))
-                            .sorted(Comparator.comparing(Gift::name))
-                            .collect(Collectors.groupingBy(g -> g.availableTo().stream().filter(gl -> gl.group().name().equals(t.tribe().displayName())).map(gl -> Rank.from(gl.level())).findFirst().orElseThrow()))
+                    collectGifts(t.tribe().displayName(), giftProcessor.gifts)
             ));
         }
 
@@ -1296,8 +1287,17 @@ public class Werewolf20Extractor {
         return entries;
     }
 
-    private Map<Tribes, String> parseTribalStereotypes(List<String> stereotypes) {
-        var rv = new TreeMap<Tribes, String>();
+    private static List<PowerCollection<Rank, Gift>> collectGifts(String name, List<Gift> gifts) {
+        return gifts.stream()
+                .filter(g -> g.availableFor(name))
+                .collect(Collectors.groupingBy(g -> g.availableTo().stream().filter(gl -> gl.group().name().equals(name)).map(gl -> Rank.from(gl.level())).findFirst().orElseThrow()))
+                .entrySet().stream().map(e -> new PowerCollection<>(e.getKey(), e.getValue()))
+                .sorted(Comparator.comparing(PowerCollection::group))
+                .toList();
+    }
+
+    private List<Stereotype<Tribes>> parseTribalStereotypes(List<String> stereotypes) {
+        var rv = new ArrayList<Stereotype<Tribes>>();
         Tribes currentTribe = null;
         StringBuilder sb = new StringBuilder();
         var stereotypePattern = Pattern.compile("^\\s*(.*?)\\s*:\\s*(.*)");
@@ -1313,7 +1313,7 @@ public class Werewolf20Extractor {
                     sb.append(" ").append(line);
                 } else {
                     if (currentTribe != null) {
-                        rv.put(currentTribe, sb.toString());
+                        rv.add(new Stereotype<>(currentTribe, fixText(sb.toString())));
                     }
                     currentTribe = tribesOptional.get();
                     sb = new StringBuilder(restOfLine);
@@ -1324,7 +1324,7 @@ public class Werewolf20Extractor {
             }
         }
 
-        rv.put(currentTribe, fixText(sb.toString()));
+        rv.add(new Stereotype<>(currentTribe, sb.toString()));
 
         return rv;
     }

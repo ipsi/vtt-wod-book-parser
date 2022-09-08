@@ -12,7 +12,7 @@ public record Gift(
         String system,
         GiftRoll giftRoll,
         List<GiftAvailability> availableTo
-) implements BookEntry {
+) implements BookEntry, Comparable<Gift> {
     public Gift(String name, String description, String system, GiftRoll giftRoll, List<GiftAvailability> availableTo) {
         this(FoundryUtils.generateId("gift", name), name, description, system, giftRoll, availableTo);
     }
@@ -24,5 +24,10 @@ public record Gift(
             }
         }
         return false;
+    }
+
+    @Override
+    public int compareTo(Gift o) {
+        return name.compareTo(o.name);
     }
 }

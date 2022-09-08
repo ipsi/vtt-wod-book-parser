@@ -1,10 +1,12 @@
 package name.ipsi.project.fwbp.books.werewolf;
 
 import name.ipsi.project.fwbp.books.shared.BookEntry;
+import name.ipsi.project.fwbp.books.shared.PowerCollection;
+import name.ipsi.project.fwbp.books.shared.Stereotype;
 import name.ipsi.project.fwbp.foundry.core.FoundryUtils;
 
+import java.util.Collections;
 import java.util.List;
-import java.util.Map;
 
 public record Tribe(
         String id,
@@ -17,9 +19,9 @@ public record Tribe(
         int initialWillpower,
         String backgroundRestrictions,
         String derangement,
-        Map<Tribes, String> stereotypes,
+        List<Stereotype<Tribes>> stereotypes,
         String quote,
-        Map<Rank, List<Gift>> gifts
+        List<PowerCollection<Rank, Gift>> gifts
 ) implements BookEntry {
     public Tribe(
             Tribes name,
@@ -31,9 +33,10 @@ public record Tribe(
             int initialWillpower,
             String backgroundRestrictions,
             String derangement,
-            Map<Tribes, String> stereotypes,
+            List<Stereotype<Tribes>> stereotypes,
             String quote,
-            Map<Rank, List<Gift>> gifts) {
+            List<PowerCollection<Rank, Gift>> gifts
+    ) {
         this(
                 FoundryUtils.generateId("tribe", name.displayName()),
                 name,
@@ -48,5 +51,13 @@ public record Tribe(
                 stereotypes,
                 quote,
                 gifts);
+    }
+
+    public List<Gift> beginningGifts() {
+        return gifts().stream()
+                .filter(pc -> pc.group().equals(Rank.ONE))
+                .findFirst()
+                .map(PowerCollection::powers)
+                .orElse(Collections.emptyList());
     }
 }

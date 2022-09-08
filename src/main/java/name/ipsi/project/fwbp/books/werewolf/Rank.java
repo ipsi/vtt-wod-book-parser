@@ -1,6 +1,6 @@
 package name.ipsi.project.fwbp.books.werewolf;
 
-public enum Rank {
+public enum Rank implements Comparable<Rank> {
     ONE,
     TWO,
     THREE,

@@ -1,7 +1,7 @@
 package name.ipsi.project.fwbp.books.shared;
 
-public record Stereotype(
-        String source,
+public record Stereotype<T>(
+        T source,
         String text
 ) implements BookEntry {
 }

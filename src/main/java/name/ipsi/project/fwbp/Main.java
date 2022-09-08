@@ -54,6 +54,7 @@ public class Main {
             log.debug("DTRPG_TOKEN env var not found - requesting");
             System.out.println("Please enter your DTRPG Application Key (you can find or create one here: https://www.drivethrurpg.com/account_edit.php -> Application Keys)");
             token = scanner.next();
+            scanner.close();
         } else {
             log.debug("DTRPG_TOKEN env var found");
         }
@@ -143,6 +144,7 @@ public class Main {
         }
 
         context.getLogger("com.itextpdf").setLevel(Level.WARN);
+        context.getLogger("com.github.jknack.handlebars").setLevel(Level.WARN);
     }
 
     private static void writeIds() throws IOException {
