@@ -38,7 +38,7 @@ jobs:
         run: |
           ls -l target/gluonfx/x86_64-windows
           cp -r target/gluonfx/x86_64-windows/vtt-wod-book-parser.exe staging
-          cp -r target/gluonfx/x86_64-windows/vtt-wod-book-parser*.msi staging
+          cp -r target/gluonfx/x86_64-windows/vtt-wod-book-parser*.msi staging/vtt-wod-book-parser.msi
 
       - name: Upload
         uses: actions/upload-artifact@v2
@@ -75,13 +75,13 @@ jobs:
       - name: Copy native bundles to staging
         run: |
           ls -l target/gluonfx/x86_64-darwin
-          cp -r target/gluonfx/x86_64-darwin/vtt-wod-book-parser*.dmg staging
+          cp -r target/gluonfx/x86_64-darwin/vtt-wod-book-parser*.dmg staging/vtt-wod-book-parser.dmg
 
       - name: Upload (pkg)
         uses: actions/upload-artifact@v2
         with:
           name: macos
-          path: ${{ steps.outputfile.outputs.path }}
+          path: staging
   build-linux:
     name: "VTT WoD Book Parser on Linux"
     runs-on: ubuntu-latest
@@ -150,7 +150,7 @@ jobs:
           case "${{ matrix.os }}" in
               linux)
                 osName="linux"
-                suffix=".deb"
+                suffix=""
                 ;;
               macos)
                 osName="macos"
