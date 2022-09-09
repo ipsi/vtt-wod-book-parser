@@ -29,13 +29,14 @@ jobs:
           restore-keys: windows-maven
 
       - name: Gluon Build and Package
-        run: mvn -Pgluon,windows test gluonfx:build gluonfx:package
+        run: mvn -P "gluon,windows" test gluonfx:build gluonfx:package
         env:
           DTRPG_TOKEN: "${{ secrets.DTRPG_TOKEN }}"
           LOG_LEVEL: "debug"
 
       - name: Copy native bundles to staging
         run: |
+          ls -l target/gluonfx/x86_64-windows
           cp -r target/gluonfx/x86_64-windows/vtt-wod-book-parser.exe staging
           cp -r target/gluonfx/x86_64-windows/vtt-wod-book-parser*.msi staging
 
@@ -66,14 +67,15 @@ jobs:
           restore-keys: macos-maven
 
       - name: Gluon Build and Package
-        run: mvn -Pgluon,macos test gluonfx:build gluonfx:package
+        run: mvn -P "gluon,macos" test gluonfx:build gluonfx:package
         env:
           DTRPG_TOKEN: "${{ secrets.DTRPG_TOKEN }}"
           LOG_LEVEL: "debug"
 
       - name: Copy native bundles to staging
         run: |
-          cp -r target/gluonfx/x86_64-windows/vtt-wod-book-parser*.dmg staging
+          ls -l target/gluonfx/x86_64-darwin
+          cp -r target/gluonfx/x86_64-darwin/vtt-wod-book-parser*.dmg staging
 
       - name: Upload (pkg)
         uses: actions/upload-artifact@v2
@@ -107,13 +109,15 @@ jobs:
           restore-keys: linux-maven
 
       - name: Gluon Build
-        run: mvn -Pgluon,linux test gluonfx:build gluonfx:package
+        run: mvn -P "gluon,linux" test gluonfx:build gluonfx:package
         env:
           DTRPG_TOKEN: "${{ secrets.DTRPG_TOKEN }}"
           LOG_LEVEL: "debug"
 
       - name: Copy native image to staging
-        run: cp -r target/gluonfx/x86_64-linux/vtt-wod-book-parser*.deb staging
+        run: |
+          ls -l target/gluonfx/x86_64-linux/
+          cp -r target/gluonfx/x86_64-linux/vtt-wod-book-parser* staging
 
       - name: Upload
         uses: actions/upload-artifact@v2
