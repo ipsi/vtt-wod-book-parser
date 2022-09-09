@@ -1,0 +1,21 @@
+@font-face {
+    font-family: 'Kingthings Xander';
+    font-style: normal;
+    font-weight: 400;
+    src: local('Kingthings Xander'), url('https://fonts.cdnfonts.com/s/8436/Kingthings Xander.woff') format('woff');
+}
+
+.tribal-quote {
+    font-family: 'Kingthings Xander', sans-serif;
+    font-size: large;
+    font-style: italic;
+    text-align: center;
+}
+
+.backgrounds {
+}
+
+.backgrounds td:first-child {
+    vertical-align: top;
+    min-width: 40px;
+}

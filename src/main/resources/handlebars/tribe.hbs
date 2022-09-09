@@ -2,7 +2,7 @@
     <img src="modules/wod-werewolf-20-core/images/{{name.urlName}}-splash.jpeg"
          height="400" alt="{{name.displayName}} Splash Image">
 </div>
-<p class="tribal-quote" style="text-align: center; font-style: italic;">
+<p class="tribal-quote">
     {{#each (split quote)}}
     <span>{{.}}</span>{{#unless @last}}<br>{{/unless}}
     {{/each}}
@@ -29,7 +29,7 @@
 {{>beginningGifts}}
 
 {{#with stereotypes}}
-<div>
+<div class="tribal-stereotypes">
     <h4>Stereotypes</h4>
     {{#each .}}
     <p>@UUID[JournalEntry.{{generate-id 'tribes' group='journal'}}.JournalEntryPage.{{generate-id source.displayName group='tribe'}}]{ {{~source.displayName~}} }: {{text}}</p>

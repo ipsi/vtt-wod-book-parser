@@ -3,6 +3,7 @@ package name.ipsi.project.fwbp.foundry.core;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 
+import java.util.Collections;
 import java.util.List;
 
 @JsonInclude(JsonInclude.Include.NON_NULL)
@@ -20,6 +21,8 @@ public record Module(
         @Deprecated
         String compatibleCoreVersion,
         Compatibility compatibility,
+        List<String> esmodules,
+        List<String> styles,
         List<ModulePack> packs
 ) {
     public Module(
@@ -29,6 +32,7 @@ public record Module(
             String version,
             List<Author> authors,
             Compatibility compatibility,
+            String stleSheet,
             List<ModulePack> packs
     ) {
         this(
@@ -41,30 +45,8 @@ public record Module(
                 null,
                 null,
                 compatibility,
-                packs
-        );
-    }
-
-    public Module(
-            String name,
-            String title,
-            String description,
-            String version,
-            String author,
-            String minimumCoreVersion,
-            String compatibleCoreVersion,
-            List<ModulePack> packs
-    ) {
-        this(
-                name,
-                title,
-                description,
-                version,
-                author,
-                null,
-                minimumCoreVersion,
-                compatibleCoreVersion,
-                null,
+                Collections.emptyList(),
+                Collections.singletonList(stleSheet),
                 packs
         );
     }

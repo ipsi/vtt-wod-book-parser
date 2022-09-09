@@ -11,8 +11,6 @@ import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.*;
 import java.nio.file.attribute.BasicFileAttributes;
-import java.util.ArrayList;
-import java.util.Collection;
 import java.util.Collections;
 import java.util.Map;
 import java.util.stream.Stream;
@@ -44,52 +42,6 @@ public final class ModuleGenerator {
         this.outputPath = Path.of("modules", name);
     }
 
-    public void createModule(Collection<FoundryDocument> foundryDocuments) throws IOException {
-        ensureModuleDirectory();
-
-        var modulePacks = new ArrayList<ModulePack>();
-        Files.createDirectories(outputPath.resolve("packs"));
-
-        log.trace("Creating pack - Breeds");
-        modulePacks.add(createPack("Breeds (W20)", "breeds", DocumentTypes.JOURNAL_ENTRY, foundryDocuments.stream().filter(d -> d.pack().equals(Packs.Breeds))));
-        log.trace("Creating pack - Auspices");
-        modulePacks.add(createPack("Auspices (W20)", "auspices", DocumentTypes.JOURNAL_ENTRY, foundryDocuments.stream().filter(d -> d.pack().equals(Packs.Auspices))));
-        log.trace("Creating pack - Tribes");
-        modulePacks.add(createPack("Tribes (W20)", "tribes", DocumentTypes.JOURNAL_ENTRY, foundryDocuments.stream().filter(d -> d.pack().equals(Packs.Tribes))));
-
-        log.trace("Creating pack - Gifts");
-        modulePacks.add(createPack("Gifts (W20)", "gifts", DocumentTypes.ITEM, foundryDocuments.stream().filter(d -> d.pack().equals(Packs.Gifts))));
-
-        log.trace("Creating pack - Weapons");
-        modulePacks.add(createPack("Weapons (W20)", "weapons", DocumentTypes.ITEM, foundryDocuments.stream().filter(d -> d.pack().equals(Packs.Weapons))));
-
-        var module = new Module(
-                name,
-                title,
-                description,
-                version,
-                Collections.singletonList(new Author(
-                        "Andrew Thorburn",
-                        "",
-                        "ipsi#2461"
-                )),
-                new Compatibility(
-                        "10",
-                        "10",
-                        "10"
-                ),
-                modulePacks
-        );
-
-        writeImages();
-
-        log.trace("Writing module data to file");
-        var prettyPrinter = new DefaultPrettyPrinter()
-                .withObjectIndenter(DefaultIndenter.SYSTEM_LINEFEED_INSTANCE.withLinefeed("\n"));
-
-        Files.writeString(outputPath.resolve("module.json"), objectMapper.writer(prettyPrinter).writeValueAsString(module), StandardCharsets.UTF_8);
-    }
-
     public void createModule(Adventure adventure) throws IOException {
         ensureModuleDirectory();
 
@@ -113,8 +65,16 @@ public final class ModuleGenerator {
                         "10",
                         "10"
                 ),
+                "w20.css",
                 Collections.singletonList(pack)
         );
+
+        try (var is = getClass().getResourceAsStream("/css/w20.css")) {
+            if (is == null) {
+                throw new RuntimeException("Unable to find /css/w20.css on classpath");
+            }
+            Files.write(outputPath.resolve("w20.css"), is.readAllBytes());
+        }
 
         writeImages();
 
