@@ -40,6 +40,13 @@ jobs:
           cp -r target/gluonfx/x86_64-windows/vtt-wod-book-parser.exe staging
           cp -r target/gluonfx/x86_64-windows/vtt-wod-book-parser*.msi staging/vtt-wod-book-parser.msi
 
+      - name: Upload logs
+        if: failure()
+        uses: actions/upload-artifact@v2
+        with:
+          name: windows-error-logs
+          path: target/gluonfx/log
+
       - name: Upload
         uses: actions/upload-artifact@v2
         with:
