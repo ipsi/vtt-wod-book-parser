@@ -19,27 +19,33 @@ public final class ModuleGenerator {
     public static final Logger log = LoggerFactory.getLogger(ModuleGenerator.class);
     private final ObjectMapper objectMapper;
     private final Path outputPath;
-    private final String name;
+    private final String id;
     private final String title;
     private final String description;
     private final String version;
-    private final String author;
-    private final String minVersion;
-    private final String compatibleVersion;
     private final Map<String, byte[]> images;
 
-    public ModuleGenerator(ObjectMapper objectMapper, String name, String title, String description, String version, String author, String minVersion, String compatibleVersion, Map<String, byte[]> images) {
+    public ModuleGenerator(ObjectMapper objectMapper, String id, String title, String description, String version, Map<String, byte[]> images) {
+        this(
+                Path.of("modules"),
+                objectMapper,
+                id,
+                title,
+                description,
+                version,
+                images
+        );
+    }
+
+    public ModuleGenerator(Path modulesDir, ObjectMapper objectMapper, String id, String title, String description, String version, Map<String, byte[]> images) {
         this.objectMapper = objectMapper;
-        this.name = name;
+        this.id = id;
         this.title = title;
         this.description = description;
         this.version = version;
-        this.author = author;
-        this.minVersion = minVersion;
-        this.compatibleVersion = compatibleVersion;
         this.images = images;
 
-        this.outputPath = Path.of("modules", name);
+        this.outputPath = modulesDir.resolve(id);
     }
 
     public void createModule(Adventure adventure) throws IOException {
@@ -51,7 +57,7 @@ public final class ModuleGenerator {
         var pack = createPack("Werewolf: the Apocalypse 20th Anniversary Edition", "w20", DocumentTypes.ADVENTURE, Stream.of(adventure));
 
         var module = new Module(
-                name,
+                id,
                 title,
                 description,
                 version,

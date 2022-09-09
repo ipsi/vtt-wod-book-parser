@@ -74,8 +74,9 @@ class MainTest {
         Main.main(new String[]{"--adventure"});
 
         var expectedFiles = new TreeMap<Path, String>();
-        expectedFiles.put(Path.of("modules", "wod-werewolf-20-core", "module.json"), "ea943ceeccbee074da951c163e65d71d9f7bca8bed0a3b7bd7665418d09cfe6a07eafea0fb9990e854976df003fccae480881c676b42267567e564ad043e7dac");
-        expectedFiles.put(Path.of("modules", "wod-werewolf-20-core", "packs", "w20.db"), "534f2f148d90e0c9b5068eaabd70b0b1df84710dc1590a731612b0c67d6a213d27591683ee510da6ddbc18547c5f7406e15a53974d495be14d93fe6889a8cf9e");
+        expectedFiles.put(Path.of("modules", "wod-werewolf-20-core", "module.json"), "b711a3ddc3ee7341f0fe2163dbec4761d73c5edbbe95f7725b41c38f68516d959df32d4e0196d7c9363fba06d93d33048109f5aa141e160adbb0e81246fc45c1");
+        expectedFiles.put(Path.of("modules", "wod-werewolf-20-core", "w20.css"), "2debd674fb547d898a6cfc8addefa1e22cacde66938df545de2937c23715b39ecc4185818845ad2318c98dba0514e476d23377d80ba9fd450be4e0addf550cad");
+        expectedFiles.put(Path.of("modules", "wod-werewolf-20-core", "packs", "w20.db"), "3a1ea1fa50840188c2751854a16dcff15ab280b8ca9dfc6bae00c9d05609192043503970955ce4ac085e1c60a72fea06a2b322e6b259f0dfc79efc5992e2a883");
         expectedFiles.put(Path.of("modules", "wod-werewolf-20-core", "images", "adventure-cover.jpeg"), "17d71cdd62f4c930b803fbcf1fab02a3d0244eb7fa1d4359ab088381b1288f1bb191117ec60d3075528732ff9ce4888545e6b66b0d681b00b68b79a214daee1c");
         expectedFiles.put(Path.of("modules", "wod-werewolf-20-core", "images", "black-furies-splash.jpeg"), "0c2f71fba6238336509d84672af71bee9344c477e0696ddd2f4dcf7d53193a1df4726f59f78135d653411f9e44dddbb08f54c65cb552a3ae3ce358dc1e2a4dea");
         expectedFiles.put(Path.of("modules", "wod-werewolf-20-core", "images", "black-spiral-dancers-splash.jpeg"), "10c193572ee8f878ce800f3e4bd6db12e3971714f9f69bda1ca15ee8edb64b9540f6638aacefdafdeef07d7027dc9c6f44d0423ca9c75caa492bcc752feaa372");

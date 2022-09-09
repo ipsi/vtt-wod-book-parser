@@ -9,7 +9,7 @@ import java.util.List;
 @JsonInclude(JsonInclude.Include.NON_NULL)
 @JsonPropertyOrder(alphabetic = true)
 public record Module(
-        String name,
+        String id,
         String title,
         String description,
         String version,
@@ -26,7 +26,7 @@ public record Module(
         List<ModulePack> packs
 ) {
     public Module(
-            String name,
+            String id,
             String title,
             String description,
             String version,
@@ -36,7 +36,7 @@ public record Module(
             List<ModulePack> packs
     ) {
         this(
-                name,
+                id,
                 title,
                 description,
                 version,

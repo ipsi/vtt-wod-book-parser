@@ -1141,7 +1141,7 @@ public class Werewolf20Extractor {
     }
 
     public List<BookEntry> process() {
-        log.debug("Extracting Gifts");
+        log.info("Extracting Gifts");
         var giftProcessor = new GiftProcessor(parser);
 
         for (var textLocations : BOOK_DETAILS.gifts()) {
@@ -1152,7 +1152,7 @@ public class Werewolf20Extractor {
 
         var entries = new ArrayList<BookEntry>(giftProcessor.gifts);
 
-        log.debug("Extracting breeds");
+        log.info("Extracting breeds");
         for (var breed : BOOK_DETAILS.breeds()) {
             log.trace("Processing {}", breed);
             log.trace("Getting name");
@@ -1197,7 +1197,7 @@ public class Werewolf20Extractor {
             ));
         }
 
-        log.debug("Extracting Auspices");
+        log.info("Extracting Auspices");
         for (var a : BOOK_DETAILS.auspices()) {
             log.trace("Processing {}", a);
             log.trace("Getting name");
@@ -1224,7 +1224,7 @@ public class Werewolf20Extractor {
             ));
         }
 
-        log.debug("Extracting Tribes");
+        log.info("Extracting Tribes");
         for (var t : BOOK_DETAILS.tribes()) {
             log.trace("Processing {}", t);
             log.trace("Getting description");
@@ -1331,7 +1331,7 @@ public class Werewolf20Extractor {
                 true
         ));
 
-        log.debug("Extracting Melee weapons");
+        log.info("Extracting Melee weapons");
         var meleeWeaponPattern = Pattern.compile("([\\w\\s]+)(\\**)?\\s*(\\d+)(\\**)?\\s*Strength(\\s*\\+\\s*(\\d+))?/([BLA])(\\**)?\\s*([PJTN])\\s*");
         for (var line : getTextAsLines(parser, BOOK_DETAILS.weapons().meleeWeapons())) {
             log.trace("Processing weapon line");
@@ -1358,7 +1358,7 @@ public class Werewolf20Extractor {
             }
         }
 
-        log.debug("Extracting backgrounds");
+        log.info("Extracting backgrounds");
         var dotPattern = Pattern.compile("(•+)\\s*(.*)");
         var totemHeaderPattern = Pattern.compile("(Cost)\\s*(Power)");
         var totemPattern = Pattern.compile("(\\d+)\\s*(.*)");
@@ -1440,7 +1440,7 @@ public class Werewolf20Extractor {
 
                 Optional<Tribes> tribesOptional = Tribes.findByDisplayName(tribeName);
                 if (tribesOptional.isEmpty()) {
-                    log.warn("Unable to find Tribe [{}] - assuming bad regex match and adding to paragraph", tribeName);
+                    log.debug("Unable to find Tribe [{}] - assuming bad regex match and adding to paragraph", tribeName);
                     sb.append(" ").append(line);
                 } else {
                     if (currentTribe != null) {

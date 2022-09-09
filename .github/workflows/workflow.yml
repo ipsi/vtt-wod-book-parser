@@ -1,53 +1,125 @@
 name: GraalVM Native Image builds
 on: [push, pull_request, workflow_dispatch]
 jobs:
-  build:
-    name: VTT WoD Book Parser on ${{ matrix.os }}
-    runs-on: ${{ matrix.os }}
-    timeout-minutes: 90
-    strategy:
-      fail-fast: false
-      matrix:
-        os: [macos-latest, windows-latest, ubuntu-latest]
-        include:
-          - os: ubuntu-latest
-            executable-suffix: ''
-            native-build-args: -Xmx10g
-          - os: macos-latest
-            executable-suffix: ''
-            native-build-args: -Xmx13g
-          - os: windows-latest
-            executable-suffix: '.exe'
-            native-build-args: -Xmx10g
+  build-windows:
+    name: "VTT WoD Book Parser on Windows"
+    runs-on: windows-latest
     steps:
       - uses: actions/checkout@v2
 
-      - uses: graalvm/setup-graalvm@v1
-        with:
-          version: '22.2.0'
-          java-version: '17'
-          components: 'native-image'
-          github-token: ${{ secrets.GITHUB_TOKEN }}
+      - name: Add msbuild to PATH
+        uses: microsoft/setup-msbuild@v1.0.2
+
+      - name: Visual Studio shell
+        uses: egor-tensin/vs-shell@v1
+
+      - name: Setup Gluon's GraalVM
+        uses: gluonhq/setup-graalvm@master
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Make staging directory
+        run: mkdir staging
 
       - name: Cache Maven dependencies
         uses: actions/cache@v3
         with:
           path: ~/.m2/repository
-          key: ${{ runner.os }}-maven-${{ hashFiles('**/pom.xml') }}
-          restore-keys: ${{ runner.os }}-maven
+          key: windows-maven-${{ hashFiles('**/pom.xml') }}
+          restore-keys: windows-maven
 
-      - name: Maven - Package
-        run: mvn -P native package
+      - name: Gluon Build and Package
+        run: mvn -Pgluon,windows test gluonfx:build gluonfx:package
         env:
           DTRPG_TOKEN: "${{ secrets.DTRPG_TOKEN }}"
-          MAVEN_OPTS: "${{ matrix.native-build-args }}"
-          LOG_LEVEL: "trace"
+          LOG_LEVEL: "debug"
 
-      - name: Upload binary
+      - name: Copy native bundles to staging
+        run: |
+          cp -r target/gluonfx/x86_64-windows/vtt-wod-book-parser.exe staging
+          cp -r target/gluonfx/x86_64-windows/vtt-wod-book-parser*.msi staging
+
+      - name: Upload
         uses: actions/upload-artifact@v2
         with:
-          name: vtt-wod-book-parser-${{ matrix.os }}
-          path: target/vtt-wod-book-parser*
+          name: windows
+          path: staging
+  build-macos:
+    name: "VTT WoD Book Parser on MacOS"
+    runs-on: macos-latest
+    steps:
+      - uses: actions/checkout@v2
+
+      - name: Setup Gluon's GraalVM
+        uses: gluonhq/setup-graalvm@master
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Make staging directory
+        run: mkdir staging
+
+      - name: Cache Maven dependencies
+        uses: actions/cache@v3
+        with:
+          path: ~/.m2/repository
+          key: macos-maven-${{ hashFiles('**/pom.xml') }}
+          restore-keys: macos-maven
+
+      - name: Gluon Build and Package
+        run: mvn -Pgluon,macos test gluonfx:build gluonfx:package
+        env:
+          DTRPG_TOKEN: "${{ secrets.DTRPG_TOKEN }}"
+          LOG_LEVEL: "debug"
+
+      - name: Copy native bundles to staging
+        run: |
+          cp -r target/gluonfx/x86_64-windows/vtt-wod-book-parser*.dmg staging
+
+      - name: Upload (pkg)
+        uses: actions/upload-artifact@v2
+        with:
+          name: macos
+          path: ${{ steps.outputfile.outputs.path }}
+  build-linux:
+    name: "VTT WoD Book Parser on Linux"
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+
+      - name: Setup Gluon's GraalVM
+        uses: gluonhq/setup-graalvm@master
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Install libraries
+        run: |
+          sudo apt update
+          sudo apt install libasound2-dev libavcodec-dev libavformat-dev libavutil-dev libgl-dev libgtk-3-dev libpango1.0-dev libxtst-dev
+
+      - name: Make staging directory
+        run: mkdir staging
+
+      - name: Cache Maven dependencies
+        uses: actions/cache@v3
+        with:
+          path: ~/.m2/repository
+          key: linux-maven-${{ hashFiles('**/pom.xml') }}
+          restore-keys: linux-maven
+
+      - name: Gluon Build
+        run: mvn -Pgluon,linux test gluonfx:build gluonfx:package
+        env:
+          DTRPG_TOKEN: "${{ secrets.DTRPG_TOKEN }}"
+          LOG_LEVEL: "debug"
+
+      - name: Copy native image to staging
+        run: cp -r target/gluonfx/x86_64-linux/vtt-wod-book-parser*.deb staging
+
+      - name: Upload
+        uses: actions/upload-artifact@v2
+        with:
+          name: linux
+          path: staging
   publish-to-github:
     name: Publish to Github
     needs: [build]
@@ -56,9 +128,10 @@ jobs:
     strategy:
       matrix:
         include:
-          - os: ubuntu-latest
-          - os: macos-latest
-          - os: windows-latest
+          - os: windows
+          - os: windows-msi
+          - os: macos
+          - os: linux
     steps:
       - uses: actions/download-artifact@v3
         with:
@@ -71,15 +144,21 @@ jobs:
           suffix=""
           osName=""
           case "${{ matrix.os }}" in
-              ubuntu-latest)
+              linux)
                 osName="linux"
+                suffix=".deb"
                 ;;
-              macos-latest)
+              macos)
                 osName="macos"
+                suffix=".dmg"
                 ;;
-              windows-latest)
+              windows)
                 osName="windows"
                 suffix=".exe"
+                ;;
+              windows-msi)
+                osName="windows"
+                suffix=".msi"
                 ;;
               *)
                 osName="unknown"
@@ -88,26 +167,36 @@ jobs:
           esac
           RELEASE_VERSION=${GITHUB_REF#refs/tags/v}
           ls -la
-          ls -la target/
-          cp target/vtt-wod-book-parser$suffix $stage/vtt-wod-book-parser-$osName-$RELEASE_VERSION-x64$suffix
+          ls -la staging/
+          cp staging/vtt-wod-book-parser$suffix $stage/vtt-wod-book-parser-$osName-$RELEASE_VERSION-x64$suffix
           cd $stage
           ARCHIVE_SUFFIX=""
           COMPRESSION_COMMAND=""
           if [[ "$osName" == "windows" ]]; then
-            ARCHIVE_SUFFIX="zip"
-            COMPRESSION_COMMAND="zip -r"
+            if [[ "$suffix" == ".msi"]]; then
+              ARCHIVE_SUFFIX=""
+              COMPRESSION_COMMAND=""
+            else
+              ARCHIVE_SUFFIX=".zip"
+              COMPRESSION_COMMAND="zip -r"
+            fi
+          elif [[ "$suffix" == ".dmg" || "$suffix" == ".deb" ]]; then
+              ARCHIVE_SUFFIX=""
+              COMPRESSION_COMMAND=""
           else
             chmod +x vtt-wod-book-parser-$osName-$RELEASE_VERSION-x64$suffix
-            ARCHIVE_SUFFIX="tgz"
+            ARCHIVE_SUFFIX=".tgz"
             COMPRESSION_COMMAND="tar czf"
           fi
           
-          ASSET_NAME="vtt-wod-book-parser-$osName-$RELEASE_VERSION-x64.$ARCHIVE_SUFFIX"
+          ASSET_NAME="vtt-wod-book-parser-$osName-$RELEASE_VERSION-x64$ARCHIVE_SUFFIX"
           ASSET_PATH="$src/$ASSET_NAME"
           CHECKSUM_PATH="$ASSET_PATH.sha256"
           echo "ASSET_PATH=$ASSET_PATH" >> $GITHUB_ENV
           echo "CHECKSUM_PATH=$CHECKSUM_PATH" >> $GITHUB_ENV
-          $COMPRESSION_COMMAND $ASSET_PATH *
+          if [[ -n "$COMPRESSION_COMMAND ]]; then
+            $COMPRESSION_COMMAND $ASSET_PATH *
+          fi
           
           cd $src
           sha256sum $ASSET_NAME > $CHECKSUM_PATH

@@ -28,24 +28,17 @@ public class Main {
 
     public static final Logger log = LoggerFactory.getLogger(Main.class);
 
-    public enum OutputType {
-        LEGACY,
-        ADVENTURE
-    }
-
     public static void main(String[] args) throws Exception {
         configureLogging();
 
-        OutputType outputType;
         if (args.length == 0) {
-            outputType = OutputType.ADVENTURE;
-        } else if(args[0].equals("--legacy")) {
-            outputType = OutputType.LEGACY;
+            Gui.launch(Gui.class, args);
+            return;
         } else if (args[0].equals("--adventure")) {
-            outputType = OutputType.ADVENTURE;
+            log.info("Building adventure with CLI GUI (primarily intended for automated testing)");
         } else {
-            log.warn("Unknown output type - defaulting to adventure");
-            outputType = OutputType.ADVENTURE;
+            log.warn("Unknown arg {} - only accepts --adventure or no args", args[0]);
+            System.exit(1);
         }
 
         var scanner = new Scanner(System.in);
@@ -95,18 +88,13 @@ public class Main {
                         Werewolf20Extractor.BOOK_NAME,
                         Werewolf20Extractor.BOOK_NAME + " - Automatically extracted from PDF",
                         "0.0.1",
-                        "ipsi",
-                        "9",
-                        "9",
                         images
                 );
 
-                if (outputType == OutputType.ADVENTURE) {
-                    log.debug("Generating Adventure");
-                    var adventure = new Werewolf20FoundryConverter().processAsAdventure(rawBookEntries);
-                    log.debug("Generating module");
-                    moduleGenerator.createModule(adventure);
-                }
+                log.debug("Generating Adventure");
+                var adventure = new Werewolf20FoundryConverter().processAsAdventure(rawBookEntries);
+                log.debug("Generating module");
+                moduleGenerator.createModule(adventure);
 
                 log.info("Module {} generated at {}", Werewolf20FoundryConverter.MODULE_NAME, moduleGenerator.getOutputPath().toAbsolutePath());
 
