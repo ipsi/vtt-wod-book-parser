@@ -122,7 +122,7 @@ jobs:
           path: staging
   publish-to-github:
     name: Publish to Github
-    needs: [build]
+    needs: [build-windows, build-macos, build-linux]
     runs-on: ubuntu-latest
     if: startsWith(github.ref, 'refs/tags/v')
     strategy:
