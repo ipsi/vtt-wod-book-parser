@@ -3,7 +3,6 @@ package name.ipsi.project.fwbp.foundry.core;
 import com.fasterxml.jackson.core.util.DefaultIndenter;
 import com.fasterxml.jackson.core.util.DefaultPrettyPrinter;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import name.ipsi.project.fwbp.books.werewolf.Tribes;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -11,41 +10,39 @@ import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.*;
 import java.nio.file.attribute.BasicFileAttributes;
+import java.util.Collection;
 import java.util.Collections;
-import java.util.Map;
 import java.util.stream.Stream;
 
 public final class ModuleGenerator {
     public static final Logger log = LoggerFactory.getLogger(ModuleGenerator.class);
     private final ObjectMapper objectMapper;
     private final Path outputPath;
+    private final String coreFilePrefix;
     private final String id;
     private final String title;
     private final String description;
     private final String version;
-    private final Map<String, byte[]> images;
+    private final Collection<PdfImage> images;
 
-    public ModuleGenerator(ObjectMapper objectMapper, String id, String title, String description, String version, Map<String, byte[]> images) {
-        this(
-                Path.of("modules"),
-                objectMapper,
-                id,
-                title,
-                description,
-                version,
-                images
-        );
-    }
+    public ModuleGenerator(
+            Path modulesDir,
+            String coreFilePrefix,
+            String id,
+            String title,
+            String description,
+            String version,
+            Collection<PdfImage> images
+    ) {
+        this.objectMapper = new ObjectMapper();
 
-    public ModuleGenerator(Path modulesDir, ObjectMapper objectMapper, String id, String title, String description, String version, Map<String, byte[]> images) {
-        this.objectMapper = objectMapper;
+        this.outputPath = modulesDir.resolve(id);
+        this.coreFilePrefix = coreFilePrefix;
         this.id = id;
         this.title = title;
         this.description = description;
         this.version = version;
         this.images = images;
-
-        this.outputPath = modulesDir.resolve(id);
     }
 
     public void createModule(Adventure adventure) throws IOException {
@@ -54,8 +51,10 @@ public final class ModuleGenerator {
         Files.createDirectories(outputPath.resolve("packs"));
 
         log.trace("Creating pack - Adventure");
-        var pack = createPack("Werewolf: the Apocalypse 20th Anniversary Edition", "w20", DocumentTypes.ADVENTURE, Stream.of(adventure));
+        var pack = createPack(title, coreFilePrefix, DocumentTypes.ADVENTURE, Stream.of(adventure));
 
+        var coreJavascript = coreFilePrefix + ".js";
+        var coreStylesheet = coreFilePrefix + ".css";
         var module = new Module(
                 id,
                 title,
@@ -63,7 +62,7 @@ public final class ModuleGenerator {
                 version,
                 Collections.singletonList(new Author(
                         "Andrew Thorburn",
-                        "",
+                        "https://github.com/ipsi/vtt-wod-book-parser",
                         "ipsi#2461"
                 )),
                 new Compatibility(
@@ -71,15 +70,23 @@ public final class ModuleGenerator {
                         "10",
                         "10"
                 ),
-                "w20.css",
+                coreJavascript,
+                coreStylesheet,
                 Collections.singletonList(pack)
         );
 
-        try (var is = getClass().getResourceAsStream("/css/w20.css")) {
+        try (var is = getClass().getResourceAsStream("/css/" + coreStylesheet)) {
             if (is == null) {
-                throw new RuntimeException("Unable to find /css/w20.css on classpath");
+                throw new RuntimeException("Unable to find /css/" + coreStylesheet + " on classpath");
             }
-            Files.write(outputPath.resolve("w20.css"), is.readAllBytes());
+            Files.write(outputPath.resolve(coreStylesheet), is.readAllBytes());
+        }
+
+        try (var is = getClass().getResourceAsStream("/js/" + coreJavascript)) {
+            if (is == null) {
+                throw new RuntimeException("Unable to find /js/" + coreJavascript + " on classpath");
+            }
+            Files.write(outputPath.resolve(coreJavascript), is.readAllBytes());
         }
 
         writeImages();
@@ -97,10 +104,16 @@ public final class ModuleGenerator {
             Files.createDirectories(imagesDirectory);
         }
 
-        Files.write(imagesDirectory.resolve("adventure-cover.jpeg"), images.get("26:Im1"));
+        var coverImageSeen = false;
+        for (var i : images) {
+            Files.write(imagesDirectory.resolve(i.name()), i.data());
+            if (i.type() == ImageType.COVER) {
+                coverImageSeen = true;
+            }
+        }
 
-        for(var t : Tribes.values()) {
-            Files.write(imagesDirectory.resolve(t.urlName() + "-splash.jpeg"), images.get(String.format("%d:%s", t.imagePage(), t.imageName())));
+        if (!coverImageSeen) {
+            throw new RuntimeException("Cover image must be provided");
         }
     }
 

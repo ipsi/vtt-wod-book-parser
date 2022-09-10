@@ -16,14 +16,56 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.util.*;
 import java.util.regex.Pattern;
+import java.util.stream.Collector;
 import java.util.stream.Collectors;
 
 public class Utils {
 
-    // All non-word characters *except* the hyphen...
     private static final Logger log = LoggerFactory.getLogger(Utils.class);
+
+    // All non-word characters *except* the hyphen...
     private static final Pattern STRIP_PUNCTUATION_PATTERN = Pattern.compile("[(),.!@#$%^&*\\[\\]{}:;'\"/?<>_=+]*(\\w+)[(),.!@#$%^&*\\[\\]{}:;'\"/?<>_=+]*.*?");
     private static final Pattern SPACE_STRIPPER = Pattern.compile("(\\W)?([TVWY]) (\\w+)");
+
+    public static final Collector<CharSequence, StringBuilder, String> CONTENT_AWARE_JOINER = Collector.of(
+            StringBuilder::new,
+            (stringBuilder, charSequence) -> {
+                if(stringBuilder.isEmpty()) {
+                    stringBuilder.append(charSequence);
+                    return;
+                }
+
+                if (charSequence.isEmpty()) {
+                    return;
+                }
+
+                char lastChar = stringBuilder.charAt(stringBuilder.length() - 1);
+                char leadingChar = charSequence.charAt(0);
+
+                if (((lastChar >= '!' && lastChar < '/') && lastChar != '(' && lastChar != '-')
+                            || (lastChar >= ':' && lastChar <= '@')
+                            || (lastChar >= '\\' && lastChar <= '^')
+                            || (lastChar >= '{' && lastChar <= '~')
+                ) {
+                    stringBuilder.append(" ");
+                } else if (leadingChar == '['
+                        || leadingChar == '('
+                        || leadingChar == '{'
+                        || (leadingChar >= 'A' && leadingChar <= 'Z')
+                        || (leadingChar >= 'a' && leadingChar <= 'z')
+                        || (leadingChar >= '0' && leadingChar <= '9')
+                ) {
+                    stringBuilder.append(" ");
+                }
+
+                stringBuilder.append(charSequence);
+            },
+            (sb1, sb2) -> {
+                sb1.append(sb2);
+                return sb1;
+            },
+            StringBuilder::toString
+    );
 
     private static final Set<String> words;
 
@@ -47,18 +89,11 @@ public class Utils {
     public static List<String> getText(PdfDocumentContentParser parser, Content content) {
         List<String> paragraphs = new ArrayList<>(content.content().length);
         for (var location : content.content()) {
-            var builder = new StringBuilder();
-            for (TextArea textArea : location.locations()) {
-                builder.append(fixText(parser
-                        .processContent(textArea.page(), new FilteredTextEventListener(
-                                new SimpleTextExtractionStrategy(),
-                                new TextRegionEventFilter(textArea.location()))
-                        ).getResultantText()
-                        .trim()
-                        .replaceAll("[\n\r]", ""))
-                ).append(" ");
-            }
-            paragraphs.add(builder.toString().trim());
+            paragraphs.add(Arrays.stream(location.locations())
+                    .map(l -> parser.processContent(l.page(), new FilteredTextEventListener(new SimpleTextExtractionStrategy(), new TextRegionEventFilter(l.location()))).getResultantText())
+                    .map(s -> s.trim().replaceAll("[\n\r]", ""))
+                    .map(Utils::fixText)
+                    .collect(CONTENT_AWARE_JOINER));
         }
         return paragraphs;
     }
@@ -86,6 +121,7 @@ public class Utils {
                 .replaceAll("’", "'")
                 .replaceAll("“", "\"")
                 .replaceAll("”", "\"")
+                .replaceAll("\\s+,", ",")
                 .replaceAll(" \\. | \\.$", ". ")
                 .replaceAll("(\\w)\\.(\\w)", "$1. $2")
                 .replaceAll("andyet", "and yet")

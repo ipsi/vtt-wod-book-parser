@@ -4,17 +4,37 @@ from [DriveThru RPG](https://www.drivethrurpg.com/index.php), extracts a subset 
 images from the PDF, and converts that into a [Foundry VTT](https://foundryvtt.com) module.
 
 ## Supported Books
+You **must** own the book on DriveThru RPG - using a local copy of the PDF is not supported.
+
 Currently only [Werewolf: the Apocalypse 20th Anniversary Edition](https://www.drivethrurpg.com/product/112871/Werewolf-The-Apocalypse-20th-Anniversary-Edition?term=Werewolf+the+apocalypse+20) is supported.
 
 ## Content Generated
+All content should be correctly de-hyphenated but if you notice any issues please let me know.
+
 ### Werewolf 20th
 The following content is currently extracted from the PDF:
 
-* Gifts (all tribes, except for ...)
+* Gifts (all tribes, except for Boli Zousizhe, Kucha Ekundu, Hakken, Siberakh, and Gifts of the Outsiders);
+  Includes description + system, and gifts _should_ have the correct roll set, if applicable.
 * Breed descriptions
 * Auspice descriptions
 * Tribe descriptions
-* Backgrounds (partial)
+* Backgrounds, including full description (partial)
+* Melee Weapons
+
+Things I would like to do (in rough priority order):
+
+* Rites
+* Fetishes
+* Remaining items like ranged weapons and armor
+* Spirit Charms
+* Sample NPCs (e.g., Banes, Elementals, Weaver Spirits, etc)
+* Merits & Flaws
+* Totems
+* Fomori powers
+* Nature & Demeanor
+* Tribal Camps
+* Anything else that could be useful
 
 ## Getting started
 Download the [latest release](https://github.com/ipsi/vtt-wod-book-parser/releases) for your operating system:
@@ -53,5 +73,5 @@ few minutes.
 
 When you see the message `Module "wod-werewolf-20-core" generated at ...` in the large text box in the center, then it's done.
 
-If you see any likes that don't look like `16:53:03.861 [main] INFO name.ipsi.project.fwbp.BookProcessor - `,
+If you see any lines that don't look like `16:53:03.861 [main] INFO name.ipsi.project.fwbp.BookProcessor - `,
 then it's likely an error occurred.

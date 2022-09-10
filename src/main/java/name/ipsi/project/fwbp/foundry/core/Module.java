@@ -32,7 +32,7 @@ public record Module(
             String version,
             List<Author> authors,
             Compatibility compatibility,
-            String stleSheet,
+            String styleSheet,
             List<ModulePack> packs
     ) {
         this(
@@ -46,7 +46,60 @@ public record Module(
                 null,
                 compatibility,
                 Collections.emptyList(),
-                Collections.singletonList(stleSheet),
+                Collections.singletonList(styleSheet),
+                packs
+        );
+    }
+    public Module(
+            String id,
+            String title,
+            String description,
+            String version,
+            List<Author> authors,
+            Compatibility compatibility,
+            String javascript,
+            String styleSheet,
+            List<ModulePack> packs
+    ) {
+        this(
+                id,
+                title,
+                description,
+                version,
+                null,
+                authors,
+                null,
+                null,
+                compatibility,
+                Collections.singletonList(javascript),
+                Collections.singletonList(styleSheet),
+                packs
+        );
+    }
+
+    public Module(
+            String id,
+            String title,
+            String description,
+            String version,
+            List<Author> authors,
+            Compatibility compatibility,
+            List<String> styleSheets,
+            List<String> javascript,
+            List<ModulePack> packs
+    ) {
+        this(
+                id,
+                title,
+                description,
+                version,
+                null,
+                authors,
+                null,
+                null,
+                compatibility,
+                javascript,
+                styleSheets,
                 packs
         );
     }

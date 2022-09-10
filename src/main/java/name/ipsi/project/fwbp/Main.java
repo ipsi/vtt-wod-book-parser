@@ -2,15 +2,8 @@ package name.ipsi.project.fwbp;
 
 import ch.qos.logback.classic.Level;
 import ch.qos.logback.classic.LoggerContext;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.itextpdf.kernel.pdf.PdfName;
-import com.itextpdf.kernel.pdf.PdfStream;
-import com.itextpdf.kernel.pdf.canvas.parser.PdfDocumentContentParser;
 import name.ipsi.project.fwbp.books.werewolf.Werewolf20Extractor;
-import name.ipsi.project.fwbp.dtrpg.Downloader;
 import name.ipsi.project.fwbp.foundry.core.FoundryUtils;
-import name.ipsi.project.fwbp.foundry.core.ModuleGenerator;
-import name.ipsi.project.fwbp.foundry.wod.werewolf.Werewolf20FoundryConverter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -19,8 +12,6 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.StandardOpenOption;
-import java.util.Arrays;
-import java.util.HashMap;
 import java.util.Scanner;
 import java.util.stream.Collectors;
 
@@ -33,6 +24,9 @@ public class Main {
 
         if (args.length == 0) {
             Gui.launch(Gui.class, args);
+            return;
+        } else if (args[0].equals("--preprocess")) {
+            Preprocessor.process(Path.of("raw_text/w20.json"), Werewolf20Extractor.BOOK_ID);
             return;
         } else if (args[0].equals("--adventure")) {
             log.info("Building adventure with CLI GUI (primarily intended for automated testing)");
@@ -56,48 +50,7 @@ public class Main {
         var selection = scanner.nextInt();
         switch (selection) {
             case 1:
-//                var doc = new PdfDocument(new PdfReader("/Volumes/books/Roleplaying/Werewolf the Apocalypse/Werewolf the Apocalypse 20th Anniversary Edition.pdf"));
-                log.debug("Downloading file");
-                var doc = Downloader.downloadFile(Werewolf20Extractor.BOOK_ID, token);
-                log.debug("File downloaded");
-
-                var images = new HashMap<String, byte[]>();
-
-                for (int i = 1; i <= doc.getNumberOfPages(); i++) {
-                    var p = doc.getPage(i);
-                    for (var rn : Arrays.asList(PdfName.ExtGState, PdfName.Pattern, PdfName.XObject)) {
-                        var r = p.getResources().getResource(rn);
-                        if (r != null) {
-                            for (var a : r.entrySet()) {
-                                if (a.getValue() instanceof PdfStream pdfStream) {
-                                    images.put(String.format("%d:%s", i, a.getKey().getValue()), pdfStream.getBytes());
-                                }
-                            }
-                        }
-                    }
-                }
-
-                log.debug("Extracting data from PDF");
-                var w20 = new Werewolf20Extractor(new PdfDocumentContentParser(doc));
-                var rawBookEntries = w20.process();
-                log.debug("Extracted data from PDF, creating {} book entries", rawBookEntries.size());
-
-                var moduleGenerator = new ModuleGenerator(
-                        new ObjectMapper(),
-                        Werewolf20FoundryConverter.MODULE_NAME,
-                        Werewolf20Extractor.BOOK_NAME,
-                        Werewolf20Extractor.BOOK_NAME + " - Automatically extracted from PDF",
-                        "0.0.1",
-                        images
-                );
-
-                log.debug("Generating Adventure");
-                var adventure = new Werewolf20FoundryConverter().processAsAdventure(rawBookEntries);
-                log.debug("Generating module");
-                moduleGenerator.createModule(adventure);
-
-                log.info("Module {} generated at {}", Werewolf20FoundryConverter.MODULE_NAME, moduleGenerator.getOutputPath().toAbsolutePath());
-
+                BookProcessor.processWerewolf20(Path.of("modules"), token);
                 break;
             default:
                 System.out.println("Unknown book " + selection);

@@ -6,10 +6,6 @@ import ch.qos.logback.classic.encoder.PatternLayoutEncoder;
 import ch.qos.logback.classic.spi.ILoggingEvent;
 import ch.qos.logback.core.AppenderBase;
 import ch.qos.logback.core.Context;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.itextpdf.kernel.pdf.PdfName;
-import com.itextpdf.kernel.pdf.PdfStream;
-import com.itextpdf.kernel.pdf.canvas.parser.PdfDocumentContentParser;
 import javafx.application.Application;
 import javafx.application.Platform;
 import javafx.collections.FXCollections;
@@ -25,9 +21,6 @@ import javafx.stage.DirectoryChooser;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
 import name.ipsi.project.fwbp.books.werewolf.Werewolf20Extractor;
-import name.ipsi.project.fwbp.dtrpg.Downloader;
-import name.ipsi.project.fwbp.foundry.core.ModuleGenerator;
-import name.ipsi.project.fwbp.foundry.wod.werewolf.Werewolf20FoundryConverter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -36,13 +29,11 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashMap;
 import java.util.List;
 
 public class Gui extends Application {
     private static final Logger LOGGER = LoggerFactory.getLogger(Gui.class);
-    public static final String MODULE_VERSION = "0.0.5";
+    public static final String MODULE_VERSION = "0.0.6";
 
     @Override
     public void start(Stage stage) throws Exception {
@@ -100,49 +91,16 @@ public class Gui extends Application {
                 errStage.showAndWait();
             } else {
                 log.setText("");
+                var foundryDirText = foundryDir.getText();
                 new Thread(() -> {
                     try {
-                        LOGGER.info("Downloading file");
-                        var doc = Downloader.downloadFile(Werewolf20Extractor.BOOK_ID, dtrpgTokenText);
-                        LOGGER.info("File downloaded");
-
-                        var images = new HashMap<String, byte[]>();
-
-                        for (int i = 1; i <= doc.getNumberOfPages(); i++) {
-                            var p = doc.getPage(i);
-                            for (var rn : Arrays.asList(PdfName.ExtGState, PdfName.Pattern, PdfName.XObject)) {
-                                var r = p.getResources().getResource(rn);
-                                if (r != null) {
-                                    for (var a : r.entrySet()) {
-                                        if (a.getValue() instanceof PdfStream pdfStream) {
-                                            images.put(String.format("%d:%s", i, a.getKey().getValue()), pdfStream.getBytes());
-                                        }
-                                    }
-                                }
-                            }
+                        switch (selectedBook) {
+                            case Werewolf20Extractor.BOOK_NAME:
+                                BookProcessor.processWerewolf20(Path.of(foundryDirText), dtrpgTokenText);
+                            default:
+                                // Should be impossible
+                                LOGGER.error("Unknown book {}", selectedBook);
                         }
-
-                        LOGGER.info("Extracting data from PDF");
-                        var w20 = new Werewolf20Extractor(new PdfDocumentContentParser(doc));
-                        var rawBookEntries = w20.process();
-                        LOGGER.info("Extracted data from PDF, creating {} book entries", rawBookEntries.size());
-
-                        var moduleGenerator = new ModuleGenerator(
-                                Path.of(foundryDir.getText()),
-                                new ObjectMapper(),
-                                Werewolf20FoundryConverter.MODULE_NAME,
-                                Werewolf20Extractor.BOOK_NAME,
-                                Werewolf20Extractor.BOOK_NAME + " - Automatically extracted from PDF",
-                                MODULE_VERSION,
-                                images
-                        );
-
-                        LOGGER.info("Generating Adventure");
-                        var adventure = new Werewolf20FoundryConverter().processAsAdventure(rawBookEntries);
-                        LOGGER.info("Generating module");
-                        moduleGenerator.createModule(adventure);
-
-                        LOGGER.info("Module \"{}\" generated at {}", Werewolf20FoundryConverter.MODULE_NAME, moduleGenerator.getOutputPath().toAbsolutePath());
                     } catch (Exception e) {
                         LOGGER.error("Unable to generate Foundry Module", e);
                     }

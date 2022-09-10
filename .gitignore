@@ -25,6 +25,7 @@ target
 .idea
 
 modules
+raw_text
 
 # Grrr. MacOS.
 .DS_Store

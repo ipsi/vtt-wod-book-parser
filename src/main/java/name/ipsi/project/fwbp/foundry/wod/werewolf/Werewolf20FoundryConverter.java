@@ -22,6 +22,7 @@ public class Werewolf20FoundryConverter {
     private double tribeSort;
 
     public static final String MODULE_NAME = "wod-werewolf-20-core";
+    public static final String CORE_FILE_PREFIX = "w20";
 
     public Adventure processAsAdventure(List<BookEntry> entries) throws IOException {
         log.trace("Converting book entries tp adventure");
@@ -148,7 +149,7 @@ public class Werewolf20FoundryConverter {
         return new Journal(
                 b.id(),
                 b.name(),
-                html.replaceAll("\r\n", "\n"),
+                html,
                 null,
                 breedSort++,
                 Packs.Breeds
@@ -162,7 +163,7 @@ public class Werewolf20FoundryConverter {
         return new Journal(
                 a.id(),
                 a.name(),
-                html.replaceAll("\r\n", "\n"),
+                html,
                 null,
                 auspiceSort++,
                 Packs.Auspices
@@ -176,7 +177,7 @@ public class Werewolf20FoundryConverter {
         return new Journal(
                 t.id(),
                 t.name().displayName(),
-                html.replaceAll("\r\n", "\n"),
+                html,
                 null,
                 tribeSort++,
                 Packs.Tribes
@@ -197,7 +198,7 @@ public class Werewolf20FoundryConverter {
                         false,
                         "",
                         "",
-                        description.replaceAll("\r\n", "\n"),
+                        description,
                         PowerTypes.GIFT,
                         g.availableTo().get(0).level(),
                         gr != null ? convertCharacteristic(gr.characteristicOne()) : "",
@@ -207,7 +208,7 @@ public class Werewolf20FoundryConverter {
                         gr != null,
                         false,
                         "",
-                        system.replaceAll("\r\n", "\n")
+                        system
                 ),
                 "",
                 folder,
@@ -227,7 +228,7 @@ public class Werewolf20FoundryConverter {
                 ItemTypes.FEATURE,
                 "systems/worldofdarkness/assets/img/items/feature.svg",
                 new FeatureData(
-                        description.replaceAll("\r\n", "\n"),
+                        description,
                         null,
                         FeatureTypes.BACKGROUND
                 ),
