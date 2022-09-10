@@ -161,67 +161,64 @@ jobs:
           path: target
       - name: Package Artifacts - Full
         run: |
-          src=$(pwd)
-          stage=$(mktemp -d)
+          set -ex
+          src="$(pwd)"
+          stage="$(mktemp -d)"
           suffix=""
           osName=""
+          archive_suffix=""
+          compression_command=""
+          
           case "${{ matrix.os }}" in
-              linux)
-                osName="linux"
-                suffix=""
-                ;;
-              macos)
-                osName="macos"
-                suffix=".dmg"
-                ;;
-              windows-exe)
-                osName="windows"
-                suffix=".exe"
-                ;;
-              windows-msi)
-                osName="windows"
-                suffix=".msi"
-                ;;
-              *)
-                osName="unknown"
-                suffix=".unknown"
-                ;;
+            linux)
+              osName="linux"
+              suffix=""
+              archive_suffix=".tgz"
+              compression_command="tar czf"
+              ;;
+            macos)
+              osName="macos"
+              suffix=".dmg"
+              archive_suffix=".dmg"
+              compression_command=""
+              ;;
+            windows-exe)
+              osName="windows"
+              suffix=".exe"
+              archive_suffix=".zip"
+              compression_command="zip -r"
+              ;;
+            windows-msi)
+              osName="windows"
+              suffix=".msi"
+              archive_suffix=".msi"
+              compression_command=""
+              ;;
+            *)
+              osName="unknown"
+              suffix=".unknown"
+              archive_suffix=".tgz"
+              compression_command="tar czf"
+              ;;
           esac
           RELEASE_VERSION=${GITHUB_REF#refs/tags/v}
           ls -la
           ls -la target/
-          cp target/vtt-wod-book-parser$suffix $stage/vtt-wod-book-parser-$osName-$RELEASE_VERSION-x64$suffix
-          cd $stage
-          ARCHIVE_SUFFIX=""
-          COMPRESSION_COMMAND=""
-          if [[ "$osName" == "windows" ]]; then
-            if [[ "$suffix" == ".msi" ]]; then
-              ARCHIVE_SUFFIX=".msi"
-              COMPRESSION_COMMAND=""
-            else
-              ARCHIVE_SUFFIX=".zip"
-              COMPRESSION_COMMAND="zip -r"
-            fi
-          elif [[ "$suffix" == ".dmg" || "$suffix" == ".deb" ]]; then
-              ARCHIVE_SUFFIX="$suffix"
-              COMPRESSION_COMMAND=""
-          else
-            chmod +x vtt-wod-book-parser-$osName-$RELEASE_VERSION-x64$suffix
-            ARCHIVE_SUFFIX=".tgz"
-            COMPRESSION_COMMAND="tar czf"
-          fi
+          final_binary="$stage/vtt-wod-book-parser-$osName-$RELEASE_VERSION-x64$suffix"
+          cp "$src/target/vtt-wod-book-parser$suffix" "$final_binary"
+          cd "$stage" || exit 1
+          ls -l
           
-          ASSET_NAME="vtt-wod-book-parser-$osName-$RELEASE_VERSION-x64$ARCHIVE_SUFFIX"
-          ASSET_PATH="$src/$ASSET_NAME"
+          ASSET_NAME="vtt-wod-book-parser-$osName-$RELEASE_VERSION-x64$archive_suffix"
+          ASSET_PATH="$stage/$ASSET_NAME"
           CHECKSUM_PATH="$ASSET_PATH.sha256"
-          echo "ASSET_PATH=$ASSET_PATH" >> $GITHUB_ENV
-          echo "CHECKSUM_PATH=$CHECKSUM_PATH" >> $GITHUB_ENV
-          if [[ -n "$COMPRESSION_COMMAND" ]]; then
-            $COMPRESSION_COMMAND $ASSET_PATH *
+          echo "ASSET_PATH=$ASSET_PATH" >> "$GITHUB_ENV"
+          echo "CHECKSUM_PATH=$CHECKSUM_PATH" >> "$GITHUB_ENV"
+          if [[ -n "$compression_command" ]]; then
+            $compression_command "$ASSET_PATH" "$final_binary"
           fi
           
-          cd $src
-          sha256sum $ASSET_NAME > $CHECKSUM_PATH
+          sha256sum "$ASSET_NAME" > "$CHECKSUM_PATH"
 
       - name: Release
         uses: softprops/action-gh-release@v1
