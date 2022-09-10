@@ -35,6 +35,7 @@ jobs:
         env:
           DTRPG_TOKEN: "${{ secrets.DTRPG_TOKEN }}"
           LOG_LEVEL: "debug"
+          MAVEN_OPTS: "-Xmx10g"
 
       - name: Copy native bundles to staging
         run: |
@@ -86,6 +87,7 @@ jobs:
         env:
           DTRPG_TOKEN: "${{ secrets.DTRPG_TOKEN }}"
           LOG_LEVEL: "debug"
+          MAVEN_OPTS: "-Xmx13g"
 
       - name: Copy native bundles to staging
         run: |
@@ -128,6 +130,7 @@ jobs:
         env:
           DTRPG_TOKEN: "${{ secrets.DTRPG_TOKEN }}"
           LOG_LEVEL: "debug"
+          MAVEN_OPTS: "-Xmx10g"
 
       - name: Copy native image to staging
         run: |
