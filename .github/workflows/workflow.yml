@@ -1,5 +1,12 @@
 name: GraalVM Native Image builds
-on: [push, pull_request, workflow_dispatch]
+on:
+  push:
+    paths-ignore:
+      - 'README.md'
+      - 'LICENSE'
+      - 'docs/**'
+  pull_request: {}
+  workflow_dispatch: {}
 jobs:
   build-windows:
     name: "VTT WoD Book Parser on Windows"
