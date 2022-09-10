@@ -192,7 +192,7 @@ jobs:
           ARCHIVE_SUFFIX=""
           COMPRESSION_COMMAND=""
           if [[ "$osName" == "windows" ]]; then
-            if [[ "$suffix" == ".msi"]]; then
+            if [[ "$suffix" == ".msi" ]]; then
               ARCHIVE_SUFFIX=""
               COMPRESSION_COMMAND=""
             else
