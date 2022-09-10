@@ -196,14 +196,14 @@ jobs:
           COMPRESSION_COMMAND=""
           if [[ "$osName" == "windows" ]]; then
             if [[ "$suffix" == ".msi" ]]; then
-              ARCHIVE_SUFFIX=""
+              ARCHIVE_SUFFIX=".msi"
               COMPRESSION_COMMAND=""
             else
               ARCHIVE_SUFFIX=".zip"
               COMPRESSION_COMMAND="zip -r"
             fi
           elif [[ "$suffix" == ".dmg" || "$suffix" == ".deb" ]]; then
-              ARCHIVE_SUFFIX=""
+              ARCHIVE_SUFFIX="$suffix"
               COMPRESSION_COMMAND=""
           else
             chmod +x vtt-wod-book-parser-$osName-$RELEASE_VERSION-x64$suffix
