@@ -1,26 +1,9 @@
 package name.ipsi.project.fwbp;
 
-import name.ipsi.project.fwbp.books.shared.Background;
-import name.ipsi.project.fwbp.books.shared.Table;
-import name.ipsi.project.fwbp.books.werewolf.Auspice;
-import name.ipsi.project.fwbp.books.werewolf.Breed;
-import name.ipsi.project.fwbp.books.werewolf.Gift;
-import name.ipsi.project.fwbp.books.werewolf.Tribe;
-import name.ipsi.project.fwbp.books.werewolf.locations.AuspiceGifts;
-import name.ipsi.project.fwbp.books.werewolf.locations.BreedGifts;
-import name.ipsi.project.fwbp.books.werewolf.locations.TribeGifts;
-import name.ipsi.project.fwbp.dtrpg.Downloader;
-import name.ipsi.project.fwbp.foundry.core.Module;
-import name.ipsi.project.fwbp.foundry.core.*;
-import name.ipsi.project.fwbp.foundry.wod.FeatureData;
-import name.ipsi.project.fwbp.foundry.wod.MeleeWeaponData;
-import name.ipsi.project.fwbp.foundry.wod.werewolf.GiftData;
 import org.junit.jupiter.api.Test;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
-import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.RecordComponent;
 import java.nio.charset.Charset;
 import java.nio.file.FileVisitResult;
 import java.nio.file.Files;
@@ -29,7 +12,6 @@ import java.nio.file.SimpleFileVisitor;
 import java.nio.file.attribute.BasicFileAttributes;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
-import java.util.Arrays;
 import java.util.TreeMap;
 
 import static org.junit.jupiter.api.Assertions.assertIterableEquals;
@@ -38,38 +20,6 @@ class MainTest {
 
     @Test
     void testAdventure() throws Exception {
-        invokeAllMethodsWithReflection(Breed.class);
-        invokeAllMethodsWithReflection(BreedGifts.class);
-        invokeAllMethodsWithReflection(Auspice.class);
-        invokeAllMethodsWithReflection(AuspiceGifts.class);
-        invokeAllMethodsWithReflection(Tribe.class);
-        invokeAllMethodsWithReflection(TribeGifts.class);
-        invokeAllMethodsWithReflection(Gift.class);
-        invokeAllMethodsWithReflection(Background.class);
-        invokeAllMethodsWithReflection(Table.class);
-        invokeAllMethodsWithReflection(Downloader.DtrpgTokenMessage.class);
-        invokeAllMethodsWithReflection(Downloader.DtrpgTokenResponse.class);
-        invokeAllMethodsWithReflection(Downloader.DtrpgFileMessage.class);
-        invokeAllMethodsWithReflection(Downloader.DtrpgFileResponse.class);
-        invokeAllMethodsWithReflection(Adventure.class);
-        invokeAllMethodsWithReflection(Author.class);
-        invokeAllMethodsWithReflection(Compatibility.class);
-        invokeAllMethodsWithReflection(Folder.class);
-        invokeAllMethodsWithReflection(GiftData.class);
-        invokeAllMethodsWithReflection(FeatureData.class);
-        invokeAllMethodsWithReflection(Item.class);
-        invokeAllMethodsWithReflection(Journal.class);
-        invokeAllMethodsWithReflection(MeleeWeaponData.class);
-        invokeAllMethodsWithReflection(MeleeWeaponData.Attack.class);
-        invokeAllMethodsWithReflection(MeleeWeaponData.Damage.class);
-        invokeAllMethodsWithReflection(Module.class);
-        invokeAllMethodsWithReflection(ModulePack.class);
-        invokeAllMethodsWithReflection(Page.class);
-        invokeAllMethodsWithReflection(PageImage.class);
-        invokeAllMethodsWithReflection(PageText.class);
-        invokeAllMethodsWithReflection(PageTitle.class);
-        invokeAllMethodsWithReflection(PageVideo.class);
-
         System.setIn(new ByteArrayInputStream("1".getBytes(Charset.defaultCharset())));
         Main.main(new String[]{"--adventure"});
 
@@ -77,7 +27,7 @@ class MainTest {
         expectedFiles.put(Path.of("modules", "wod-werewolf-20-core", "module.json"), "bc45a644bba8462a218ff53fa120cd721177083f7d72e30fb4ccde779d8425b609c1b4a8399e861a4be3a2d343db04e193fc19fc6e7a6e91be49b5eeaff13cfd");
         expectedFiles.put(Path.of("modules", "wod-werewolf-20-core", "w20.css"), "2debd674fb547d898a6cfc8addefa1e22cacde66938df545de2937c23715b39ecc4185818845ad2318c98dba0514e476d23377d80ba9fd450be4e0addf550cad");
         expectedFiles.put(Path.of("modules", "wod-werewolf-20-core", "w20.js"), "01d4f461c7e84a173e206815cd9e48ceef1606c954c189f85e0d293657ac9393beb42faab59711f374733ab3b6c5bca6cebf63aed5d767c574e8e6e0d325d363");
-        expectedFiles.put(Path.of("modules", "wod-werewolf-20-core", "packs", "w20.db"), "3a1ea1fa50840188c2751854a16dcff15ab280b8ca9dfc6bae00c9d05609192043503970955ce4ac085e1c60a72fea06a2b322e6b259f0dfc79efc5992e2a883");
+        expectedFiles.put(Path.of("modules", "wod-werewolf-20-core", "packs", "w20.db"), "be857290ea63903348802cd62526624fde76002c566641f4234a2967fe272a05f8c7ece821db7f9c5d168f37cbbf98c858064ebe7755244f38cb0884f5c846ae");
         expectedFiles.put(Path.of("modules", "wod-werewolf-20-core", "images", "adventure-cover.jpeg"), "17d71cdd62f4c930b803fbcf1fab02a3d0244eb7fa1d4359ab088381b1288f1bb191117ec60d3075528732ff9ce4888545e6b66b0d681b00b68b79a214daee1c");
         expectedFiles.put(Path.of("modules", "wod-werewolf-20-core", "images", "black-furies-splash.jpeg"), "0c2f71fba6238336509d84672af71bee9344c477e0696ddd2f4dcf7d53193a1df4726f59f78135d653411f9e44dddbb08f54c65cb552a3ae3ce358dc1e2a4dea");
         expectedFiles.put(Path.of("modules", "wod-werewolf-20-core", "images", "black-spiral-dancers-splash.jpeg"), "10c193572ee8f878ce800f3e4bd6db12e3971714f9f69bda1ca15ee8edb64b9540f6638aacefdafdeef07d7027dc9c6f44d0423ca9c75caa492bcc752feaa372");
@@ -117,50 +67,5 @@ class MainTest {
         });
 
         assertIterableEquals(expectedFiles.entrySet(), actualFiles.entrySet());
-    }
-
-    private static void invokeAllMethodsWithReflection(Class<?> aClass) throws NoSuchMethodException, InstantiationException, IllegalAccessException, InvocationTargetException {
-        // This exists because GraalVM can't handle the case where some *but not all* values of a class (possibly just a record)
-        // are included in the reflection metadata - it gets very upset.
-        Object instance;
-        if (aClass.isRecord()) {
-            Class<?>[] componentTypes = Arrays.stream(aClass.getRecordComponents())
-                    .map(RecordComponent::getType)
-                    .toArray(Class<?>[]::new);
-            var constructor = aClass.getDeclaredConstructor(componentTypes);
-            var defaultParams = Arrays.stream(componentTypes).map(c -> {
-                if (c == boolean.class) {
-                    return false;
-                } else if (c == int.class) {
-                    return -1;
-                } else if (c == double.class) {
-                    return 0.0d;
-                } else {
-                    return null;
-                }
-            }).toArray(Object[]::new);
-            instance = constructor.newInstance(defaultParams);
-        } else {
-            var constructor = aClass.getDeclaredConstructors()[0];
-            var params = Arrays.stream(constructor.getParameterTypes()).map(c -> {
-                if (c == boolean.class) {
-                    return false;
-                } else if (c == int.class) {
-                    return -1;
-                } else if (c == double.class) {
-                    return 0.0d;
-                } else {
-                    return null;
-                }
-            }).toArray(Object[]::new);
-            instance = constructor.newInstance(params);
-        }
-        for (var method : aClass.getMethods()) {
-            try {
-                method.invoke(instance);
-            } catch (Exception e) {
-                // Ignore - only doing this for GraalVM...
-            }
-        }
     }
 }

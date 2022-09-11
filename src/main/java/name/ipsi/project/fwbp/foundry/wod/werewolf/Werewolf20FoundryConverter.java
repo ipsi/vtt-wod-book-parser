@@ -26,16 +26,21 @@ public class Werewolf20FoundryConverter {
 
     public Adventure processAsAdventure(List<BookEntry> entries) throws IOException {
         log.trace("Converting book entries tp adventure");
-
         folderIdsByName = new HashMap<>();
-        folderIdsByName.put("Garou", FoundryUtils.generateId("folder", "garou"));
-        folderIdsByName.put("Gifts - Garou", FoundryUtils.generateId("folder", "gifts-garou"));
-        folderIdsByName.put("Backgrounds - Garou", FoundryUtils.generateId("folder", "backgrounds-garou"));
-        folderIdsByName.put("Weapons - Melee", FoundryUtils.generateId("folder", "weapons-melee"));
 
         var items = new ArrayList<Item>();
         var journals = new ArrayList<Journal>();
         var folders = new ArrayList<Folder>();
+
+        folders.add(createFolder("garou", "Garou", DocumentTypes.JOURNAL_ENTRY, FolderSortingModes.MANUAL, 1.0, null));
+        folders.add(createFolder("gifts-garou", "Gifts - Garou", DocumentTypes.ITEM, FolderSortingModes.ALPHABETICAL, 1.0, null));
+        folders.add(createFolder("backgrounds-garou", "Backgrounds - Garou", DocumentTypes.ITEM, FolderSortingModes.ALPHABETICAL, 1.0, null));
+        folders.add(createFolder("rites-garou", "Rites - Garou", DocumentTypes.ITEM, FolderSortingModes.ALPHABETICAL, 1.0, null));
+        folders.add(createFolder("weapons-melee", "Weapons - Melee", DocumentTypes.ITEM, FolderSortingModes.MANUAL, 1.0, null));
+        double sortIdx = 0;
+        for(var type : RiteType.values()) {
+            folders.add(createFolder("garou-rites-" + type.displayName(), type.displayName(), DocumentTypes.ITEM, FolderSortingModes.ALPHABETICAL, sortIdx++, folderIdsByName.get("Rites - Garou")));
+        }
 
         List<Page> breedJournalPages = new ArrayList<>();
         var breedJournal = new Journal(FoundryUtils.generateId("journal", "breeds"), "Breeds", folderIdsByName.get("Garou"), 1.0, Collections.emptyMap(), breedJournalPages, DocumentOwnershipLevel.defaultObserver());
@@ -46,11 +51,6 @@ public class Werewolf20FoundryConverter {
         List<Page> tribeJournalPages = new ArrayList<>();
         var tribeJournal = new Journal(FoundryUtils.generateId("journal", "tribes"), "Tribes", folderIdsByName.get("Garou"), 3.0, Collections.emptyMap(), tribeJournalPages, DocumentOwnershipLevel.defaultObserver());
         journals.add(tribeJournal);
-
-        folders.add(new Folder(folderIdsByName.get("Garou"), "Garou", DocumentTypes.JOURNAL_ENTRY, FolderSortingModes.MANUAL, 1.0, null, Collections.emptyMap(), null, null));
-        folders.add(new Folder(folderIdsByName.get("Gifts - Garou"), "Gifts - Garou", DocumentTypes.ITEM, FolderSortingModes.ALPHABETICAL, 1.0, null, Collections.emptyMap(), null, null));
-        folders.add(new Folder(folderIdsByName.get("Backgrounds - Garou"), "Backgrounds - Garou", DocumentTypes.ITEM, FolderSortingModes.ALPHABETICAL, 1.0, null, Collections.emptyMap(), null, null));
-        folders.add(new Folder(folderIdsByName.get("Weapons - Melee"), "Weapons - Melee", DocumentTypes.ITEM, FolderSortingModes.ALPHABETICAL, 2.0, null, Collections.emptyMap(), null, null));
 
         for (var entry : entries) {
             log.trace("Converting book entry {}", entry.getClass().getSimpleName());
@@ -75,6 +75,9 @@ public class Werewolf20FoundryConverter {
                 items.add(processMeleeWeapon(mw, folderIdsByName.get("Weapons - Melee")));
             } else if (entry instanceof Background b) {
                 items.add(processBackground(b));
+            } else if (entry instanceof Rite r) {
+                items.add(processRite(r));
+//                processRite(r);
             }
         }
 
@@ -98,6 +101,12 @@ public class Werewolf20FoundryConverter {
                 "Werewolf: the Apocalypse 20th Anniversary Edition",
                 null
         );
+    }
+
+    private Folder createFolder(String idGroup, String name, DocumentTypes documentType, FolderSortingModes sortingMode, double sortOrder, String parentFolderId) {
+        String id = FoundryUtils.generateId("folder", idGroup);
+        folderIdsByName.put(name, id);
+        return new Folder(id, name, documentType, sortingMode, sortOrder, null, Collections.emptyMap(), parentFolderId, null);
     }
 
     private Item processMeleeWeapon(MeleeWeapon meleeWeapon, String folder) {
@@ -194,7 +203,7 @@ public class Werewolf20FoundryConverter {
                 g.name(),
                 ItemTypes.POWER,
                 "systems/worldofdarkness/assets/img/items/power.svg",
-                new GiftData(
+                new PowerData(
                         false,
                         "",
                         "",
@@ -234,6 +243,40 @@ public class Werewolf20FoundryConverter {
                 ),
                 null,
                 folderIdsByName.get("Backgrounds - Garou"),
+                0,
+                DocumentOwnershipLevel.defaultObserver(),
+                Collections.emptyMap(),
+                null
+        );
+    }
+
+    private Item processRite(Rite r) throws IOException {
+        log.debug("Running templates for rite {}", r.name());
+        var description = Templater.instance().compile("rite-description").apply(r);
+        var system = Templater.instance().compile("rite-system").apply(r);
+        return new Item(
+                r.id(),
+                r.name(),
+                ItemTypes.POWER,
+                "systems/worldofdarkness/assets/img/items/ritual_werewolf.svg",
+                new PowerData(
+                        true,
+                        null,
+                        null,
+                        description,
+                        PowerTypes.RITE,
+                        r.level().foundryLevel(),
+                        r.rollData() != null ? convertCharacteristic(r.rollData().characteristicOne()) : null,
+                        r.rollData() != null && r.rollData().characteristicTwo() != null ? convertCharacteristic(r.rollData().characteristicTwo()) : null,
+                        0,
+                        r.rollData() != null ? r.rollData().difficulty() : null,
+                        r.rollData() != null,
+                        true,
+                        null,
+                        system
+                ),
+                null,
+                folderIdsByName.get(r.type().displayName()),
                 0,
                 DocumentOwnershipLevel.defaultObserver(),
                 Collections.emptyMap(),

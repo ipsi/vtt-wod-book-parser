@@ -10,6 +10,8 @@ import com.itextpdf.kernel.pdf.canvas.parser.listener.RegexBasedLocationExtracti
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.*;
@@ -22,10 +24,12 @@ public class Preprocessor {
     private static final Pattern DOT_PATTERN = Pattern.compile("^(•+)");
 
     private final Map<Integer, Collection<IPdfTextLocation>> stringLocations;
+    private final Path outputDir;
     private final StringBuilder output;
 
-    private Preprocessor(Map<Integer, Collection<IPdfTextLocation>> stringLocations) {
+    private Preprocessor(Map<Integer, Collection<IPdfTextLocation>> stringLocations, Path outputDir) {
         this.stringLocations = stringLocations;
+        this.outputDir = outputDir;
         output = new StringBuilder();
     }
 
@@ -40,12 +44,24 @@ public class Preprocessor {
             stringLocations.put(i, parser.processContent(i, new RegexBasedLocationExtractionStrategy(".*\n")).getResultantLocations());
         }
 
-        var p = new Preprocessor(stringLocations);
+        var p = new Preprocessor(stringLocations, jsonFile.getParent());
         p.doProcessing(entries);
-        System.out.println(p.output);
+//        System.out.println(p.output);
     }
 
     private void doProcessing(RawBook entries) {
+        processBackgrounds(entries);
+
+        try {
+            Files.writeString(outputDir.resolve("Backgrounds.java"), output.toString(), StandardCharsets.UTF_8);
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+
+        processRites(entries);
+    }
+
+    private void processBackgrounds(RawBook entries) {
         for (var background : entries.backgrounds()) {
             output.append("                        new BackgroundLocation(\n")
                     .append("                                \"").append(background.name())
@@ -83,6 +99,94 @@ public class Preprocessor {
         output.deleteCharAt(output.length() - 2);
     }
 
+    private void processRites(RawBook entries) {
+        output.setLength(0);
+        output.append("package name.ipsi.project.fwbp.books.werewolf.locations;\n" +
+                "\n" +
+                "import com.itextpdf.kernel.geom.Rectangle;\n" +
+                "import name.ipsi.project.fwbp.books.shared.locations.TextArea;\n" +
+                "import name.ipsi.project.fwbp.books.shared.locations.TextLocation;\n" +
+                "import name.ipsi.project.fwbp.books.shared.locations.TextLocationType;\n" +
+                "import name.ipsi.project.fwbp.books.werewolf.RiteLevel;\n" +
+                "import name.ipsi.project.fwbp.books.werewolf.RiteType;\n" +
+                "\n" +
+                "import java.util.Arrays;\n" +
+                "import java.util.List;\n\n");
+        output.append("public class RiteLocations {\n")
+                .append("    public static final List<RiteLocation> RITES = Arrays.asList(\n");
+
+        for (var rite : entries.rites().accord()) {
+            processRite(rite, "ACCORD");
+        }
+
+        for (var rite : entries.rites().caern()) {
+            processRite(rite, "CAERN");
+        }
+
+        for (var rite : entries.rites().death()) {
+            processRite(rite, "DEATH");
+        }
+
+        for (var rite : entries.rites().mystic()) {
+            processRite(rite, "MYSTIC");
+        }
+
+        for (var rite : entries.rites().punishment()) {
+            processRite(rite, "PUNISHMENT");
+        }
+
+        for (var rite : entries.rites().renown()) {
+            processRite(rite, "RENOWN");
+        }
+
+        for (var rite : entries.rites().seasonal()) {
+            processRite(rite, "SEASONAL");
+        }
+
+        for (var rite : entries.rites().minor()) {
+            processRite(rite, "MINOR");
+        }
+        // remove trailing comma
+        output.deleteCharAt(output.length() - 2);
+        output.append("    );\n");
+        output.append("};\n");
+
+        try {
+            Files.writeString(outputDir.resolve("RiteLocations.java"), output.toString(), StandardCharsets.UTF_8);
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    private void processRite(Entry rite, String type) {
+        String level = rite.level();
+        output.append("                        new RiteLocation(\n")
+                .append("                                \"").append(rite.name()).append("\",\n")
+                .append("                                RiteType.").append(type).append(",\n")
+                .append("                                RiteLevel.").append(level == null ? "MINOR" : level.toUpperCase()).append(",\n");
+        for (var paragraph : rite.paragraphs()) {
+            output.append("                                new TextLocation(\n")
+                    .append("                                        TextLocationType.")
+                    .append(paragraph.type().toUpperCase())
+                    .append(",\n");
+            if (paragraph.areas() != null && !paragraph.areas().isEmpty()) {
+                for (var area : paragraph.areas) {
+                    buildTextArea(area.page(), area.content());
+                }
+                // remove trailing comma
+                output.deleteCharAt(output.length() - 2);
+            } else {
+                buildTextArea(paragraph.page(), paragraph.content());
+                // remove trailing comma
+                output.deleteCharAt(output.length() - 2);
+            }
+            output.append("                                        ),\n");
+        }
+        output.deleteCharAt(output.length() - 2);
+        // remove trailing comma
+        output.append("                        ),\n");
+    }
+
     private void buildTextArea(int page, String content) {
         for (var rect : processLines(page, content)) {
             if (rect.getHeight() > 13.5f) {
@@ -101,13 +205,13 @@ public class Preprocessor {
 
     private List<Rectangle> processLines(int page, String content) {
         var rv = new ArrayList<Rectangle>();
-        boolean skipNext = false;
+        var skipNext = 0;
         String[] lines = content.split("\n");
         nextline:
-        for (int i = 0; i < lines.length; i++) {
-            var line = lines[i];
-            if (skipNext) {
-                skipNext = false;
+        for (int lineNumber = 0; lineNumber < lines.length; lineNumber++) {
+            var line = lines[lineNumber];
+            if (skipNext > 0) {
+                skipNext -= 1;
                 LOGGER.debug("skipping line [{}] as it's likely the next part of a hyphenated line", line);
                 continue;
             }
@@ -133,64 +237,38 @@ public class Preprocessor {
                     matchedLocation = textLocation.getRectangle();
                     break;
                 } else if (text.startsWith(line)) {
-                    LOGGER.trace("Text [{}] matched start of line - limiting width and praying", line);
+                    LOGGER.trace("Text [{}] starts with line [{}] - limiting width and praying", text, line);
                     matchedLocation = makePrefixRect(page, textLocation);
                     break;
                 } else if (text.endsWith(line)) {
-                    LOGGER.trace("Text [{}] matched end of line - limiting width and y and praying", line);
+                    var charCount = text.indexOf(line);
+                    if (charCount <= 9){
+                        LOGGER.trace("Text [{}] ends with line [{}] but only [{}] chars unmatched - assuming bad match and skipping", text, line, charCount);
+                        continue;
+                    }
+
+                    LOGGER.trace("Text [{}] ends with line [{}] with [{}] chars unmatched - limiting width and y and praying", text, line, charCount);
                     matchedLocation = makePostFixRect(page, textLocation);
                     break;
+                } else if(line.replaceAll("th ", " ").equals(text)) {
+                    LOGGER.trace("Text [{}] matched line [{}] after stripping [th] - hooray superscript...", text, line);
+                    matchedLocation = textLocation.getRectangle();
                 } else if (text.contains("-")) {
-                    for (int idx = text.lastIndexOf("-"); idx != -1; idx = text.lastIndexOf("-", idx - 1)) {
-                        String substring = text.substring(0, idx);
-                        var nextLine = i + 1 < lines.length ? lines[i + 1] : "";
-                        Rectangle nextLineLocation = null;
+                    HyphenationResult hyphenationResult = processHyphenatedText(
+                            page,
+                            lineNumber,
+                            lines,
+                            line,
+                            text,
+                            textLocation,
+                            pdfTextLocationCollection
+                    );
 
-                        if (line.contains(substring)) {
-                            LOGGER.trace("Line [{}] is hyphenated in PDF - matched against of [{}]", line, text);
-                            var lineAfterHyphenation = line.replace(substring, "");
-                            var postHyphenOptional = pdfTextLocationCollection.stream()
-                                    .filter(l -> {
-                                        var innerText = l.getText().trim().replaceAll("\\s+", " ");
-                                        return innerText.startsWith(lineAfterHyphenation) || innerText.endsWith(lineAfterHyphenation);
-                                    })
-                                    .findFirst();
-                            if (postHyphenOptional.isPresent()) {
-                                IPdfTextLocation postHyphen = postHyphenOptional.get();
-                                var postHyphenText = postHyphen.getText().trim().replaceAll("\\s+", " ");
-                                if (postHyphenText.startsWith(lineAfterHyphenation) && postHyphenText.endsWith(nextLine)) {
-                                    LOGGER.trace("Post-hyphen text [{}] starts with [{}] and ends with [{}] - that must be a full match, using full rectangle", postHyphenText, lineAfterHyphenation, nextLine);
-                                    nextLineLocation = postHyphen.getRectangle();
-                                } else if (postHyphenText.startsWith(lineAfterHyphenation)) {
-                                    LOGGER.trace("Text [{}] matched start of line - limiting width and praying", lineAfterHyphenation);
-                                    nextLineLocation = makePrefixRect(page, postHyphen);
-                                } else {
-                                    LOGGER.trace("Text [{}] matched end of line - limiting width and y and praying", lineAfterHyphenation);
-                                    nextLineLocation = makePostFixRect(page, postHyphen);
-                                }
-                                if (postHyphenText.contains(nextLine)) {
-                                    LOGGER.debug("Text [{}] contains next line [{}] - skipping", postHyphenText, nextLine);
-                                    skipNext = true;
-                                }
-
-                                // Going to ignore hyphenated text for now if there's no matching line found - otherwise it gets really wonky
-                                if (idx == text.length() - 1) {
-                                    rv.add(textLocation.getRectangle());
-                                    rv.add(nextLineLocation);
-                                    continue nextline;
-                                } else if (line.startsWith(substring)) {
-                                    rv.add(makePrefixRect(page, textLocation));
-                                    rv.add(nextLineLocation);
-                                    continue nextline;
-                                } else if (line.endsWith(substring)) {
-                                    rv.add(makePostFixRect(page, textLocation));
-                                    rv.add(nextLineLocation);
-                                    continue nextline;
-                                }
-                            } else {
-                                LOGGER.error("Unable to find second part of hyphenated line [{}]-[{}]", substring, lineAfterHyphenation);
-                            }
-                        }
+                    if (hyphenationResult != null) {
+                        rv.add(hyphenationResult.location());
+                        rv.addAll(hyphenationResult.nextLineLocations());
+                        skipNext = hyphenationResult.nextLineLocations().size();
+                        continue nextline;
                     }
                 }
             }
@@ -204,6 +282,88 @@ public class Preprocessor {
 
         return rv;
     }
+
+    private HyphenationResult processHyphenatedText(
+            int page,
+            int lineNumber,
+            String[] lines,
+            String line,
+            String text,
+            IPdfTextLocation textLocation,
+            Collection<IPdfTextLocation> pdfTextLocationCollection
+    ) {
+        var nextLine = lineNumber + 1 < lines.length ? lines[lineNumber + 1] : "";
+        for (int idx = text.lastIndexOf("-"); idx != -1; idx = text.lastIndexOf("-", idx - 1)) {
+            String substring = text.substring(0, idx);
+
+            if (line.contains(substring) || (line.lastIndexOf(" ") >= 0 && substring.contains(line.substring(0, line.lastIndexOf(" "))))) {
+                LOGGER.trace("Line [{}] is hyphenated in PDF - matched against of [{}]", line, text);
+                String lineAfterHyphenation;
+                if (line.contains(substring)) {
+                    lineAfterHyphenation = line.replace(substring, "");
+                } else {
+                    lineAfterHyphenation = line.replace(substring.substring(substring.indexOf(line.substring(0, line.lastIndexOf(" ")))), "");
+                }
+
+                var postHyphenTextLocations = pdfTextLocationCollection.stream()
+                        .filter(l -> {
+                            var innerText = l.getText().trim().replaceAll("\\s+", " ");
+                            return innerText.startsWith(lineAfterHyphenation) || innerText.endsWith(lineAfterHyphenation) || innerText.endsWith(lineAfterHyphenation + " " + nextLine);
+                        })
+                        .toList();
+                if (!postHyphenTextLocations.isEmpty()) {
+                    for (var postHyphen : postHyphenTextLocations) {
+                        var postHyphenText = postHyphen.getText().trim().replaceAll("\\s+", " ");
+
+                        Rectangle nextLineLocation;
+                        if (postHyphenText.contains(nextLine)) {
+                            LOGGER.debug("Text [{}] contains next line [{}] - skipping", postHyphenText, nextLine);
+                            if (postHyphenText.startsWith(lineAfterHyphenation)) {
+                                if (postHyphenText.endsWith(nextLine)) {
+                                    LOGGER.debug("Post-hyphen text [{}] starts with [{}] and ends with [{}] - that must be a full match, using full rectangle", postHyphenText, lineAfterHyphenation, nextLine);
+                                    nextLineLocation = postHyphen.getRectangle();
+                                } else {
+                                    LOGGER.debug("Text [{}] matched start of line - limiting width and praying", lineAfterHyphenation);
+                                    nextLineLocation = makePrefixRect(page, postHyphen);
+                                }
+                            } else {
+                                LOGGER.debug("Text [{}] matched end of line - limiting width and y and praying", lineAfterHyphenation);
+                                nextLineLocation = makePostFixRect(page, postHyphen);
+                            }
+                        } else {
+                            LOGGER.trace("Text [{}] does not match line [{}] - ignoring", text, line);
+                            continue;
+                        }
+
+                        // Going to ignore hyphenated text for now if there's no matching line found - otherwise it gets really wonky
+                        var nextLineLocations = new ArrayList<Rectangle>();
+                        nextLineLocations.add(nextLineLocation);
+                        if (idx == text.length() - 1) {
+                            return new HyphenationResult(
+                                    textLocation.getRectangle(),
+                                    nextLineLocations
+                            );
+                        } else if (line.startsWith(substring)) {
+                            return new HyphenationResult(
+                                    makePrefixRect(page, textLocation),
+                                    nextLineLocations
+                            );
+                        } else if (line.endsWith(substring)) {
+                            return new HyphenationResult(
+                                    makePostFixRect(page, textLocation),
+                                    nextLineLocations
+                            );
+                        }
+                    }
+                } else {
+                    LOGGER.warn("Unable to find second part of hyphenated line [{}]-[{}] - might be false match", substring, lineAfterHyphenation);
+                }
+            }
+        }
+        return null;
+    }
+
+    private record HyphenationResult(Rectangle location, List<Rectangle> nextLineLocations) {}
 
     private static Rectangle makePostFixRect(int page, IPdfTextLocation textLocation) {
         float x;
@@ -243,9 +403,20 @@ public class Preprocessor {
     //that you can maintain a one-dot standard of living
     //wherever you are for up to six months.
 
-    public record RawBook(List<Entry> backgrounds) {}
+    public record RawBook(List<Entry> backgrounds, Rites rites) {}
 
-    public record Entry(String name, List<Paragraph> paragraphs) {}
+    public record Rites(
+            List<Entry> accord,
+            List<Entry> caern,
+            List<Entry> death,
+            List<Entry> mystic,
+            List<Entry> punishment,
+            List<Entry> renown,
+            List<Entry> seasonal,
+            List<Entry> minor
+    ) {}
+
+    public record Entry(String name, String level, List<Paragraph> paragraphs) {}
 
     public record Paragraph(String type, int page, String content, List<Area> areas) {}
     public record Area(int page, String content) {}

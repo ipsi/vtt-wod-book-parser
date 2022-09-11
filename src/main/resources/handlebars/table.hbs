@@ -1,0 +1,20 @@
+{{#with .}}
+<div>
+    <table>
+        {{#if header}}
+        <tr>
+            {{#each header.columns}}
+            <th>{{data}}</th>
+            {{/each}}
+        </tr>
+        {{/if}}
+        {{#each rows}}
+        <tr>
+            {{#each columns}}
+            <td>{{data}}</td>
+            {{/each}}
+        </tr>
+        {{/each}}
+    </table>
+</div>
+{{/with}}

@@ -89,13 +89,19 @@ public class Utils {
     public static List<String> getText(PdfDocumentContentParser parser, Content content) {
         List<String> paragraphs = new ArrayList<>(content.content().length);
         for (var location : content.content()) {
-            paragraphs.add(Arrays.stream(location.locations())
+            paragraphs.add(fixText(Arrays.stream(location.locations())
                     .map(l -> parser.processContent(l.page(), new FilteredTextEventListener(new SimpleTextExtractionStrategy(), new TextRegionEventFilter(l.location()))).getResultantText())
                     .map(s -> s.trim().replaceAll("[\n\r]", ""))
-                    .map(Utils::fixText)
-                    .collect(CONTENT_AWARE_JOINER));
+                    .collect(CONTENT_AWARE_JOINER)));
         }
         return paragraphs;
+    }
+
+    public static String getText(PdfDocumentContentParser parser, TextArea... textLocations) {
+        return fixText(Arrays.stream(textLocations)
+                .map(l -> parser.processContent(l.page(), new FilteredTextEventListener(new SimpleTextExtractionStrategy(), new TextRegionEventFilter(l.location()))).getResultantText())
+                .map(s -> s.trim().replaceAll("[\n\r]", ""))
+                .collect(CONTENT_AWARE_JOINER));
     }
 
     public static List<String> getTextAsLines(PdfDocumentContentParser parser, Content content) {

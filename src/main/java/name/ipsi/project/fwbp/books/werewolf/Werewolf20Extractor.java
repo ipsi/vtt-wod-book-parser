@@ -2,6 +2,7 @@ package name.ipsi.project.fwbp.books.werewolf;
 
 import com.itextpdf.kernel.geom.Rectangle;
 import com.itextpdf.kernel.pdf.canvas.parser.PdfDocumentContentParser;
+import name.ipsi.project.fwbp.books.Utils;
 import name.ipsi.project.fwbp.books.shared.*;
 import name.ipsi.project.fwbp.books.shared.locations.*;
 import name.ipsi.project.fwbp.books.werewolf.locations.*;
@@ -1255,7 +1256,7 @@ public class Werewolf20Extractor {
                                 new Paragraph(429, makeRectOddLeft(45, 610))
                         ))
                 ),
-                Collections.emptyList(),
+                RiteLocations.RITES,
                 Collections.emptyList(),
                 Collections.emptyList(),
                 new WeaponLocations(
@@ -1291,7 +1292,7 @@ public class Werewolf20Extractor {
             List<TribeLocation> tribes,
             List<BackgroundLocation> backgrounds,
             List<GiftLocations> gifts,
-            List<RiteLocations> rites,
+            List<RiteLocation> rites,
             List<FetishLocations> fetishes,
             List<TalenLocations> talens,
             WeaponLocations weapons,
@@ -1438,13 +1439,13 @@ public class Werewolf20Extractor {
             var fixedSys = sys == null ? null : fixText(sys.toString());
             var l = levelToInt(level);
             var giftLevel = new GiftAvailability(group, l);
-            GiftRoll giftRoll = null;
+            RollData giftRoll = null;
             if (fixedSys != null) {
                 var matcher = Pattern.compile(".*?(([\\w-]+) \\+)? ([\\w-]+|Animal Ken)( roll)? \\([Dd]ifficulty ([^)]+)\\).*").matcher(fixedSys);
                 if (matcher.matches()) {
                     // Poor templating means we pick up "bite attack rollable" which we can't use and need to exclude
                     if (!matcher.group(3).equals("attack")) {
-                        giftRoll = new GiftRoll(
+                        giftRoll = new RollData(
                                 matcher.group(2) == null ? matcher.group(3) : matcher.group(2),
                                 matcher.group(2) == null ? null : matcher.group(3),
                                 matcher.group(5).matches("\\d+") ? matcher.group(5) : "-1"
@@ -1772,6 +1773,65 @@ public class Werewolf20Extractor {
                 rows.add(new Table.Row(new Table.Column(fixText(cost.toString())), new Table.Column(fixText(power.stream().collect(CONTENT_AWARE_JOINER)))));
                 entries.add(new Background(name, description, new Table(headerRow, trailer, rows.toArray(new Table.Row[0])), "werewolf"));
             }
+        }
+
+        log.info("Extracting Rites");
+        var headerPattern = Pattern.compile("(.*) (Difficulty|Effect|Level)");
+        var tableBodyPattern1 = Pattern.compile("^([0-9+–-]+) (.*)$");
+        var tableBodyPattern2 = Pattern.compile("^(.*) ([0-9+–-]+)$");
+        for(var rite : BOOK_DETAILS.rites()) {
+            List<TextEntry> description = new ArrayList<>();
+            List<TextEntry> system = new ArrayList<>();
+            boolean foundSystem = false;
+            for (var textLocation : rite.textLocations()) {
+                if (textLocation.type() == TextLocationType.TEXT) {
+                    var text = Utils.getText(parser, textLocation.locations());
+                    if (text.startsWith("System:")) {
+                        foundSystem = true;
+                        system.add(new StringEntry(text.replaceAll("^System:\\s+", "")));
+                    } else if (foundSystem) {
+                        system.add(new StringEntry(text));
+                    } else {
+                        description.add(new StringEntry(text));
+                    }
+                } else if (textLocation.type() == TextLocationType.TABLE) {
+                    var text = Utils.getTextAsLines(parser, textLocation);
+
+                    Table.HeaderRow header = null;
+                    List<Table.Row> rows = new ArrayList<>();
+                    for (int i = 0; i < text.size(); i++) {
+                        if (i == 0) {
+                            var matcher = headerPattern.matcher(text.get(i));
+                            if (matcher.matches()) {
+                                header = new Table.HeaderRow(new Table.Column(matcher.group(1)), new Table.Column(matcher.group(2)));
+                            } else {
+                                log.error("No match found for header row [{}]", text.get(i));
+                            }
+                        } else {
+                            var matcher1 = tableBodyPattern1.matcher(text.get(i));
+                            var matcher2 = tableBodyPattern2.matcher(text.get(i));
+
+                            if (matcher1.matches()) {
+                                rows.add(new Table.Row(new Table.Column(matcher1.group(1)), new Table.Column(matcher1.group(2))));
+                            } else if (matcher2.matches()) {
+                                rows.add(new Table.Row(new Table.Column(matcher2.group(1)), new Table.Column(matcher2.group(2))));
+                            } else {
+                                log.trace("Line [{}] not matched by regex - assuming part of previous line, second column", text.get(i));
+                                var prev = rows.remove(rows.size() - 1);
+                                rows.add(new Table.Row(prev.columns()[0], new Table.Column(prev.columns()[1].data() + " " + text.get(i))));
+                            }
+                        }
+                    }
+
+                    if (foundSystem) {
+                        system.add(new TableEntry(new Table(header, null, rows.toArray(new Table.Row[0]))));
+                    } else {
+                        description.add(new TableEntry(new Table(header, null, rows.toArray(new Table.Row[0]))));
+                    }
+                }
+            }
+
+            entries.add(new Rite(rite.name(), rite.type(), rite.level(), rite.type().rollData(), description, system));
         }
 
         return entries;

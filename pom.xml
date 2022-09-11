@@ -191,19 +191,25 @@
                                 <list>name.ipsi.project.fwbp.books.werewolf.locations.TribeGifts</list>
                                 <list>name.ipsi.project.fwbp.books.werewolf.Gift</list>
                                 <list>name.ipsi.project.fwbp.books.werewolf.GiftAvailability</list>
-                                <list>name.ipsi.project.fwbp.books.werewolf.GiftRoll</list>
+                                <list>name.ipsi.project.fwbp.books.werewolf.RollData</list>
                                 <list>name.ipsi.project.fwbp.books.werewolf.RestrictedAbilities</list>
                                 <list>name.ipsi.project.fwbp.books.werewolf.Rank</list>
+                                <list>name.ipsi.project.fwbp.books.werewolf.Rite</list>
+                                <list>name.ipsi.project.fwbp.books.werewolf.RiteLevel</list>
+                                <list>name.ipsi.project.fwbp.books.werewolf.RiteType</list>
                                 <list>name.ipsi.project.fwbp.books.werewolf.Deformities</list>
                                 <list>name.ipsi.project.fwbp.books.werewolf.Deformity</list>
                                 <list>name.ipsi.project.fwbp.books.shared.Background</list>
                                 <list>name.ipsi.project.fwbp.books.shared.MeleeWeapon</list>
                                 <list>name.ipsi.project.fwbp.books.shared.PowerCollection</list>
                                 <list>name.ipsi.project.fwbp.books.shared.Stereotype</list>
+                                <list>name.ipsi.project.fwbp.books.shared.StringEntry</list>
                                 <list>name.ipsi.project.fwbp.books.shared.Table</list>
                                 <list>name.ipsi.project.fwbp.books.shared.Table$HeaderRow</list>
                                 <list>name.ipsi.project.fwbp.books.shared.Table$Column</list>
                                 <list>name.ipsi.project.fwbp.books.shared.Table$Row</list>
+                                <list>name.ipsi.project.fwbp.books.shared.TableEntry</list>
+                                <list>name.ipsi.project.fwbp.books.shared.TextEntry</list>
                                 <list>name.ipsi.project.fwbp.books.shared.ThrownWeapon</list>
                                 <list>name.ipsi.project.fwbp.dtrpg.Downloader$DtrpgTokenMessage</list>
                                 <list>name.ipsi.project.fwbp.dtrpg.Downloader$DtrpgTokenResponse</list>
@@ -213,7 +219,7 @@
                                 <list>name.ipsi.project.fwbp.foundry.core.Author</list>
                                 <list>name.ipsi.project.fwbp.foundry.core.Compatibility</list>
                                 <list>name.ipsi.project.fwbp.foundry.core.Folder</list>
-                                <list>name.ipsi.project.fwbp.foundry.wod.werewolf.GiftData</list>
+                                <list>name.ipsi.project.fwbp.foundry.wod.PowerData</list>
                                 <list>name.ipsi.project.fwbp.foundry.wod.FeatureData</list>
                                 <list>name.ipsi.project.fwbp.foundry.core.Item</list>
                                 <list>name.ipsi.project.fwbp.foundry.core.Journal</list>

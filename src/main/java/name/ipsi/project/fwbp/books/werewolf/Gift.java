@@ -11,11 +11,11 @@ public record Gift(
         String name,
         String description,
         String system,
-        GiftRoll giftRoll,
+        RollData giftRoll,
         List<GiftAvailability> availableTo,
         Table chart
 ) implements BookEntry, Comparable<Gift> {
-    public Gift(String name, String description, String system, GiftRoll giftRoll, List<GiftAvailability> availableTo, Table chart) {
+    public Gift(String name, String description, String system, RollData giftRoll, List<GiftAvailability> availableTo, Table chart) {
         this(FoundryUtils.generateId("gift", name), name, description, system, giftRoll, availableTo, chart);
     }
 
