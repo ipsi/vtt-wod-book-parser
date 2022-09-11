@@ -2,6 +2,7 @@ package name.ipsi.project.fwbp;
 
 import com.itextpdf.kernel.pdf.PdfDocument;
 import com.itextpdf.kernel.pdf.PdfName;
+import com.itextpdf.kernel.pdf.PdfReader;
 import com.itextpdf.kernel.pdf.PdfStream;
 import com.itextpdf.kernel.pdf.canvas.parser.PdfDocumentContentParser;
 import com.itextpdf.kernel.pdf.canvas.parser.listener.RegexBasedLocationExtractionStrategy;
@@ -26,12 +27,23 @@ public class BookProcessor {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(BookProcessor.class);
 
+    public static void processWerewolf20(Path modulesDir, Path pdfFile) throws Exception {
+        LOGGER.info("Reading PDF file [{}]", pdfFile.toAbsolutePath());
+        var doc = new PdfDocument(new PdfReader(pdfFile.toAbsolutePath().toString()));
+        LOGGER.info("PDF File read and converted to PdfDocument");
+
+        processWerewolf20(modulesDir, doc);
+    }
+
     public static void processWerewolf20(Path modulesDir, String dtrpgTokenText) throws Exception {
-//                var doc = new PdfDocument(new PdfReader("/Volumes/books/Roleplaying/Werewolf the Apocalypse/Werewolf the Apocalypse 20th Anniversary Edition.pdf"));
         LOGGER.info("Downloading file");
         var doc = Downloader.downloadFile(Werewolf20Extractor.BOOK_ID, dtrpgTokenText);
         LOGGER.info("File downloaded");
 
+        processWerewolf20(modulesDir, doc);
+    }
+
+    public static void processWerewolf20(Path modulesDir, PdfDocument doc) throws Exception {
         var images = extractImagesFromPdf(doc);
 
         LOGGER.info("Extracting data from PDF");

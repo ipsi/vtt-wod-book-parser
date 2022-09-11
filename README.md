@@ -1,11 +1,9 @@
 # VTT World of Darkness Book Parser
-This is a desktop application for Windows, macOS and Linux which downloads certain books
-from [DriveThru RPG](https://www.drivethrurpg.com/index.php), extracts a subset of the text and
-images from the PDF, and converts that into a [Foundry VTT](https://foundryvtt.com) module.
+This is a desktop application for Windows, macOS and Linux which reads PDF files for supported White Wolf / Onxy Path
+books (see [Supported Books](#supported-books)), extracts a subset of the text and images from the PDF, and converts that
+subset into a [Foundry VTT](https://foundryvtt.com) module.
 
 ## Supported Books
-You **must** own the book on DriveThru RPG - using a local copy of the PDF is not supported.
-
 Currently only [Werewolf: the Apocalypse 20th Anniversary Edition](https://www.drivethrurpg.com/product/112871/Werewolf-The-Apocalypse-20th-Anniversary-Edition?term=Werewolf+the+apocalypse+20) is supported.
 
 ## Content Generated
@@ -19,12 +17,12 @@ The following content is currently extracted from the PDF:
 * Breed descriptions
 * Auspice descriptions
 * Tribe descriptions
-* Backgrounds, including full description (partial)
+* Backgrounds, including full description
+* Rites, including full description
 * Melee Weapons
 
 Things I would like to do (in rough priority order):
 
-* Rites
 * Fetishes
 * Remaining items like ranged weapons and armor
 * Spirit Charms
@@ -48,21 +46,13 @@ When you run the application you will see a screen that looks like this (macOS v
 
 ![default screen](docs/default-screen.png)
 
-### DTRPG Application Key
-
-You will need to select a book and enter your DTRPG Application Key (this is similar to a
-username and password, but you can delete it when you're finished with it without having
-to change your password). If you don't already have one, click on the link, and it should open
-up the [DTRPG Account Page](https://www.drivethrurpg.com/account_edit.php). This page looks
-like this:
-
-![DTRPG Account Page](docs/dtrpg-application-keys.png)
-
-In the highlighted section, you'll see a header for "Application Keys" - if you don't see an
-existing one there, click "New Key" to create one, and then "Copy Key" to copy it.
+### PDF File Location
+Either type (or paste) the path of the PDF file for the book you want to use, or click the "Select PDF File" button and
+choose the file.
 
 ### Foundry Directory
-This will default to the [standard Foundry install location](https://foundryvtt.com/article/configuration/),
+This will default to the [standard Foundry install location](https://foundryvtt.com/article/configuration/)
+(on Linux, this will look in order and will pick the first directory that exists. If none exist, it will default to the first),
 and will automatically create a module inside it. If you want to place the module in a different
 directory, click the button next to the text box.
 
@@ -75,3 +65,14 @@ When you see the message `Module "wod-werewolf-20-core" generated at ...` in the
 
 If you see any lines that don't look like `16:53:03.861 [main] INFO name.ipsi.project.fwbp.BookProcessor - `,
 then it's likely an error occurred.
+
+## Development
+### Environment Variables
+* `DTRPG_TOKEN` will pass in a DTRPG token - really only use for CI testing and with the `--preprocess` flag
+* `PDF_FILE_PATH` will pass in the file path - useful for CLI testing
+
+### Program Args
+* `--preprocess` - downloads the book from DTRPG and runs a pre-processing step to generate text locations from the
+  actual book text, assuming that's been set up properly in a file named `$PWD/raw_text/w20.json`. See [Preprocessor.java](src/main/java/name/ipsi/project/fwbp/Preprocessor.java)
+  for details on how that works. Requires a `DTRPG_TOKEN`.
+* `--adventure` - uses a basic CLI interface instead of a GUI

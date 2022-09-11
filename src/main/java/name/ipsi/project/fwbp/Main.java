@@ -35,22 +35,28 @@ public class Main {
             System.exit(1);
         }
 
+        var filePath = System.getenv("PDF_FILE_PATH");
         var scanner = new Scanner(System.in);
         var token = System.getenv("DTRPG_TOKEN");
-        if (token == null) {
-            log.debug("DTRPG_TOKEN env var not found - requesting");
+        if (token == null && filePath == null) {
+            log.debug("DTRPG_TOKEN env var not found and no file provided - requesting");
             System.out.println("Please enter your DTRPG Application Key (you can find or create one here: https://www.drivethrurpg.com/account_edit.php -> Application Keys)");
             token = scanner.next();
             scanner.close();
         } else {
             log.debug("DTRPG_TOKEN env var found");
         }
+
         System.out.println("Please select a book to convert:");
         System.out.printf("(%d) %s%n", 1, Werewolf20Extractor.BOOK_NAME);
         var selection = scanner.nextInt();
         switch (selection) {
             case 1:
-                BookProcessor.processWerewolf20(Path.of("modules"), token);
+                if (filePath == null) {
+                    BookProcessor.processWerewolf20(Path.of("modules"), token);
+                } else {
+                    BookProcessor.processWerewolf20(Path.of("modules"), Path.of(filePath));
+                }
                 break;
             default:
                 System.out.println("Unknown book " + selection);

@@ -16,8 +16,8 @@ import javafx.scene.control.*;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
 import javafx.scene.text.Text;
-import javafx.scene.text.TextFlow;
 import javafx.stage.DirectoryChooser;
+import javafx.stage.FileChooser;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
 import name.ipsi.project.fwbp.books.werewolf.Werewolf20Extractor;
@@ -27,6 +27,7 @@ import org.slf4j.LoggerFactory;
 import java.io.File;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
+import java.nio.file.InvalidPathException;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
@@ -49,12 +50,34 @@ public class Gui extends Application {
 
         var bookLabel = new Label("Book:");
         var bookDropDown = new ComboBox<>(FXCollections.observableArrayList(Werewolf20Extractor.BOOK_NAME));
-        var dtrpgTokenLabel = new Label("DTRPG Application Key:");
-        var dtrpgToken = new TextField();
-        dtrpgToken.setPrefWidth(300);
-        var hyperlink = new Hyperlink("https://www.drivethrurpg.com/account_edit.php");
-        hyperlink.setOnAction(event -> getHostServices().showDocument("https://www.drivethrurpg.com/account_edit.php"));
-        var dtrpgHelp = new TextFlow(new Text("Please enter your DTRPG Application Key (you can find or create one here: "), hyperlink, new Text(" -> Application Keys)"));
+        var pdfLocationLabel = new Label("Location of PDF:");
+        var pdfLocation = new TextField();
+        pdfLocation.setPrefWidth(400);
+        var pdfLocationButton = new Button("Select PDF File");
+        pdfLocationButton.setOnAction(event -> {
+            var fileChooser = new FileChooser();
+            fileChooser.setSelectedExtensionFilter(new FileChooser.ExtensionFilter("PDF", "*.pdf"));
+            fileChooser.setTitle("Choose PDF for for book");
+            var pdfLocationText = pdfLocation.getText();
+            if (pdfLocationText != null && !pdfLocationText.isBlank()) {
+                try {
+                    var existingFile = new File(pdfLocationText);
+                    if (existingFile.isDirectory()) {
+                        fileChooser.setInitialDirectory(existingFile);
+                    } else {
+                        fileChooser.setInitialFileName(existingFile.getName());
+                        fileChooser.setInitialDirectory(existingFile.getParentFile());
+                    }
+                } catch (Exception e) {
+                    // Invalid directory - use default
+                    fileChooser.setInitialDirectory(new File(System.getProperty("user.home")));
+                }
+            }
+            var chosenFile = fileChooser.showOpenDialog(stage);
+            if (chosenFile != null) {
+                pdfLocation.setText(chosenFile.toString());
+            }
+        });
         var foundryDirLabel = new Label("Foundry Directory:");
         var foundryDir = new TextField(foundryDir().resolve("Data").resolve("modules").toAbsolutePath().toString());
         foundryDir.setPrefWidth(400);
@@ -64,19 +87,27 @@ public class Gui extends Application {
             directoryChooser.setTitle("Choose Foundry Directory");
             directoryChooser.setInitialDirectory(new File(System.getProperty("user.home")));
             var chosenDir = directoryChooser.showDialog(stage);
-            foundryDir.setText(chosenDir.toString());
+            if (chosenDir != null) {
+                foundryDir.setText(chosenDir.toString());
+            }
         });
         var button = new Button("Generate Foundry Module");
         button.setOnAction(event -> {
             List<String> errors = new ArrayList<>();
             var selectedBook = bookDropDown.selectionModelProperty().getValue().getSelectedItem();
-            var dtrpgTokenText = dtrpgToken.getText();
+            var pdfFile = pdfLocation.getText();
             if (selectedBook == null || selectedBook.isBlank()) {
                 errors.add("You must select a book");
             }
 
-            if (dtrpgTokenText == null || dtrpgTokenText.isBlank()) {
-                errors.add("DTRPG Token must be set");
+            try {
+                if (pdfFile == null || pdfFile.isBlank()) {
+                    errors.add("Path to PDF File must be set");
+                } else if (!Files.isRegularFile(Path.of(pdfFile))) {
+                    errors.add("PDF file does not exist at path " + pdfFile);
+                }
+            } catch (InvalidPathException e) {
+                errors.add("Invalid PDF file path " + pdfFile);
             }
 
             if (!errors.isEmpty()) {
@@ -96,7 +127,12 @@ public class Gui extends Application {
                     try {
                         switch (selectedBook) {
                             case Werewolf20Extractor.BOOK_NAME:
-                                BookProcessor.processWerewolf20(Path.of(foundryDirText), dtrpgTokenText);
+                                BookProcessor.processWerewolf20(Path.of(foundryDirText), Path.of(pdfFile));
+                                Platform.runLater(() -> {
+                                    var successDialog = createMessageDialog("Module Successfully Created");
+                                    successDialog.showAndWait();
+                                });
+                                break;
                             default:
                                 // Should be impossible
                                 LOGGER.error("Unknown book {}", selectedBook);
@@ -110,18 +146,29 @@ public class Gui extends Application {
 
         VBox root = new VBox(10,
                 new HBox(15, bookLabel, bookDropDown),
-                new HBox(15, dtrpgTokenLabel, dtrpgToken),
-                new HBox(dtrpgHelp),
+                new HBox(15, pdfLocationLabel, pdfLocation, pdfLocationButton),
                 new HBox(15, foundryDirLabel, foundryDir, foundryDirChooserButton),
                 new HBox(log),
                 new HBox(button)
         );
         root.setPadding(new Insets(20));
         root.setAlignment(Pos.CENTER);
-        Scene scene = new Scene(root, 640, 480);
+        Scene scene = new Scene(root, 960, 480);
         scene.getStylesheets().add("/css/javafx.css");
         stage.setScene(scene);
         stage.show();
+    }
+
+    private Stage createMessageDialog(String text) {
+        var stage = new Stage();
+        stage.initModality(Modality.APPLICATION_MODAL);
+        var closeButton = new Button("OK");
+        closeButton.setOnAction(event -> stage.close());
+        var wrapper = new VBox(10, new Text(text));
+        var box = new VBox(30, wrapper, closeButton);
+        box.setPadding(new Insets(20));
+        stage.setScene(new Scene(box));
+        return stage;
     }
 
     private Path foundryDir() {
