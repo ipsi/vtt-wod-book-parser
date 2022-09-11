@@ -186,4 +186,20 @@ public class Utils {
     public static Rectangle makeRect(int left, int top, int width, int height) {
         return new Rectangle(left, (792 - top) - height, (float) width, (float) height);
     }
+
+    public static Rectangle makeRectOddLeft(int top, int height) {
+        return makeRect(42, top, 247, height);
+    }
+
+    public static Rectangle makeRectOddRight(int top, int height) {
+        return makeRect(304, top, 247, height);
+    }
+
+    public static Rectangle makeRectEvenLeft(int top, int height) {
+        return makeRect(61, top, 247, height);
+    }
+
+    public static Rectangle makeRectEvenRight(int top, int height) {
+        return makeRect(322, top, 247, height);
+    }
 }
