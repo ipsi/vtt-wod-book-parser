@@ -23,7 +23,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 public class BookProcessor {
-    public static final String MODULE_VERSION = "0.0.6";
+    public static final String MODULE_VERSION = "0.0.7";
 
     private static final Logger LOGGER = LoggerFactory.getLogger(BookProcessor.class);
 

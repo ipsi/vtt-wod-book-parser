@@ -34,7 +34,7 @@ import java.util.List;
 
 public class Gui extends Application {
     private static final Logger LOGGER = LoggerFactory.getLogger(Gui.class);
-    public static final String MODULE_VERSION = "0.0.6";
+    public static final String MODULE_VERSION = "0.0.7";
 
     @Override
     public void start(Stage stage) throws Exception {
