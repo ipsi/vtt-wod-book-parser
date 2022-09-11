@@ -1,0 +1,98 @@
+name: GraalVM Native Image builds
+on:
+  push:
+    tags:
+      - v*
+jobs:
+  publish-to-github:
+    name: Publish to Github
+    runs-on: ubuntu-latest
+    if: startsWith(github.ref, 'refs/tags/v')
+    strategy:
+      matrix:
+        include:
+          - os: windows-exe
+          - os: windows-msi
+          - os: macos
+          - os: linux
+    steps:
+      - name: Download artifact
+        id: download-artifact
+        uses: dawidd6/action-download-artifact@v2
+        with:
+          github_token: ${{secrets.GITHUB_TOKEN}}
+          workflow: workflow.yml
+          workflow_conclusion: success
+          branch: main
+          name: ${{ matrix.os }}
+          path: target
+      - name: Package Artifacts - ${{ matrix.os }}
+        run: |
+          set -ex
+          src="$(pwd)"
+          stage="$(mktemp -d)"
+          suffix=""
+          osName=""
+          archive_suffix=""
+          compression_command=""
+          
+          case "${{ matrix.os }}" in
+            linux)
+              osName="linux"
+              suffix=""
+              archive_suffix=".tgz"
+              compression_command="tar czf"
+              ;;
+            macos)
+              osName="macos"
+              suffix=".dmg"
+              archive_suffix=".dmg"
+              compression_command=""
+              ;;
+            windows-exe)
+              osName="windows"
+              suffix=".exe"
+              archive_suffix=".zip"
+              compression_command="zip -r"
+              ;;
+            windows-msi)
+              osName="windows"
+              suffix=".msi"
+              archive_suffix=".msi"
+              compression_command=""
+              ;;
+            *)
+              osName="unknown"
+              suffix=".unknown"
+              archive_suffix=".tgz"
+              compression_command="tar czf"
+              ;;
+          esac
+          RELEASE_VERSION=${GITHUB_REF#refs/tags/v}
+          ls -la
+          ls -la target/
+          final_binary="$stage/vtt-wod-book-parser-$osName-$RELEASE_VERSION-x64$suffix"
+          cp "$src/target/vtt-wod-book-parser$suffix" "$final_binary"
+          cd "$stage" || exit 1
+          ls -l
+          
+          ASSET_NAME="vtt-wod-book-parser-$osName-$RELEASE_VERSION-x64$archive_suffix"
+          ASSET_PATH="$stage/$ASSET_NAME"
+          CHECKSUM_PATH="$ASSET_PATH.sha256"
+          echo "ASSET_PATH=$ASSET_PATH" >> "$GITHUB_ENV"
+          echo "CHECKSUM_PATH=$CHECKSUM_PATH" >> "$GITHUB_ENV"
+          if [[ -n "$compression_command" ]]; then
+            $compression_command "$ASSET_PATH" "$final_binary"
+          fi
+          
+          sha256sum "$ASSET_NAME" > "$CHECKSUM_PATH"
+
+      - name: Release - ${{ matrix.os }}
+        uses: softprops/action-gh-release@v1
+        with:
+          prerelease: true
+          files: |
+            ${{ env.ASSET_PATH }}
+            ${{ env.CHECKSUM_PATH }}
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
