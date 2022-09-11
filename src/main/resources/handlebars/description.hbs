@@ -1,0 +1,11 @@
+<div>
+{{#each this}}
+{{#if table}}
+    {{>table data}}
+{{else if list}}
+    {{>list data}}
+{{else}}
+    <p>{{text}}</p>
+{{/if}}
+{{/each}}
+</div>

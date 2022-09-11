@@ -1,5 +1,6 @@
 package name.ipsi.project.fwbp;
 
+import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.itextpdf.kernel.geom.Rectangle;
 import com.itextpdf.kernel.pdf.PdfDocument;
@@ -34,8 +35,7 @@ public class Preprocessor {
     }
 
     public static void process(Path jsonFile, String bookId) throws Exception {
-        var entries = new ObjectMapper().readValue(Files.readAllBytes(jsonFile), RawBook.class);
-//        var doc = Downloader.downloadFile(Werewolf20Extractor.BOOK_ID, System.getenv("DTRPG_TOKEN"));
+        //        var doc = Downloader.downloadFile(Werewolf20Extractor.BOOK_ID, System.getenv("DTRPG_TOKEN"));
         var doc = new PdfDocument(new PdfReader("/Volumes/books/Roleplaying/Werewolf the Apocalypse/Werewolf the Apocalypse 20th Anniversary Edition.pdf"));
         var parser = new PdfDocumentContentParser(doc);
         Map<Integer, Collection<IPdfTextLocation>> stringLocations = new HashMap<>(doc.getNumberOfPages());
@@ -45,146 +45,77 @@ public class Preprocessor {
         }
 
         var p = new Preprocessor(stringLocations, jsonFile.getParent());
-        p.doProcessing(entries);
-//        System.out.println(p.output);
+        p.doProcessing(new ObjectMapper().readValue(Files.readAllBytes(jsonFile), new TypeReference<>() {}));
     }
 
-    private void doProcessing(RawBook entries) {
-        processBackgrounds(entries);
+    private void doProcessing(List<Group> groups) {
+        for (var group : groups) {
+            String cpr = group.type().getClassPrefix();
+            var className = cpr + "Locations";
+            var locName = cpr + "Location";
+            output.setLength(0);
+            output.append("""
+                    package name.ipsi.project.fwbp.books.werewolf.locations;
 
-        try {
-            Files.writeString(outputDir.resolve("Backgrounds.java"), output.toString(), StandardCharsets.UTF_8);
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
+                    import com.itextpdf.kernel.geom.Rectangle;
+                    import name.ipsi.project.fwbp.books.shared.locations.*;
+                    import name.ipsi.project.fwbp.books.werewolf.*;
 
-        processRites(entries);
-    }
+                    import java.util.Arrays;
+                    import java.util.List;
 
-    private void processBackgrounds(RawBook entries) {
-        for (var background : entries.backgrounds()) {
-            output.append("                        new BackgroundLocation(\n")
-                    .append("                                \"").append(background.name())
-                    .append("\",\n                                new DescriptionLocation(\n");
-            for (var paragraph : background.paragraphs.stream().filter(p -> p.type().equals("text")).toList()) {
-                output.append("                                        new Paragraph(\n");
-                if (paragraph.areas != null && !paragraph.areas.isEmpty()) {
-                    for (var area : paragraph.areas) {
-                        buildTextArea(area.page(), area.content());
-                    }
-                    // remove trailing comma
-                    output.deleteCharAt(output.length() - 2);
-                } else {
-                    buildTextArea(paragraph.page(), paragraph.content());
-                    // remove trailing comma
-                    output.deleteCharAt(output.length() - 2);
+                    """);
+            output.append("public class ").append(className).append(" {\n")
+                    .append("    public static final List<").append(locName).append("> DATA = Arrays.asList(\n");
+
+            for(var entry : group.entries()) {
+                output.append("        new ").append(locName).append("(\n")
+                        .append("            \"").append(entry.name()).append("\",\n");
+                if (entry.type() != null) {
+                    output.append("            ").append(cpr).append("Type.").append(entry.type().toUpperCase()).append(",\n");
                 }
-                output.append("                                        ),\n");
+                if (entry.level() != null) {
+                    output.append("            ").append(cpr).append("Level.").append(entry.level().toUpperCase()).append(",\n");
+                }
+                if (entry.gnosis() != null) {
+                    output.append("            ").append(entry.gnosis()).append(",\n");
+                }
+
+                for (var paragraph : entry.paragraphs()) {
+                    output.append("            new TextLocation(\n")
+                            .append("                    TextLocationType.")
+                            .append(paragraph.type().toUpperCase())
+                            .append(",\n");
+
+                    if (paragraph.areas() != null && !paragraph.areas().isEmpty()) {
+                        for (var area : paragraph.areas) {
+                            buildTextArea(area.page(), area.content());
+                        }
+                        // remove trailing comma
+                        output.deleteCharAt(output.length() - 2);
+                    } else {
+                        buildTextArea(paragraph.page(), paragraph.content());
+                        // remove trailing comma
+                        output.deleteCharAt(output.length() - 2);
+                    }
+
+                    output.append("            ),\n");
+                }
+
+                output.deleteCharAt(output.length() - 2);
+                // remove trailing comma
+                output.append("        ),\n");
             }
             output.deleteCharAt(output.length() - 2);
-            output.append("                                ),\n");
-            var tableOptional = background.paragraphs.stream().filter(p -> p.type.equals("table")).findFirst();
-            if (tableOptional.isPresent()) {
-                var table = tableOptional.get();
-                output.append("                                new TableParagraph(new Paragraph(\n");
-                buildTextArea(table.page(), table.content());
-                // remove trailing comma
-                output.deleteCharAt(output.length() - 2);
-                output.append("                                ))\n");
+            output.append("    );\n");
+            output.append("}\n");
+
+            try {
+                Files.writeString(outputDir.resolve(className + ".java"), output.toString(), StandardCharsets.UTF_8);
+            } catch (IOException e) {
+                throw new RuntimeException(e);
             }
-            // remove trailing comma
-            output.append("                        ),\n");
         }
-        // remove trailing comma
-        output.deleteCharAt(output.length() - 2);
-    }
-
-    private void processRites(RawBook entries) {
-        output.setLength(0);
-        output.append("package name.ipsi.project.fwbp.books.werewolf.locations;\n" +
-                "\n" +
-                "import com.itextpdf.kernel.geom.Rectangle;\n" +
-                "import name.ipsi.project.fwbp.books.shared.locations.TextArea;\n" +
-                "import name.ipsi.project.fwbp.books.shared.locations.TextLocation;\n" +
-                "import name.ipsi.project.fwbp.books.shared.locations.TextLocationType;\n" +
-                "import name.ipsi.project.fwbp.books.werewolf.RiteLevel;\n" +
-                "import name.ipsi.project.fwbp.books.werewolf.RiteType;\n" +
-                "\n" +
-                "import java.util.Arrays;\n" +
-                "import java.util.List;\n\n");
-        output.append("public class RiteLocations {\n")
-                .append("    public static final List<RiteLocation> RITES = Arrays.asList(\n");
-
-        for (var rite : entries.rites().accord()) {
-            processRite(rite, "ACCORD");
-        }
-
-        for (var rite : entries.rites().caern()) {
-            processRite(rite, "CAERN");
-        }
-
-        for (var rite : entries.rites().death()) {
-            processRite(rite, "DEATH");
-        }
-
-        for (var rite : entries.rites().mystic()) {
-            processRite(rite, "MYSTIC");
-        }
-
-        for (var rite : entries.rites().punishment()) {
-            processRite(rite, "PUNISHMENT");
-        }
-
-        for (var rite : entries.rites().renown()) {
-            processRite(rite, "RENOWN");
-        }
-
-        for (var rite : entries.rites().seasonal()) {
-            processRite(rite, "SEASONAL");
-        }
-
-        for (var rite : entries.rites().minor()) {
-            processRite(rite, "MINOR");
-        }
-        // remove trailing comma
-        output.deleteCharAt(output.length() - 2);
-        output.append("    );\n");
-        output.append("};\n");
-
-        try {
-            Files.writeString(outputDir.resolve("RiteLocations.java"), output.toString(), StandardCharsets.UTF_8);
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
-    }
-
-    private void processRite(Entry rite, String type) {
-        String level = rite.level();
-        output.append("                        new RiteLocation(\n")
-                .append("                                \"").append(rite.name()).append("\",\n")
-                .append("                                RiteType.").append(type).append(",\n")
-                .append("                                RiteLevel.").append(level == null ? "MINOR" : level.toUpperCase()).append(",\n");
-        for (var paragraph : rite.paragraphs()) {
-            output.append("                                new TextLocation(\n")
-                    .append("                                        TextLocationType.")
-                    .append(paragraph.type().toUpperCase())
-                    .append(",\n");
-            if (paragraph.areas() != null && !paragraph.areas().isEmpty()) {
-                for (var area : paragraph.areas) {
-                    buildTextArea(area.page(), area.content());
-                }
-                // remove trailing comma
-                output.deleteCharAt(output.length() - 2);
-            } else {
-                buildTextArea(paragraph.page(), paragraph.content());
-                // remove trailing comma
-                output.deleteCharAt(output.length() - 2);
-            }
-            output.append("                                        ),\n");
-        }
-        output.deleteCharAt(output.length() - 2);
-        // remove trailing comma
-        output.append("                        ),\n");
     }
 
     private void buildTextArea(int page, String content) {
@@ -193,7 +124,7 @@ public class Preprocessor {
                 LOGGER.debug("rect{{ x: {}, y: {}, width: {}, height: {} }} on page {} has a height of greater than 13.5 - setting to 13.0", rect.getX(), rect.getY(), rect.getWidth(), rect.getHeight(), page);
                 rect.setHeight(13.0f);
             }
-            output.append("                                                new TextArea(").append(page).append(", new Rectangle(")
+            output.append("                    new TextArea(").append(page).append(", new Rectangle(")
                     .append(rect.getX()).append("f, ")
                     .append(rect.getY()).append("f, ")
                     .append(rect.getWidth()).append("f, ")
@@ -292,7 +223,13 @@ public class Preprocessor {
             IPdfTextLocation textLocation,
             Collection<IPdfTextLocation> pdfTextLocationCollection
     ) {
-        var nextLine = lineNumber + 1 < lines.length ? lines[lineNumber + 1] : "";
+        var nextLine = lineNumber + 1 < lines.length ? lines[lineNumber + 1] : null;
+
+        if(nextLine == null) {
+            LOGGER.debug("Line [{}] can't be hyphenate as there is no next line", line);
+            return null;
+        }
+
         for (int idx = text.lastIndexOf("-"); idx != -1; idx = text.lastIndexOf("-", idx - 1)) {
             String substring = text.substring(0, idx);
 
@@ -396,28 +333,27 @@ public class Preprocessor {
         );
     }
 
-    //•• Moderate. You’re thoroughly middle-class in income,
-    //and can afford the odd indulgence. You can
-    //hire specific help as necessary. You have enough
-    //available cash, portable property, and valuables
-    //that you can maintain a one-dot standard of living
-    //wherever you are for up to six months.
+    public record Group(GroupType type, List<Entry> entries) {}
 
-    public record RawBook(List<Entry> backgrounds, Rites rites) {}
-
-    public record Rites(
-            List<Entry> accord,
-            List<Entry> caern,
-            List<Entry> death,
-            List<Entry> mystic,
-            List<Entry> punishment,
-            List<Entry> renown,
-            List<Entry> seasonal,
-            List<Entry> minor
-    ) {}
-
-    public record Entry(String name, String level, List<Paragraph> paragraphs) {}
-
+    public record Entry(String name, String level, Integer gnosis, String type, List<Paragraph> paragraphs) {}
     public record Paragraph(String type, int page, String content, List<Area> areas) {}
+
     public record Area(int page, String content) {}
+
+    public enum GroupType {
+        backgrounds("Background"),
+        rites("Rite"),
+        fetishes("Fetish"),
+        talens("Talen");
+
+        private final String classPrefix;
+
+        GroupType(String classPrefix) {
+            this.classPrefix = classPrefix;
+        }
+
+        public String getClassPrefix() {
+            return classPrefix;
+        }
+    }
 }

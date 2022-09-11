@@ -33,10 +33,15 @@ public class Werewolf20FoundryConverter {
         var folders = new ArrayList<Folder>();
 
         folders.add(createFolder("garou", "Garou", DocumentTypes.JOURNAL_ENTRY, FolderSortingModes.MANUAL, 1.0, null));
-        folders.add(createFolder("gifts-garou", "Gifts - Garou", DocumentTypes.ITEM, FolderSortingModes.ALPHABETICAL, 1.0, null));
-        folders.add(createFolder("backgrounds-garou", "Backgrounds - Garou", DocumentTypes.ITEM, FolderSortingModes.ALPHABETICAL, 1.0, null));
-        folders.add(createFolder("rites-garou", "Rites - Garou", DocumentTypes.ITEM, FolderSortingModes.ALPHABETICAL, 1.0, null));
-        folders.add(createFolder("weapons-melee", "Weapons - Melee", DocumentTypes.ITEM, FolderSortingModes.MANUAL, 1.0, null));
+
+        var itemFolderSort = 0;
+        folders.add(createFolder("gifts-garou", "Gifts - Garou", DocumentTypes.ITEM, FolderSortingModes.ALPHABETICAL, itemFolderSort++, null));
+        folders.add(createFolder("backgrounds-garou", "Backgrounds - Garou", DocumentTypes.ITEM, FolderSortingModes.ALPHABETICAL, itemFolderSort++, null));
+        folders.add(createFolder("rites-garou", "Rites - Garou", DocumentTypes.ITEM, FolderSortingModes.ALPHABETICAL, itemFolderSort++, null));
+        folders.add(createFolder("fetishes-garou", "Fetishes - Garou", DocumentTypes.ITEM, FolderSortingModes.ALPHABETICAL, itemFolderSort++, null));
+        folders.add(createFolder("talens-garou", "Talens - Garou", DocumentTypes.ITEM, FolderSortingModes.ALPHABETICAL, itemFolderSort++, null));
+
+        folders.add(createFolder("weapons-melee", "Weapons - Melee", DocumentTypes.ITEM, FolderSortingModes.ALPHABETICAL, itemFolderSort++, null));
         double sortIdx = 0;
         for(var type : RiteType.values()) {
             folders.add(createFolder("garou-rites-" + type.displayName(), type.displayName(), DocumentTypes.ITEM, FolderSortingModes.ALPHABETICAL, sortIdx++, folderIdsByName.get("Rites - Garou")));
@@ -77,7 +82,10 @@ public class Werewolf20FoundryConverter {
                 items.add(processBackground(b));
             } else if (entry instanceof Rite r) {
                 items.add(processRite(r));
-//                processRite(r);
+            } else if (entry instanceof Fetish f) {
+                items.add(processFetish(f));
+            } else if (entry instanceof Talen t) {
+                items.add(processTalen(t));
             }
         }
 
@@ -118,29 +126,23 @@ public class Werewolf20FoundryConverter {
                 meleeWeapon.natural() ? "systems/worldofdarkness/assets/img/items/naturalweapons.svg"
                         : "systems/worldofdarkness/assets/img/items/meleeweapons.svg",
                 new MeleeWeaponData(
-                        false,
-                        "",
-                        "",
-                        meleeWeapon.description(),
-                        false,
-                        meleeWeapon.silver(),
                         new MeleeWeaponData.Attack(
                                 "dexterity",
+                                0,
                                 "brawl",
                                 true
                         ),
+                        meleeWeapon.concealment(),
                         new MeleeWeaponData.Damage(
                                 "strength",
                                 meleeWeapon.damageBonus(),
                                 meleeWeapon.damageType(),
                                 true
                         ),
+                        meleeWeapon.description(),
                         String.valueOf(meleeWeapon.difficulty()),
-                        meleeWeapon.difficulty(),
-                        meleeWeapon.concealment(),
-                        meleeWeapon.twoHanded(),
                         meleeWeapon.natural(),
-                        "wod.types.meleeweapon"
+                        meleeWeapon.twoHanded()
                 ),
                 "",
                 folder,
@@ -204,20 +206,14 @@ public class Werewolf20FoundryConverter {
                 ItemTypes.POWER,
                 "systems/worldofdarkness/assets/img/items/power.svg",
                 new PowerData(
-                        false,
-                        "",
-                        "",
                         description,
-                        PowerTypes.GIFT,
-                        g.availableTo().get(0).level(),
                         gr != null ? convertCharacteristic(gr.characteristicOne()) : "",
                         gr != null && gr.characteristicTwo() != null ? convertCharacteristic(gr.characteristicTwo()) : "",
-                        0,
                         gr != null ? gr.difficulty() : "",
                         gr != null,
-                        false,
-                        "",
-                        system
+                        String.valueOf(g.availableTo().get(0).level()),
+                        system,
+                        PowerTypes.GIFT
                 ),
                 "",
                 folder,
@@ -238,7 +234,7 @@ public class Werewolf20FoundryConverter {
                 "systems/worldofdarkness/assets/img/items/feature.svg",
                 new FeatureData(
                         description,
-                        null,
+                        "",
                         FeatureTypes.BACKGROUND
                 ),
                 null,
@@ -260,23 +256,62 @@ public class Werewolf20FoundryConverter {
                 ItemTypes.POWER,
                 "systems/worldofdarkness/assets/img/items/ritual_werewolf.svg",
                 new PowerData(
-                        true,
-                        null,
-                        null,
                         description,
-                        PowerTypes.RITE,
-                        r.level().foundryLevel(),
                         r.rollData() != null ? convertCharacteristic(r.rollData().characteristicOne()) : null,
                         r.rollData() != null && r.rollData().characteristicTwo() != null ? convertCharacteristic(r.rollData().characteristicTwo()) : null,
-                        0,
                         r.rollData() != null ? r.rollData().difficulty() : null,
                         r.rollData() != null,
-                        true,
-                        null,
-                        system
+                        String.valueOf(r.level().foundryLevel()),
+                        system,
+                        PowerTypes.RITE
                 ),
                 null,
                 folderIdsByName.get(r.type().displayName()),
+                0,
+                DocumentOwnershipLevel.defaultObserver(),
+                Collections.emptyMap(),
+                null
+        );
+    }
+
+    private Item processFetish(Fetish f) throws IOException {
+        log.debug("Running templates for fetish {}", f.name());
+        var description = Templater.instance().compile("fetish").apply(f);
+        return new Item(
+                f.id(),
+                f.name(),
+                ItemTypes.FETISH,
+                "systems/worldofdarkness/assets/img/items/fetish.svg",
+                new FetishData(
+                        description,
+                        f.gnosis(),
+                        f.level().foundryLevel(),
+                        FetishType.FETISH
+                ),
+                null,
+                folderIdsByName.get("Fetishes - Garou"),
+                0,
+                DocumentOwnershipLevel.defaultObserver(),
+                Collections.emptyMap(),
+                null
+        );
+    }
+
+    private Item processTalen(Talen t) throws IOException {
+        log.debug("Running templates for talen {}", t.name());
+        var description = Templater.instance().compile("talen").apply(t);
+        return new Item(
+                t.id(),
+                t.name(),
+                ItemTypes.FETISH,
+                "systems/worldofdarkness/assets/img/items/fetish.svg",
+                new FetishData(
+                        description,
+                        t.gnosis(),
+                        FetishType.TALEN
+                ),
+                null,
+                folderIdsByName.get("Talens - Garou"),
                 0,
                 DocumentOwnershipLevel.defaultObserver(),
                 Collections.emptyMap(),

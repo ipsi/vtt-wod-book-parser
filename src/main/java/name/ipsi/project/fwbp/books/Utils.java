@@ -121,6 +121,25 @@ public class Utils {
         return lines;
     }
 
+    public static List<String> getTextAsLines(PdfDocumentContentParser parser, TextArea... locations) {
+        List<String> lines = new ArrayList<>(locations.length*2);
+        for (TextArea textArea : locations) {
+            lines.addAll(Arrays.stream(parser
+                    .processContent(textArea.page(), new FilteredTextEventListener(
+                            new SimpleTextExtractionStrategy(),
+                            new TextRegionEventFilter(textArea.location()))
+                    ).getResultantText()
+                    .trim()
+                    .split("[\n\r]+")).toList()
+            );
+        }
+        Arrays.stream(locations)
+                .map(l -> parser.processContent(l.page(), new FilteredTextEventListener(new SimpleTextExtractionStrategy(), new TextRegionEventFilter(l.location()))).getResultantText())
+                .map(s -> s.trim().replaceAll("[\n\r]+", ""))
+                .collect(CONTENT_AWARE_JOINER);
+        return lines;
+    }
+
     public static String fixText(String text) {
         String s = text
                 .replaceAll("’ s", "'s")
@@ -162,6 +181,19 @@ public class Utils {
                         if (partMatcher.matches() && !words.contains(partMatcher.replaceAll("$1").trim().toLowerCase())) {
                             fullMatch = false;
                             break;
+                        }
+                    }
+
+                    if (!fullMatch) {
+                        for (int idx = word.lastIndexOf("-"); idx >= 0; idx = word.substring(0, idx).lastIndexOf("-")) {
+                            var leftPart = word.substring(0, idx);
+                            var rightPart = word.substring(idx + 1);
+                            var leftPartMatcher = STRIP_PUNCTUATION_PATTERN.matcher(leftPart);
+                            var rightPartMatcher = STRIP_PUNCTUATION_PATTERN.matcher(rightPart);
+                            if (words.contains(leftPartMatcher.replaceAll("$1").replace("-", "").trim().toLowerCase())
+                                    && words.contains(rightPartMatcher.replaceAll("$1").replace("-", "").trim().toLowerCase())) {
+                                return leftPart.replace("-", "") + "-" + rightPart.replace("-", "");
+                            }
                         }
                     }
 

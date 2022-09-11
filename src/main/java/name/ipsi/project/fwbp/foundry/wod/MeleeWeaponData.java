@@ -6,29 +6,33 @@ import name.ipsi.project.fwbp.foundry.core.ItemData;
 
 @JsonPropertyOrder(alphabetic = true)
 public record MeleeWeaponData(
+        Attack attack,
+        WeaponConcealment conceal,
+        Damage damage,
+        String description,
+        String difficulty,
         @JsonProperty("iscreated")
         boolean created,
-        String version,
-        String worldanvil,
-        String description,
         @JsonProperty("isequipped")
         boolean equipped,
         @JsonProperty("ismagical")
         boolean magical,
-        Attack attack,
-        Damage damage,
-        String diff,
-        int difficulty,
-        WeaponConcealment conceal,
-        @JsonProperty("istwohanded")
-        boolean twohanded,
         @JsonProperty("isnatural")
         boolean natural,
-        String label
+        @JsonProperty("istwohanded")
+        boolean twohanded,
+        String parentId,
+        String version,
+        String worldanvil
 ) implements ItemData {
+
+    public MeleeWeaponData(Attack attack, WeaponConcealment conceal, Damage damage, String description, String difficulty, boolean natural, boolean twohanded) {
+        this(attack, conceal, damage, description, difficulty, true, false, false, natural, twohanded, "", "2.0.3", "");
+    }
 
     public record Attack(
             String attribute,
+            int accuracy,
             String ability,
             @JsonProperty("isrollable") boolean rollable
     ) {

@@ -34,9 +34,9 @@ public class Werewolf20Extractor {
                 TribeLocations.DATA,
                 BackgroundLocations.DATA,
                 GiftLocations.DATA,
-                RiteLocations.RITES,
-                Collections.emptyList(),
-                Collections.emptyList(),
+                RiteLocations.DATA,
+                FetishLocations.DATA,
+                TalenLocations.DATA,
                 new WeaponLocations(
                         new Paragraph(303, makeRect(121, 129, 263, 280)),
                         new Paragraph(303, makeRect(0, 0, 0, 0)),
@@ -55,18 +55,21 @@ public class Werewolf20Extractor {
             List<BackgroundLocation> backgrounds,
             List<GiftLocations> gifts,
             List<RiteLocation> rites,
-            List<FetishLocations> fetishes,
-            List<TalenLocations> talens,
+            List<FetishLocation> fetishes,
+            List<TalenLocation> talens,
             WeaponLocations weapons,
             List<SpiritLocation> spirits,
             List<MeritLocation> merits,
             List<FlawLocation> flaws
     ) {}
 
+    private final List<BookEntry> entries = new ArrayList<>();
     private final PdfDocumentContentParser parser;
+    private final GiftProcessor giftProcessor;
 
     public Werewolf20Extractor(PdfDocumentContentParser parser) {
         this.parser = parser;
+        this.giftProcessor = new GiftProcessor(parser);
     }
 
     private static int levelToInt(String level) {
@@ -264,7 +267,6 @@ public class Werewolf20Extractor {
 
     public List<BookEntry> process() {
         log.info("Extracting Gifts");
-        var giftProcessor = new GiftProcessor(parser);
 
         for (var textLocations : BOOK_DETAILS.gifts()) {
             log.trace("Extracting gift from {}", textLocations);
@@ -272,8 +274,28 @@ public class Werewolf20Extractor {
             log.trace("Extracted {} gifts", giftProcessor.gifts.size());
         }
 
-        var entries = new ArrayList<BookEntry>(giftProcessor.gifts);
+        entries.addAll(giftProcessor.gifts);
 
+        processBreeds();
+
+        processAuspices();
+
+        processTribes();
+
+        processMeleeWeapons();
+
+        processBackgrounds();
+
+        processRites();
+
+        processFetishes();
+
+        processTalens();
+
+        return entries;
+    }
+
+    private void processBreeds() {
         log.info("Extracting breeds");
         for (var breed : BOOK_DETAILS.breeds()) {
             log.trace("Processing {}", breed);
@@ -318,7 +340,9 @@ public class Werewolf20Extractor {
                     collectGifts(name, giftProcessor.gifts)
             ));
         }
+    }
 
+    private void processAuspices() {
         log.info("Extracting Auspices");
         for (var a : BOOK_DETAILS.auspices()) {
             log.trace("Processing {}", a);
@@ -345,7 +369,9 @@ public class Werewolf20Extractor {
                     collectGifts(name, giftProcessor.gifts)
             ));
         }
+    }
 
+    private void processTribes() {
         log.info("Extracting Tribes");
         for (var t : BOOK_DETAILS.tribes()) {
             log.trace("Processing {}", t);
@@ -407,7 +433,9 @@ public class Werewolf20Extractor {
                     collectGifts(t.tribe().displayName(), giftProcessor.gifts)
             ));
         }
+    }
 
+    private void processMeleeWeapons() {
         entries.add(new MeleeWeapon(
                 "Bite - Crinos, Hispo, Lupus",
                 getText(parser, new Paragraph(297, makeRect(304, 213, 245, 77))).get(0).replaceAll("^\\s*•?\\s*Bite:\\s*", ""),
@@ -479,7 +507,9 @@ public class Werewolf20Extractor {
                 log.warn("Line {} doesn't match against weapon regex", line);
             }
         }
+    }
 
+    private void processBackgrounds() {
         log.info("Extracting backgrounds");
         var dotPattern = Pattern.compile("(•+)\\s*(.*)");
         var totemHeaderPattern = Pattern.compile("(Cost)\\s*(Power)");
@@ -536,7 +566,9 @@ public class Werewolf20Extractor {
                 entries.add(new Background(name, description, new Table(headerRow, trailer, rows.toArray(new Table.Row[0])), "werewolf"));
             }
         }
+    }
 
+    private void processRites() {
         log.info("Extracting Rites");
         var headerPattern = Pattern.compile("(.*) (Difficulty|Effect|Level)");
         var tableBodyPattern1 = Pattern.compile("^([0-9+–-]+) (.*)$");
@@ -595,8 +627,62 @@ public class Werewolf20Extractor {
 
             entries.add(new Rite(rite.name(), rite.type(), rite.level(), rite.type().rollData(), description, system));
         }
+    }
 
-        return entries;
+    private void processFetishes() {
+        log.info("Extracting Fetishes");
+        for (var fetish : BOOK_DETAILS.fetishes()) {
+            var description = new ArrayList<TextEntry>();
+            for (var textLocation : fetish.textLocations()) {
+                if (textLocation.type() == TextLocationType.TEXT) {
+                    description.add(new StringEntry(Utils.getText(parser, textLocation.locations())));
+                } else if (textLocation.type() == TextLocationType.LIST) {
+                    var list = new ArrayList<String>();
+                    var sb = new ArrayList<String>();
+                    for (var line : Utils.getTextAsLines(parser, textLocation.locations())) {
+                        if (line.startsWith("•")) {
+                            if (sb.size() > 0) {
+                                list.add(fixText(sb.stream().collect(CONTENT_AWARE_JOINER)));
+                            }
+                            sb.clear();
+                            sb.add(line.replaceAll("^•\\s*", ""));
+                        } else {
+                            sb.add(line);
+                        }
+                    }
+                    description.add(new ListEntry(list));
+                } else {
+                    log.error("Unexpected table [{}] for fetish [{}]", textLocation, fetish.name());
+                }
+            }
+
+            entries.add(new Fetish(
+                    fetish.name(),
+                    fetish.level(),
+                    fetish.gnosis(),
+                    description
+            ));
+        }
+    }
+
+    private void processTalens() {
+        log.info("Extracting Talens");
+        for (var talen : BOOK_DETAILS.talens()) {
+            var description = new ArrayList<TextEntry>();
+            for (var textLocation : talen.textLocations()) {
+                if (textLocation.type() == TextLocationType.TEXT) {
+                    description.add(new StringEntry(Utils.getText(parser, textLocation.locations())));
+                } else {
+                    log.error("Unexpected non-text location [{}] for Talen [{}]", textLocation, talen.name());
+                }
+            }
+
+            entries.add(new Talen(
+                    talen.name(),
+                    talen.gnosis(),
+                    description
+            ));
+        }
     }
 
     private static List<PowerCollection<Rank, Gift>> collectGifts(String name, List<Gift> gifts) {

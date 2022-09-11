@@ -11,7 +11,7 @@ import java.util.Arrays;
 import java.util.List;
 
 public class RiteLocations {
-        public static final List<RiteLocation> RITES = Arrays.asList(
+        public static final List<RiteLocation> DATA = Arrays.asList(
                 new RiteLocation(
                         "Rite of Cleansing",
                         RiteType.ACCORD,
@@ -2067,4 +2067,4 @@ public class RiteLocations {
                         )
                 )
         );
-};
+}

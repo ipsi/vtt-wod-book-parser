@@ -199,9 +199,15 @@
                                 <list>name.ipsi.project.fwbp.books.werewolf.RiteType</list>
                                 <list>name.ipsi.project.fwbp.books.werewolf.Deformities</list>
                                 <list>name.ipsi.project.fwbp.books.werewolf.Deformity</list>
+                                <list>name.ipsi.project.fwbp.books.werewolf.Fetish</list>
+                                <list>name.ipsi.project.fwbp.books.werewolf.FetishLevel</list>
+                                <list>name.ipsi.project.fwbp.books.werewolf.FetishType</list>
+                                <list>name.ipsi.project.fwbp.books.werewolf.Talen</list>
                                 <list>name.ipsi.project.fwbp.books.shared.Background</list>
+                                <list>name.ipsi.project.fwbp.books.shared.ListEntry</list>
                                 <list>name.ipsi.project.fwbp.books.shared.MeleeWeapon</list>
                                 <list>name.ipsi.project.fwbp.books.shared.PowerCollection</list>
+                                <list>name.ipsi.project.fwbp.books.shared.RangedWeapon</list>
                                 <list>name.ipsi.project.fwbp.books.shared.Stereotype</list>
                                 <list>name.ipsi.project.fwbp.books.shared.StringEntry</list>
                                 <list>name.ipsi.project.fwbp.books.shared.Table</list>
@@ -231,6 +237,8 @@
                                 <list>name.ipsi.project.fwbp.foundry.wod.MeleeWeaponData</list>
                                 <list>name.ipsi.project.fwbp.foundry.wod.MeleeWeaponData$Attack</list>
                                 <list>name.ipsi.project.fwbp.foundry.wod.MeleeWeaponData$Damage</list>
+                                <list>name.ipsi.project.fwbp.foundry.wod.werewolf.FetishData</list>
+                                <list>name.ipsi.project.fwbp.foundry.wod.werewolf.FetishType</list>
                                 <list>name.ipsi.project.fwbp.foundry.core.Module</list>
                                 <list>name.ipsi.project.fwbp.foundry.core.ModulePack</list>
                                 <list>name.ipsi.project.fwbp.foundry.core.Page</list>
