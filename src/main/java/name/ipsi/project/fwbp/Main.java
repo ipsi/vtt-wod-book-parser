@@ -95,7 +95,7 @@ public class Main {
         var outputFile = Path.of("src", "main", "resources", "id-list.txt");
         if (Files.exists(outputFile)) {
             var fileContents = ids.entrySet().stream()
-                    .map(e -> String.format("%s,%s", e.getKey(), e.getValue()))
+                    .map(e -> String.format("%s\0%s", e.getKey(), e.getValue()))
                     .collect(Collectors.joining("\n"));
             Files.writeString(outputFile, fileContents, StandardCharsets.UTF_8, StandardOpenOption.TRUNCATE_EXISTING, StandardOpenOption.WRITE);
         } else {

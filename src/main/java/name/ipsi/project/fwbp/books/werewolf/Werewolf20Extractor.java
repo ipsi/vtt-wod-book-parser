@@ -625,7 +625,7 @@ public class Werewolf20Extractor {
                 }
             }
 
-            entries.add(new Rite(rite.name(), rite.type(), rite.level(), rite.type().rollData(), description, system));
+            entries.add(new Rite(fixText(rite.name()), rite.type(), rite.level(), rite.type().rollData(), description, system));
         }
     }
 
@@ -657,7 +657,7 @@ public class Werewolf20Extractor {
             }
 
             entries.add(new Fetish(
-                    fetish.name(),
+                    fixText(fetish.name()),
                     fetish.level(),
                     fetish.gnosis(),
                     description
@@ -678,14 +678,21 @@ public class Werewolf20Extractor {
             }
 
             entries.add(new Talen(
-                    talen.name(),
+                    fixText(talen.name()),
                     talen.gnosis(),
                     description
             ));
         }
     }
 
-    private record Data(String name, int cost, int max, boolean merit) {}
+    private record Data(String name, int cost, int max, boolean merit) {
+        private Data(String name, int cost, int max, boolean merit) {
+            this.name = fixText(name);
+            this.cost = cost;
+            this.max = max;
+            this.merit = merit;
+        }
+    }
 
     private void processMeritsAndFlaws() {
         List<String> sectionHeaders = new ArrayList<>();

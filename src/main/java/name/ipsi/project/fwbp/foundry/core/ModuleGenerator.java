@@ -133,7 +133,10 @@ public final class ModuleGenerator {
         var packFile = outputPath.resolve(path);
         log.trace("Creating pack {}, {}, {} at {}", label, packName, type, packFile);
 
-        Files.createFile(packFile);
+        if (!Files.exists(packFile)) {
+            Files.createFile(packFile);
+        }
+
         foundryDocuments.forEach(doc -> {
             try {
                 log.trace("Writing document to pack file");
