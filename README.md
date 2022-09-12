@@ -19,20 +19,24 @@ The following content is currently extracted from the PDF:
 * Tribe descriptions
 * Backgrounds, including full description
 * Rites, including full description
-* Melee Weapons
+* Melee, Thrown, & Ranged Weapons
 * Fetishes & Talens
 * Merits & Flaws
 
 Things I would like to do (in rough priority order):
 
-* Remaining items like ranged weapons and armor
 * Spirit Charms
 * Sample NPCs (e.g., Banes, Elementals, Weaver Spirits, etc)
 * Totems
 * Fomori powers
 * Nature & Demeanor
 * Tribal Camps
+* Armor
 * Anything else that could be useful
+
+#### Examples
+
+![](docs/foundry-content-sample.png)
 
 ## Getting started
 Download the [latest release](https://github.com/ipsi/vtt-wod-book-parser/releases) for your operating system:
@@ -65,6 +69,34 @@ When you see the message `Module "wod-werewolf-20-core" generated at ...` in the
 
 If you see any lines that don't look like `16:53:03.861 [main] INFO name.ipsi.project.fwbp.BookProcessor - `,
 then it's likely an error occurred.
+
+## Installing the module
+When the application has finished, go into Foundry (you might need to restart it), and you will see the following in the
+modules tab:
+
+![screenshot of the Foundry modules tab, showing a module with the title "Werewolf: the Apocalypse 20th Anniversary Edition" at the bottom](docs/foundry-modules-screen.png)
+
+If you see that, the module has been successfully installed.
+
+Next, open up the game world you want to add this content to, and
+activate the module (see the [Foundry Guide](https://foundryvtt.com/article/modules/) for more details):
+
+![](docs/foundry-module-management-screen.png)
+
+From there, you will find it listed in the "Compendiums" tab:
+
+![](docs/foundry-compendiums-tab.png)
+
+Click on that, and it will open a dialog listing a single adventure:
+
+![](docs/foundry-compendium-contents.png)
+
+Click on *that*, and it will open up the Adventure Importer:
+
+![](docs/foundry-adventure-importer.png)
+
+From there, clicking "Import Adventure" will add all the provided
+content to your world. Check the "Journals" and "Items" tabs.
 
 ## Development
 ### Environment Variables
