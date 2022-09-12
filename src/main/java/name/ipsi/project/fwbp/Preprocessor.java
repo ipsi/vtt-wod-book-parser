@@ -429,7 +429,10 @@ public class Preprocessor {
         rites("Rite"),
         fetishes("Fetish"),
         talens("Talen"),
-        mandf("MeritAndFlaw")
+        mandf("MeritAndFlaw"),
+        melee_weapons("MeleeWeapon"),
+        thrown_weapons("ThrownWeapon"),
+        ranged_weapons("RangedWeapon")
         ;
 
         private final String classPrefix;

@@ -44,6 +44,8 @@ public class Werewolf20FoundryConverter {
         folders.add(createFolder("flaws-garou", "Flaws - Garou", DocumentTypes.ITEM, FolderSortingModes.MANUAL, itemFolderSort++, null));
 
         folders.add(createFolder("weapons-melee", "Weapons - Melee", DocumentTypes.ITEM, FolderSortingModes.ALPHABETICAL, itemFolderSort++, null));
+        folders.add(createFolder("weapons-thrown", "Weapons - Thrown", DocumentTypes.ITEM, FolderSortingModes.ALPHABETICAL, itemFolderSort++, null));
+        folders.add(createFolder("weapons-ranged", "Weapons - Ranged", DocumentTypes.ITEM, FolderSortingModes.ALPHABETICAL, itemFolderSort++, null));
         double sortIdx = 0;
         for(var type : RiteType.values()) {
             folders.add(createFolder("garou-rites-" + type.displayName(), type.displayName(), DocumentTypes.ITEM, FolderSortingModes.ALPHABETICAL, sortIdx++, folderIdsByName.get("Rites - Garou")));
@@ -86,7 +88,11 @@ public class Werewolf20FoundryConverter {
             } else if (entry instanceof Gift g) {
                 items.add(processGift(g, folderIdsByName.get("Gifts - Garou")));
             } else if (entry instanceof MeleeWeapon mw) {
-                items.add(processMeleeWeapon(mw, folderIdsByName.get("Weapons - Melee")));
+                items.add(processWeapon(mw, folderIdsByName.get("Weapons - Melee")));
+            } else if (entry instanceof ThrownWeapon tw) {
+                items.add(processWeapon(tw));
+            } else if (entry instanceof RangedWeapon rw) {
+                items.add(processWeapon(rw));
             } else if (entry instanceof Background b) {
                 items.add(processBackground(b));
             } else if (entry instanceof Rite r) {
@@ -131,35 +137,107 @@ public class Werewolf20FoundryConverter {
         return new Folder(id, name, documentType, sortingMode, sortOrder, null, Collections.emptyMap(), parentFolderId, null);
     }
 
-    private Item processMeleeWeapon(MeleeWeapon meleeWeapon, String folder) {
+    private Item processWeapon(MeleeWeapon weapon, String folder) throws IOException {
         log.trace("Converting melee weapon");
+        var description = Templater.instance().compile("weapon").apply(weapon);
         return new Item(
-                meleeWeapon.id(),
-                meleeWeapon.name(),
+                weapon.id(),
+                weapon.name(),
                 ItemTypes.MELEE_WEAPON,
-                meleeWeapon.natural() ? "systems/worldofdarkness/assets/img/items/naturalweapons.svg"
+                weapon.natural() ? "systems/worldofdarkness/assets/img/items/naturalweapons.svg"
                         : "systems/worldofdarkness/assets/img/items/meleeweapons.svg",
                 new MeleeWeaponData(
-                        new MeleeWeaponData.Attack(
+                        new Attack(
                                 "dexterity",
                                 0,
-                                "brawl",
+                                weapon.natural() ? "brawl" : "melee",
                                 true
                         ),
-                        meleeWeapon.concealment(),
-                        new MeleeWeaponData.Damage(
+                        weapon.concealment(),
+                        new Damage(
                                 "strength",
-                                meleeWeapon.damageBonus(),
-                                meleeWeapon.damageType(),
+                                weapon.damageBonus(),
+                                weapon.damageType(),
                                 true
                         ),
-                        meleeWeapon.description(),
-                        String.valueOf(meleeWeapon.difficulty()),
-                        meleeWeapon.natural(),
-                        meleeWeapon.twoHanded()
+                        description,
+                        String.valueOf(weapon.difficulty()),
+                        weapon.natural(),
+                        weapon.twoHanded()
                 ),
                 "",
                 folder,
+                0,
+                DocumentOwnershipLevel.defaultObserver(),
+                Collections.emptyMap(),
+                Packs.Weapons
+        );
+    }
+
+    private Item processWeapon(ThrownWeapon weapon) throws IOException {
+        var description = Templater.instance().compile("weapon").apply(weapon);
+        log.trace("Converting thrown weapon");
+        return new Item(
+                weapon.id(),
+                weapon.name(),
+                ItemTypes.RANGED_WEAPON,
+                "systems/worldofdarkness/assets/img/items/rangedweapons.svg",
+                new RangedWeaponData(
+                        new Attack(
+                                "dexterity",
+                                0,
+                                "athletics",
+                                true
+                        ),
+                        weapon.concealment(),
+                        new Damage(
+                                weapon.includeStrength() ? "strength" : "",
+                                weapon.damageBonus(),
+                                weapon.damageType(),
+                                true
+                        ),
+                        description,
+                        weapon.difficulty()
+                ),
+                "",
+                folderIdsByName.get("Weapons - Thrown"),
+                0,
+                DocumentOwnershipLevel.defaultObserver(),
+                Collections.emptyMap(),
+                Packs.Weapons
+        );
+    }
+
+    private Item processWeapon(RangedWeapon weapon) throws IOException {
+        log.trace("Converting ranged weapon");
+        var description = Templater.instance().compile("weapon").apply(weapon);
+        return new Item(
+                weapon.id(),
+                weapon.name(),
+                ItemTypes.RANGED_WEAPON,
+                "systems/worldofdarkness/assets/img/items/rangedweapons.svg",
+                new RangedWeaponData(
+                        new Attack(
+                                "dexterity",
+                                0,
+                                weapon.name().toLowerCase().contains("bow") ? "archery" : "firearms",
+                                true
+                        ),
+                        new RangedWeaponData.Clip(weapon.clip(), weapon.clip()),
+                        weapon.concealment(),
+                        new Damage(
+                                "",
+                                weapon.damage(),
+                                weapon.damageType(),
+                                true
+                        ),
+                        description,
+                        new RangedWeaponData.Mode(weapon.canReload(), weapon.hasBurst(), weapon.hasFullAuto(), weapon.hasSpray()),
+                        weapon.range(),
+                        weapon.rate()
+                ),
+                "",
+                folderIdsByName.get("Weapons - Ranged"),
                 0,
                 DocumentOwnershipLevel.defaultObserver(),
                 Collections.emptyMap(),

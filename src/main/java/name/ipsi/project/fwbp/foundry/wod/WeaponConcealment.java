@@ -14,6 +14,7 @@ public enum WeaponConcealment {
 
     public static WeaponConcealment parse(String type) {
         return switch (type) {
+            case "varies" -> null;
             case "P" -> POCKET;
             case "J" -> JACKET;
             case "T" -> TRENCHCOAT;

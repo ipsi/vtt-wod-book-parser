@@ -39,7 +39,7 @@ class MainTest {
         expectedFiles.put(Path.of("modules", "wod-werewolf-20-core", "module.json"), "96947f364f029a8b6eb0629bdb8d167829254ae3215775ccb34b2f2613ff56ca8dc3786193a970c41c01787d2746415ba59a572803285a5d3d53556b4fefb39a");
         expectedFiles.put(Path.of("modules", "wod-werewolf-20-core", "w20.css"), "2debd674fb547d898a6cfc8addefa1e22cacde66938df545de2937c23715b39ecc4185818845ad2318c98dba0514e476d23377d80ba9fd450be4e0addf550cad");
         expectedFiles.put(Path.of("modules", "wod-werewolf-20-core", "w20.js"), "01d4f461c7e84a173e206815cd9e48ceef1606c954c189f85e0d293657ac9393beb42faab59711f374733ab3b6c5bca6cebf63aed5d767c574e8e6e0d325d363");
-        expectedFiles.put(Path.of("modules", "wod-werewolf-20-core", "packs", "w20.db"), "bac277ffd66f179cf422320c84ce686a25b5960ff5771f0499f58854979ba77fee22cc73bde97a11a43df53de641f6cdf5a7485989eb5c9b03aa12fdccc05414");
+        expectedFiles.put(Path.of("modules", "wod-werewolf-20-core", "packs", "w20.db"), "6239e01c6a18d8969c15e593d71ed408860eadcaec375a78431c4b971115b3104af39af9bd3eaf0dff6ec7833e7e37525fe0d322064160551497162888ed3552");
         expectedFiles.put(Path.of("modules", "wod-werewolf-20-core", "images", "adventure-cover.jpeg"), "17d71cdd62f4c930b803fbcf1fab02a3d0244eb7fa1d4359ab088381b1288f1bb191117ec60d3075528732ff9ce4888545e6b66b0d681b00b68b79a214daee1c");
         expectedFiles.put(Path.of("modules", "wod-werewolf-20-core", "images", "black-furies-splash.jpeg"), "0c2f71fba6238336509d84672af71bee9344c477e0696ddd2f4dcf7d53193a1df4726f59f78135d653411f9e44dddbb08f54c65cb552a3ae3ce358dc1e2a4dea");
         expectedFiles.put(Path.of("modules", "wod-werewolf-20-core", "images", "black-spiral-dancers-splash.jpeg"), "10c193572ee8f878ce800f3e4bd6db12e3971714f9f69bda1ca15ee8edb64b9540f6638aacefdafdeef07d7027dc9c6f44d0423ca9c75caa492bcc752feaa372");
@@ -78,8 +78,9 @@ class MainTest {
             }
         });
 
-        assertIterableEquals(expectedFiles.entrySet(), actualFiles.entrySet());
-
+        // Have to save the IDs first, otherwise test is not reproducible
         Main.writeIds();
+
+        assertIterableEquals(expectedFiles.entrySet(), actualFiles.entrySet());
     }
 }

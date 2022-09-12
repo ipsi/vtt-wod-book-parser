@@ -30,19 +30,4 @@ public record MeleeWeaponData(
         this(attack, conceal, damage, description, difficulty, true, false, false, natural, twohanded, "", "2.0.3", "");
     }
 
-    public record Attack(
-            String attribute,
-            int accuracy,
-            String ability,
-            @JsonProperty("isrollable") boolean rollable
-    ) {
-    }
-
-    public record Damage(
-            String attribute,
-            int bonus,
-            DamageTypes type,
-            @JsonProperty("isrollable") boolean rollable
-    ) {
-    }
 }

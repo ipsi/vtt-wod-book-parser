@@ -236,9 +236,12 @@
                                 <list>name.ipsi.project.fwbp.foundry.wod.ItemTypes</list>
                                 <list>name.ipsi.project.fwbp.foundry.wod.PowerTypes</list>
                                 <list>name.ipsi.project.fwbp.foundry.wod.WeaponConcealment</list>
+                                <list>name.ipsi.project.fwbp.foundry.wod.RangedWeaponData</list>
+                                <list>name.ipsi.project.fwbp.foundry.wod.RangedWeaponData$Clip</list>
+                                <list>name.ipsi.project.fwbp.foundry.wod.RangedWeaponData$Mode</list>
                                 <list>name.ipsi.project.fwbp.foundry.wod.MeleeWeaponData</list>
-                                <list>name.ipsi.project.fwbp.foundry.wod.MeleeWeaponData$Attack</list>
-                                <list>name.ipsi.project.fwbp.foundry.wod.MeleeWeaponData$Damage</list>
+                                <list>name.ipsi.project.fwbp.foundry.wod.Attack</list>
+                                <list>name.ipsi.project.fwbp.foundry.wod.Damage</list>
                                 <list>name.ipsi.project.fwbp.foundry.wod.werewolf.FetishData</list>
                                 <list>name.ipsi.project.fwbp.foundry.wod.werewolf.FetishType</list>
                                 <list>name.ipsi.project.fwbp.foundry.core.Module</list>

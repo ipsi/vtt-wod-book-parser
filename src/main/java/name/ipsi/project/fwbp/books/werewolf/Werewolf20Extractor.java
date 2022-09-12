@@ -37,11 +37,9 @@ public class Werewolf20Extractor {
                 RiteLocations.DATA,
                 FetishLocations.DATA,
                 TalenLocations.DATA,
-                new WeaponLocations(
-                        new Paragraph(303, makeRect(121, 129, 263, 280)),
-                        new Paragraph(303, makeRect(0, 0, 0, 0)),
-                        new Paragraph(304, makeRect(0, 0, 0, 0))
-                ),
+                MeleeWeaponLocations.DATA.get(0),
+                ThrownWeaponLocations.DATA.get(0),
+                RangedWeaponLocations.DATA.get(0),
                 Collections.emptyList(),
                 MeritAndFlawLocations.DATA
         );
@@ -56,7 +54,9 @@ public class Werewolf20Extractor {
             List<RiteLocation> rites,
             List<FetishLocation> fetishes,
             List<TalenLocation> talens,
-            WeaponLocations weapons,
+            MeleeWeaponLocation meleeWeapons,
+            ThrownWeaponLocation thrownWeapons,
+            RangedWeaponLocation rangedWeapons,
             List<SpiritLocation> spirits,
             List<MeritAndFlawLocation> meritsAndFlaws
     ) {}
@@ -280,7 +280,7 @@ public class Werewolf20Extractor {
 
         processTribes();
 
-        processMeleeWeapons();
+        processWeapons();
 
         processBackgrounds();
 
@@ -435,10 +435,10 @@ public class Werewolf20Extractor {
         }
     }
 
-    private void processMeleeWeapons() {
+    private void processWeapons() {
         entries.add(new MeleeWeapon(
                 "Bite - Crinos, Hispo, Lupus",
-                getText(parser, new Paragraph(297, makeRect(304, 213, 245, 77))).get(0).replaceAll("^\\s*•?\\s*Bite:\\s*", ""),
+                Collections.singletonList(new StringEntry(getText(parser, new Paragraph(297, makeRect(304, 213, 245, 77))).get(0).replaceAll("^\\s*•?\\s*Bite:\\s*", ""))),
                 5,
                 1,
                 DamageTypes.AGGRAVATED,
@@ -453,7 +453,7 @@ public class Werewolf20Extractor {
 
         entries.add(new MeleeWeapon(
                 "Claw - Crinos, Hispo",
-                getText(parser, new Paragraph(297, makeRect(304, 335, 246, 52))).get(0).replaceAll("^\\s*•?\\s*Claw:\\s*", ""),
+                Collections.singletonList(new StringEntry(getText(parser, new Paragraph(297, makeRect(304, 335, 246, 52))).get(0).replaceAll("^\\s*•?\\s*Claw:\\s*", ""))),
                 6,
                 2,
                 DamageTypes.AGGRAVATED,
@@ -468,7 +468,7 @@ public class Werewolf20Extractor {
 
         entries.add(new MeleeWeapon(
                 "Claw - Glabro, Lupus",
-                getText(parser, new Paragraph(297, makeRect(304, 335, 246, 52))).get(0).replaceAll("^\\s*•?\\s*Claw:\\s*", ""),
+                Collections.singletonList(new StringEntry(getText(parser, new Paragraph(297, makeRect(304, 335, 246, 52))).get(0).replaceAll("^\\s*•?\\s*Claw:\\s*", ""))),
                 6,
                 2,
                 DamageTypes.BASHING,
@@ -482,29 +482,152 @@ public class Werewolf20Extractor {
         ));
 
         log.info("Extracting Melee weapons");
+        Map<String, String> meleeNotes = new HashMap<>();
+
+        var notePattern = Pattern.compile("^\\s*(\\*+)\\s*(.*)$");
+        for (var line : getTextAsLines(parser, BOOK_DETAILS.meleeWeapons().textLocation())) {
+            var matcher = notePattern.matcher(line);
+            if (matcher.matches()) {
+                meleeNotes.put(matcher.group(1), matcher.group(2));
+            }
+        }
+
         var meleeWeaponPattern = Pattern.compile("([\\w\\s]+)(\\**)?\\s*(\\d+)(\\**)?\\s*Strength(\\s*\\+\\s*(\\d+))?/([BLA])(\\**)?\\s*([PJTN])\\s*");
-        for (var line : getTextAsLines(parser, BOOK_DETAILS.weapons().meleeWeapons())) {
+        for (var line : getTextAsLines(parser, BOOK_DETAILS.meleeWeapons().textLocation())) {
             log.trace("Processing weapon line");
             var matcher = meleeWeaponPattern.matcher(line);
             if (matcher.matches()) {
                 log.trace("Weapon matches");
+                var description = new ArrayList<TextEntry>();
+                boolean canEntangle = matcher.group(4) != null && matcher.group(4).trim().equals("*");
+                if (canEntangle) {
+                    description.add(new StringEntry(fixText(meleeNotes.get("*"))));
+                }
+                boolean breaksAfterUse = matcher.group(8) != null && matcher.group(8).trim().equals("**");
+                if (breaksAfterUse) {
+                    description.add(new StringEntry(fixText(meleeNotes.get("**"))));
+                }
+                boolean twoHanded = matcher.group(2) != null && matcher.group(2).trim().equals("***");
+                if (twoHanded) {
+                    description.add(new StringEntry(fixText(meleeNotes.get("***"))));
+                }
+                boolean silver = matcher.group(2) != null && matcher.group(2).trim().equals("****");
+                if (silver) {
+                    description.add(new StringEntry(fixText(meleeNotes.get("****"))));
+                }
+                boolean selfDamage = matcher.group(8) != null && matcher.group(8).trim().equals("*****");
+                if (selfDamage) {
+                    description.add(new StringEntry(fixText(meleeNotes.get("*****"))));
+                }
                 entries.add(new MeleeWeapon(
                         matcher.group(1).trim(),
-                        "",
+                        description,
                         Integer.parseInt(matcher.group(3).trim()),
                         matcher.group(6) == null ? 0 : Integer.parseInt(matcher.group(6).trim()),
                         DamageTypes.parse(matcher.group(7).trim()),
                         WeaponConcealment.parse(matcher.group(9).trim()),
-                        matcher.group(4) != null && matcher.group(4).trim().equals("*"),
-                        matcher.group(8) != null && matcher.group(8).trim().equals("**"),
-                        matcher.group(2) != null && matcher.group(2).trim().equals("***"),
-                        matcher.group(2) != null && matcher.group(2).trim().equals("****"),
-                        matcher.group(8) != null && matcher.group(8).trim().equals("*****"),
+                        canEntangle,
+                        breaksAfterUse,
+                        twoHanded,
+                        silver,
+                        selfDamage,
                         false
                 ));
                 log.trace("Weapon processed");
             } else {
-                log.warn("Line {} doesn't match against weapon regex", line);
+                log.debug("Line {} doesn't match against weapon regex", line);
+            }
+        }
+
+        log.info("Extracting Throw weapons");
+        var thrownWeaponPattern = Pattern.compile("([A-Za-z\\s,-]+)\\s*(\\d+)\\s*(Strength)?(\\s*\\+\\s*)?(\\d+)?/([BLA])\\s*([PJTN]|varies)\\s*");
+        for (var line : getTextAsLines(parser, BOOK_DETAILS.thrownWeapons().textLocation())) {
+            log.trace("Processing throw line");
+            var matcher = thrownWeaponPattern.matcher(line);
+            if (matcher.matches()) {
+                log.trace("Weapon matches");
+                entries.add(new ThrownWeapon(
+                        matcher.group(1).trim(),
+                        Collections.emptyList(),
+                        Integer.parseInt(matcher.group(2).trim()),
+                        matcher.group(3) != null,
+                        matcher.group(5) == null ? 0 : Integer.parseInt(matcher.group(5).trim()),
+                        DamageTypes.parse(matcher.group(6).trim()),
+                        WeaponConcealment.parse(matcher.group(7).trim())
+                ));
+                log.trace("Weapon processed");
+            } else {
+                log.debug("Line {} doesn't match against thrown weapon regex", line);
+            }
+        }
+
+        log.info("Extracting ranged weapons");
+        Map<String, String> rangedNotes = new HashMap<>();
+
+        var prevLineMatched = false;
+        var prevKey = "";
+        for (var line : getTextAsLines(parser, BOOK_DETAILS.rangedWeapons().textLocation())) {
+            var matcher = notePattern.matcher(line);
+            if (matcher.matches()) {
+                prevKey = matcher.group(1).trim();
+                rangedNotes.put(prevKey, matcher.group(2).trim());
+                prevLineMatched = true;
+            } else if (prevLineMatched) {
+                rangedNotes.put(prevKey, rangedNotes.get(prevKey).trim() + " " + line.trim());
+                prevLineMatched = false;
+                prevKey = null;
+            }
+        }
+
+        var rangedWeaponPattern = Pattern.compile("(?<name>[A-Za-z\\s.,-]+)(?<namestars>\\**)?\\s*(?<damage>\\d+)\\s*(?<range>\\d+)\\s*(?<rate>\\d+|\\*)\\s*(?<clip>\\d+)(\\+\\s*(?<clipbonus>\\d))?\\s*(?<conceal>[PJTN])(?<concealstars>\\**)\\s*");
+        for (var line : getTextAsLines(parser, BOOK_DETAILS.rangedWeapons().textLocation())) {
+            log.trace("Processing weapon line");
+            var matcher = rangedWeaponPattern.matcher(line);
+            if (matcher.matches()) {
+                log.trace("Weapon matches");
+                var description = new ArrayList<TextEntry>();
+                var nameStars = matcher.group("namestars");
+                var bursty = false;
+                var damageType = DamageTypes.LETHAL;
+                if ("*".equals(nameStars)) {
+                    bursty = true;
+                    description.add(new StringEntry(fixText(rangedNotes.get(nameStars).trim())));
+                }
+                if ("**".equals(nameStars) || line.contains("Bow") || line.contains("bow")) {
+                    description.add(new StringEntry(fixText(rangedNotes.get("**").trim())));
+                }
+                if ("****".equals(nameStars)) {
+                    damageType = DamageTypes.BASHING;
+                    description.add(new StringEntry(fixText(rangedNotes.get(nameStars).trim())));
+                }
+
+                var concealStars = matcher.group("concealstars");
+                if ("***".equals(concealStars)) {
+                    description.add(new StringEntry(fixText(rangedNotes.get(concealStars).trim())));
+                }
+
+                Integer rate = matcher.group("rate").equals("*") ? null : Integer.parseInt(matcher.group("rate"));
+                int clip = Integer.parseInt(matcher.group("clip"));
+                if (matcher.group("clipbonus") != null) {
+                    clip += Integer.parseInt(matcher.group("clipbonus"));
+                }
+                entries.add(new RangedWeapon(
+                        matcher.group("name").trim(),
+                        description,
+                        Integer.parseInt(matcher.group("damage").trim()),
+                        damageType,
+                        WeaponConcealment.parse(matcher.group("conceal").trim()),
+                        Integer.parseInt(matcher.group("range")),
+                        rate,
+                        clip,
+                        false,
+                        bursty,
+                        bursty,
+                        bursty
+                ));
+                log.trace("Weapon processed");
+            } else {
+                log.debug("Line {} doesn't match against weapon regex", line);
             }
         }
     }
