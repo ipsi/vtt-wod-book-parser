@@ -20,13 +20,16 @@ class MainTest {
     void testAdventure() throws Exception {
         Main.configureLogging();
         var outputPath = Path.of("modules");
-        Files.walkFileTree(outputPath, new SimpleFileVisitor<>() {
-            @Override
-            public FileVisitResult visitFile(Path file, BasicFileAttributes attrs) throws IOException {
-                Files.delete(file);
-                return FileVisitResult.CONTINUE;
-            }
-        });
+        // If it exists but isn't a directory... bugger.
+        if (Files.isDirectory(outputPath)) {
+            Files.walkFileTree(outputPath, new SimpleFileVisitor<>() {
+                @Override
+                public FileVisitResult visitFile(Path file, BasicFileAttributes attrs) throws IOException {
+                    Files.delete(file);
+                    return FileVisitResult.CONTINUE;
+                }
+            });
+        }
 
         var filePath = System.getenv("PDF_FILE_PATH");
         if (filePath == null) {
