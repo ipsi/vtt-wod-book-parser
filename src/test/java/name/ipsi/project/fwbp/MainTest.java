@@ -2,9 +2,7 @@ package name.ipsi.project.fwbp;
 
 import org.junit.jupiter.api.Test;
 
-import java.io.ByteArrayInputStream;
 import java.io.IOException;
-import java.nio.charset.Charset;
 import java.nio.file.FileVisitResult;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -20,14 +18,28 @@ class MainTest {
 
     @Test
     void testAdventure() throws Exception {
-        System.setIn(new ByteArrayInputStream("1".getBytes(Charset.defaultCharset())));
-        Main.main(new String[]{"--adventure"});
+        Main.configureLogging();
+        var outputPath = Path.of("modules");
+        Files.walkFileTree(outputPath, new SimpleFileVisitor<>() {
+            @Override
+            public FileVisitResult visitFile(Path file, BasicFileAttributes attrs) throws IOException {
+                Files.delete(file);
+                return FileVisitResult.CONTINUE;
+            }
+        });
+
+        var filePath = System.getenv("PDF_FILE_PATH");
+        if (filePath == null) {
+            BookProcessor.processWerewolf20(outputPath, System.getenv("DTRPG_TOKEN"));
+        } else {
+            BookProcessor.processWerewolf20(outputPath, Path.of(filePath));
+        }
 
         var expectedFiles = new TreeMap<Path, String>();
         expectedFiles.put(Path.of("modules", "wod-werewolf-20-core", "module.json"), "96947f364f029a8b6eb0629bdb8d167829254ae3215775ccb34b2f2613ff56ca8dc3786193a970c41c01787d2746415ba59a572803285a5d3d53556b4fefb39a");
         expectedFiles.put(Path.of("modules", "wod-werewolf-20-core", "w20.css"), "2debd674fb547d898a6cfc8addefa1e22cacde66938df545de2937c23715b39ecc4185818845ad2318c98dba0514e476d23377d80ba9fd450be4e0addf550cad");
         expectedFiles.put(Path.of("modules", "wod-werewolf-20-core", "w20.js"), "01d4f461c7e84a173e206815cd9e48ceef1606c954c189f85e0d293657ac9393beb42faab59711f374733ab3b6c5bca6cebf63aed5d767c574e8e6e0d325d363");
-        expectedFiles.put(Path.of("modules", "wod-werewolf-20-core", "packs", "w20.db"), "bce9f9a2acac02898b8b5cb04fa4af782b1b4f1f67b2a90ab9335250a2cd14106b211b9834823af40f1b5f6aca2e60555aa056532f41706e34dbadf69299472b");
+        expectedFiles.put(Path.of("modules", "wod-werewolf-20-core", "packs", "w20.db"), "432758b98d4b1327031629c374b421c73ef643c12137315a5759454192bdd8f09d4b1d50be7cb5b3863c67e958edb85a2d45b99ac6beaf57b4b97ec905ecdcfb");
         expectedFiles.put(Path.of("modules", "wod-werewolf-20-core", "images", "adventure-cover.jpeg"), "17d71cdd62f4c930b803fbcf1fab02a3d0244eb7fa1d4359ab088381b1288f1bb191117ec60d3075528732ff9ce4888545e6b66b0d681b00b68b79a214daee1c");
         expectedFiles.put(Path.of("modules", "wod-werewolf-20-core", "images", "black-furies-splash.jpeg"), "0c2f71fba6238336509d84672af71bee9344c477e0696ddd2f4dcf7d53193a1df4726f59f78135d653411f9e44dddbb08f54c65cb552a3ae3ce358dc1e2a4dea");
         expectedFiles.put(Path.of("modules", "wod-werewolf-20-core", "images", "black-spiral-dancers-splash.jpeg"), "10c193572ee8f878ce800f3e4bd6db12e3971714f9f69bda1ca15ee8edb64b9540f6638aacefdafdeef07d7027dc9c6f44d0423ca9c75caa492bcc752feaa372");
@@ -67,5 +79,7 @@ class MainTest {
         });
 
         assertIterableEquals(expectedFiles.entrySet(), actualFiles.entrySet());
+
+        Main.writeIds();
     }
 }

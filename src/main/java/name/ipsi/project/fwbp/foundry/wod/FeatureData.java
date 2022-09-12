@@ -20,4 +20,8 @@ public record FeatureData(
     public FeatureData(String description, String details, FeatureTypes type) {
         this(description, details, true, type == FeatureTypes.BACKGROUND, "0", 5, "", type, 0, "2.0.3", "");
     }
+
+    public FeatureData(String description, String details, String level, int max, FeatureTypes type) {
+        this(description, details, true, type == FeatureTypes.BACKGROUND, level, max, "", type, 0, "2.0.3", "");
+    }
 }

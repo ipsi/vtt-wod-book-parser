@@ -204,8 +204,10 @@
                                 <list>name.ipsi.project.fwbp.books.werewolf.FetishType</list>
                                 <list>name.ipsi.project.fwbp.books.werewolf.Talen</list>
                                 <list>name.ipsi.project.fwbp.books.shared.Background</list>
+                                <list>name.ipsi.project.fwbp.books.shared.Flaw</list>
                                 <list>name.ipsi.project.fwbp.books.shared.ListEntry</list>
                                 <list>name.ipsi.project.fwbp.books.shared.MeleeWeapon</list>
+                                <list>name.ipsi.project.fwbp.books.shared.Merit</list>
                                 <list>name.ipsi.project.fwbp.books.shared.PowerCollection</list>
                                 <list>name.ipsi.project.fwbp.books.shared.RangedWeapon</list>
                                 <list>name.ipsi.project.fwbp.books.shared.Stereotype</list>

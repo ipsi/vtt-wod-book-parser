@@ -1,8 +1,6 @@
 package name.ipsi.project.fwbp.foundry.wod.werewolf;
 
-import name.ipsi.project.fwbp.books.shared.Background;
-import name.ipsi.project.fwbp.books.shared.BookEntry;
-import name.ipsi.project.fwbp.books.shared.MeleeWeapon;
+import name.ipsi.project.fwbp.books.shared.*;
 import name.ipsi.project.fwbp.books.werewolf.*;
 import name.ipsi.project.fwbp.foundry.core.*;
 import name.ipsi.project.fwbp.foundry.templating.Templater;
@@ -17,6 +15,7 @@ public class Werewolf20FoundryConverter {
     public static final Logger log = LoggerFactory.getLogger(Werewolf20FoundryConverter.class);
 
     private Map<String, String> folderIdsByName;
+    private Map<String, String> folderIdsById;
     private double breedSort;
     private double auspiceSort;
     private double tribeSort;
@@ -27,6 +26,7 @@ public class Werewolf20FoundryConverter {
     public Adventure processAsAdventure(List<BookEntry> entries) throws IOException {
         log.trace("Converting book entries tp adventure");
         folderIdsByName = new HashMap<>();
+        folderIdsById = new HashMap<>();
 
         var items = new ArrayList<Item>();
         var journals = new ArrayList<Journal>();
@@ -40,11 +40,20 @@ public class Werewolf20FoundryConverter {
         folders.add(createFolder("rites-garou", "Rites - Garou", DocumentTypes.ITEM, FolderSortingModes.ALPHABETICAL, itemFolderSort++, null));
         folders.add(createFolder("fetishes-garou", "Fetishes - Garou", DocumentTypes.ITEM, FolderSortingModes.ALPHABETICAL, itemFolderSort++, null));
         folders.add(createFolder("talens-garou", "Talens - Garou", DocumentTypes.ITEM, FolderSortingModes.ALPHABETICAL, itemFolderSort++, null));
+        folders.add(createFolder("merits-garou", "Merits - Garou", DocumentTypes.ITEM, FolderSortingModes.MANUAL, itemFolderSort++, null));
+        folders.add(createFolder("flaws-garou", "Flaws - Garou", DocumentTypes.ITEM, FolderSortingModes.MANUAL, itemFolderSort++, null));
 
         folders.add(createFolder("weapons-melee", "Weapons - Melee", DocumentTypes.ITEM, FolderSortingModes.ALPHABETICAL, itemFolderSort++, null));
         double sortIdx = 0;
         for(var type : RiteType.values()) {
             folders.add(createFolder("garou-rites-" + type.displayName(), type.displayName(), DocumentTypes.ITEM, FolderSortingModes.ALPHABETICAL, sortIdx++, folderIdsByName.get("Rites - Garou")));
+        }
+
+        sortIdx = 0;
+        for (var section : Arrays.asList("Physical", "Mental", "Social", "Supernatural")) {
+            folders.add(createFolder("garou-merits-" + section, section, DocumentTypes.ITEM, FolderSortingModes.ALPHABETICAL, sortIdx, folderIdsByName.get("Merits - Garou")));
+            folders.add(createFolder("garou-flaws-" + section, section, DocumentTypes.ITEM, FolderSortingModes.ALPHABETICAL, sortIdx, folderIdsByName.get("Flaws - Garou")));
+            sortIdx++;
         }
 
         List<Page> breedJournalPages = new ArrayList<>();
@@ -86,6 +95,10 @@ public class Werewolf20FoundryConverter {
                 items.add(processFetish(f));
             } else if (entry instanceof Talen t) {
                 items.add(processTalen(t));
+            } else if (entry instanceof Merit m) {
+                items.add(processMerit(m));
+            } else if (entry instanceof Flaw f) {
+                items.add(processFlaw(f));
             }
         }
 
@@ -114,6 +127,7 @@ public class Werewolf20FoundryConverter {
     private Folder createFolder(String idGroup, String name, DocumentTypes documentType, FolderSortingModes sortingMode, double sortOrder, String parentFolderId) {
         String id = FoundryUtils.generateId("folder", idGroup);
         folderIdsByName.put(name, id);
+        folderIdsById.put(idGroup, id);
         return new Folder(id, name, documentType, sortingMode, sortOrder, null, Collections.emptyMap(), parentFolderId, null);
     }
 
@@ -312,6 +326,54 @@ public class Werewolf20FoundryConverter {
                 ),
                 null,
                 folderIdsByName.get("Talens - Garou"),
+                0,
+                DocumentOwnershipLevel.defaultObserver(),
+                Collections.emptyMap(),
+                null
+        );
+    }
+
+    private Item processMerit(Merit m) throws IOException {
+        log.debug("Running templates for merit {}", m.name());
+        var description = Templater.instance().compile("merit").apply(m);
+        return new Item(
+                m.id(),
+                m.name(),
+                ItemTypes.FEATURE,
+                "systems/worldofdarkness/assets/img/items/feature.svg",
+                new FeatureData(
+                        description,
+                        "",
+                        String.valueOf(m.cost()),
+                        m.max(),
+                        FeatureTypes.MERIT
+                ),
+                null,
+                folderIdsById.get("garou-merits-" + m.section()),
+                0,
+                DocumentOwnershipLevel.defaultObserver(),
+                Collections.emptyMap(),
+                null
+        );
+    }
+
+    private Item processFlaw(Flaw f) throws IOException {
+        log.debug("Running templates for flaw {}", f.name());
+        var description = Templater.instance().compile("flaw").apply(f);
+        return new Item(
+                f.id(),
+                f.name(),
+                ItemTypes.FEATURE,
+                "systems/worldofdarkness/assets/img/items/feature.svg",
+                new FeatureData(
+                        description,
+                        "",
+                        String.valueOf(f.cost()),
+                        f.max(),
+                        FeatureTypes.FLAW
+                ),
+                null,
+                folderIdsById.get("garou-flaws-" + f.section()),
                 0,
                 DocumentOwnershipLevel.defaultObserver(),
                 Collections.emptyMap(),

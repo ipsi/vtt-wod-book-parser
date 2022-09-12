@@ -6,8 +6,11 @@ import com.itextpdf.kernel.geom.Rectangle;
 import com.itextpdf.kernel.pdf.PdfDocument;
 import com.itextpdf.kernel.pdf.PdfReader;
 import com.itextpdf.kernel.pdf.canvas.parser.PdfDocumentContentParser;
+import com.itextpdf.kernel.pdf.canvas.parser.filter.TextRegionEventFilter;
+import com.itextpdf.kernel.pdf.canvas.parser.listener.FilteredTextEventListener;
 import com.itextpdf.kernel.pdf.canvas.parser.listener.IPdfTextLocation;
 import com.itextpdf.kernel.pdf.canvas.parser.listener.RegexBasedLocationExtractionStrategy;
+import com.itextpdf.kernel.pdf.canvas.parser.listener.SimpleTextExtractionStrategy;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -24,11 +27,13 @@ public class Preprocessor {
 
     private static final Pattern DOT_PATTERN = Pattern.compile("^(•+)");
 
+    private final PdfDocumentContentParser parser;
     private final Map<Integer, Collection<IPdfTextLocation>> stringLocations;
     private final Path outputDir;
     private final StringBuilder output;
 
-    private Preprocessor(Map<Integer, Collection<IPdfTextLocation>> stringLocations, Path outputDir) {
+    private Preprocessor(PdfDocumentContentParser parser, Map<Integer, Collection<IPdfTextLocation>> stringLocations, Path outputDir) {
+        this.parser = parser;
         this.stringLocations = stringLocations;
         this.outputDir = outputDir;
         output = new StringBuilder();
@@ -44,7 +49,7 @@ public class Preprocessor {
             stringLocations.put(i, parser.processContent(i, new RegexBasedLocationExtractionStrategy(".*\n")).getResultantLocations());
         }
 
-        var p = new Preprocessor(stringLocations, jsonFile.getParent());
+        var p = new Preprocessor(parser, stringLocations, jsonFile.getParent());
         p.doProcessing(new ObjectMapper().readValue(Files.readAllBytes(jsonFile), new TypeReference<>() {}));
     }
 
@@ -69,8 +74,10 @@ public class Preprocessor {
                     .append("    public static final List<").append(locName).append("> DATA = Arrays.asList(\n");
 
             for(var entry : group.entries()) {
-                output.append("        new ").append(locName).append("(\n")
-                        .append("            \"").append(entry.name()).append("\",\n");
+                output.append("        new ").append(locName).append("(\n");
+                if (entry.name() != null) {
+                    output.append("            \"").append(entry.name()).append("\",\n");
+                }
                 if (entry.type() != null) {
                     output.append("            ").append(cpr).append("Type.").append(entry.type().toUpperCase()).append(",\n");
                 }
@@ -84,8 +91,14 @@ public class Preprocessor {
                 for (var paragraph : entry.paragraphs()) {
                     output.append("            new TextLocation(\n")
                             .append("                    TextLocationType.")
-                            .append(paragraph.type().toUpperCase())
-                            .append(",\n");
+                            .append(paragraph.type().toUpperCase());
+
+                    if (paragraph.type().equals("paragraph_break")) {
+                        output.append("\n            ),\n");
+                        continue;
+                    }
+
+                    output.append(",\n");
 
                     if (paragraph.areas() != null && !paragraph.areas().isEmpty()) {
                         for (var area : paragraph.areas) {
@@ -120,6 +133,9 @@ public class Preprocessor {
 
     private void buildTextArea(int page, String content) {
         for (var rect : processLines(page, content)) {
+            if (rect.getWidth() < 0) {
+                LOGGER.error("rect{{ x: {}, y: {}, width: {}, height: {} }} on page {} has a negative width", rect.getX(), rect.getY(), rect.getWidth(), rect.getHeight(), page);
+            }
             if (rect.getHeight() > 13.5f) {
                 LOGGER.debug("rect{{ x: {}, y: {}, width: {}, height: {} }} on page {} has a height of greater than 13.5 - setting to 13.0", rect.getX(), rect.getY(), rect.getWidth(), rect.getHeight(), page);
                 rect.setHeight(13.0f);
@@ -170,6 +186,12 @@ public class Preprocessor {
                 } else if (text.startsWith(line)) {
                     LOGGER.trace("Text [{}] starts with line [{}] - limiting width and praying", text, line);
                     matchedLocation = makePrefixRect(page, textLocation);
+
+                    if (matchedLocation.getWidth() < 0) {
+                        LOGGER.debug("Line [{}] matched against text [{}] but produced a rect with negative width [{}] - assuming bad match and skipping", line, text, matchedLocation.getWidth());
+                        continue;
+                    }
+
                     break;
                 } else if (text.endsWith(line)) {
                     var charCount = text.indexOf(line);
@@ -207,11 +229,67 @@ public class Preprocessor {
             if (matchedLocation == null) {
                 LOGGER.error("Unable to match line [{}]", line);
             } else {
+                shrinkRect(page, line, matchedLocation);
+
                 rv.add(matchedLocation);
             }
         }
 
         return rv;
+    }
+
+    private void shrinkRect(int page, String line, Rectangle matchedLocation) {
+        if (true) {
+            return;
+        }
+        int count = 0;
+        float startingX = matchedLocation.getX();
+        float startingWidth = matchedLocation.getWidth();
+        while (true) {
+            var s = parser.processContent(page, new FilteredTextEventListener(
+                    new SimpleTextExtractionStrategy(),
+                    new TextRegionEventFilter(matchedLocation))
+            ).getResultantText();
+
+            if (s.contains(line)) {
+                matchedLocation.setX(matchedLocation.getX() + 20);
+                matchedLocation.setWidth(matchedLocation.getWidth() - 20);
+            } else {
+                matchedLocation.setX(matchedLocation.getX() - 20);
+                matchedLocation.setWidth(matchedLocation.getWidth() + 20);
+                break;
+            }
+            count++;
+        }
+
+        if (count > 2) {
+            LOGGER.debug("(1) Shrank rect after [{}] tries from [{}]:[{}] to [{}]:[{}]", count, startingX, startingWidth, matchedLocation.getX(), matchedLocation.getWidth());
+        }
+
+        count = 0;
+        startingX = matchedLocation.getX();
+        startingWidth = matchedLocation.getWidth();
+
+        while (true) {
+            var s = parser.processContent(page, new FilteredTextEventListener(
+                    new SimpleTextExtractionStrategy(),
+                    new TextRegionEventFilter(matchedLocation))
+            ).getResultantText();
+
+            if (s.contains(line)) {
+                matchedLocation.setX(matchedLocation.getX() - 20);
+//                matchedLocation.setWidth(matchedLocation.getWidth() - 2);
+            } else {
+                matchedLocation.setX(matchedLocation.getX() + 20);
+//                matchedLocation.setWidth(matchedLocation.getWidth() + 2);
+                break;
+            }
+            count++;
+        }
+
+        if (count > 2) {
+            LOGGER.debug("(2) Shrank rect after [{}] tries from [{}]:[{}] to [{}]:[{}]", count, startingX, startingWidth, matchedLocation.getX(), matchedLocation.getWidth());
+        }
     }
 
     private HyphenationResult processHyphenatedText(
@@ -276,16 +354,22 @@ public class Preprocessor {
                         var nextLineLocations = new ArrayList<Rectangle>();
                         nextLineLocations.add(nextLineLocation);
                         if (idx == text.length() - 1) {
+                            shrinkRect(page, line, textLocation.getRectangle());
+                            shrinkRect(page, line, nextLineLocation);
                             return new HyphenationResult(
                                     textLocation.getRectangle(),
                                     nextLineLocations
                             );
                         } else if (line.startsWith(substring)) {
+                            shrinkRect(page, line, textLocation.getRectangle());
+                            shrinkRect(page, line, nextLineLocation);
                             return new HyphenationResult(
                                     makePrefixRect(page, textLocation),
                                     nextLineLocations
                             );
                         } else if (line.endsWith(substring)) {
+                            shrinkRect(page, line, textLocation.getRectangle());
+                            shrinkRect(page, line, nextLineLocation);
                             return new HyphenationResult(
                                     makePostFixRect(page, textLocation),
                                     nextLineLocations
@@ -344,7 +428,9 @@ public class Preprocessor {
         backgrounds("Background"),
         rites("Rite"),
         fetishes("Fetish"),
-        talens("Talen");
+        talens("Talen"),
+        mandf("MeritAndFlaw")
+        ;
 
         private final String classPrefix;
 

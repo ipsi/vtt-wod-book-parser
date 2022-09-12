@@ -21,13 +21,13 @@ The following content is currently extracted from the PDF:
 * Rites, including full description
 * Melee Weapons
 * Fetishes & Talens
+* Merits & Flaws
 
 Things I would like to do (in rough priority order):
 
 * Remaining items like ranged weapons and armor
 * Spirit Charms
 * Sample NPCs (e.g., Banes, Elementals, Weaver Spirits, etc)
-* Merits & Flaws
 * Totems
 * Fomori powers
 * Nature & Demeanor

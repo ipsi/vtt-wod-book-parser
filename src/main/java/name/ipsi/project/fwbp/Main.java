@@ -52,10 +52,11 @@ public class Main {
         var selection = scanner.nextInt();
         switch (selection) {
             case 1:
+                var modulesDir = Path.of("modules");
                 if (filePath == null) {
-                    BookProcessor.processWerewolf20(Path.of("modules"), token);
+                    BookProcessor.processWerewolf20(modulesDir, token);
                 } else {
-                    BookProcessor.processWerewolf20(Path.of("modules"), Path.of(filePath));
+                    BookProcessor.processWerewolf20(modulesDir, Path.of(filePath));
                 }
                 break;
             default:
@@ -65,7 +66,7 @@ public class Main {
         writeIds();
     }
 
-    private static void configureLogging() {
+    static void configureLogging() {
         LoggerContext context = (LoggerContext) LoggerFactory.getILoggerFactory();
         String logLevel = System.getenv("LOG_LEVEL");
         if (logLevel != null) {
@@ -89,7 +90,7 @@ public class Main {
         context.getLogger("com.github.jknack.handlebars").setLevel(Level.WARN);
     }
 
-    private static void writeIds() throws IOException {
+    static void writeIds() throws IOException {
         var ids = FoundryUtils.getIds();
         var outputFile = Path.of("src", "main", "resources", "id-list.txt");
         if (Files.exists(outputFile)) {

@@ -43,8 +43,7 @@ public class Werewolf20Extractor {
                         new Paragraph(304, makeRect(0, 0, 0, 0))
                 ),
                 Collections.emptyList(),
-                Collections.emptyList(),
-                Collections.emptyList()
+                MeritAndFlawLocations.DATA
         );
     }
 
@@ -59,8 +58,7 @@ public class Werewolf20Extractor {
             List<TalenLocation> talens,
             WeaponLocations weapons,
             List<SpiritLocation> spirits,
-            List<MeritLocation> merits,
-            List<FlawLocation> flaws
+            List<MeritAndFlawLocation> meritsAndFlaws
     ) {}
 
     private final List<BookEntry> entries = new ArrayList<>();
@@ -291,6 +289,8 @@ public class Werewolf20Extractor {
         processFetishes();
 
         processTalens();
+
+        processMeritsAndFlaws();
 
         return entries;
     }
@@ -682,6 +682,105 @@ public class Werewolf20Extractor {
                     talen.gnosis(),
                     description
             ));
+        }
+    }
+
+    private record Data(String name, int cost, int max, boolean merit) {}
+
+    private void processMeritsAndFlaws() {
+        List<String> sectionHeaders = new ArrayList<>();
+        sectionHeaders.add("Physical");
+        sectionHeaders.add("Mental");
+        sectionHeaders.add("Social");
+        sectionHeaders.add("Supernatural");
+
+        var headerPattern = Pattern.compile("^(.+)\\s*\\(\\s*(\\d+)\\s*pt\\.\\s*(Merit|Flaw)\\s*\\)$");
+        var partialHeaderPattern = Pattern.compile("^\\(\\s*(\\d+)\\s*pt\\.\\s*(Merit|Flaw)\\s*\\)$");
+        var headerRangePattern = Pattern.compile("^(.+)\\s*\\(\\s*(\\d+)\\s*to\\s*(\\d+)\\s*pt\\.\\s*(Merit|Flaw)\\s*\\)$");
+        var partialHeaderRangePattern = Pattern.compile("^\\(\\s*(\\d+)\\s*to\\s*(\\d+)\\s*pt\\.\\s*(Merit|Flaw)\\s*\\)$");
+        var listStartPattern = Pattern.compile("^•\\s*(.*)");
+
+        log.info("Extracting Merits and Flaws");
+        var description = new ArrayList<String>(50);
+        var textEntries = new ArrayList<TextEntry>();
+        String currentSection = null;
+        // It's ok to do get(0) - there's only ever going to be one
+        Data currentData = null;
+        for (var textLocation : BOOK_DETAILS.meritsAndFlaws().get(0).textLocations()) {
+            if (textLocation.type() == TextLocationType.TEXT) {
+                for (var line : Utils.getTextAsLines(parser, textLocation)) {
+                    if (sectionHeaders.contains(line)) {
+                        currentSection = line;
+                        continue;
+                    }
+
+                    var headerMatcher = headerPattern.matcher(line);
+                    var partialHeaderMatcher = partialHeaderPattern.matcher(line);
+                    var headerRangeMatcher = headerRangePattern.matcher(line);
+                    var partialHeaderRangeMatcher = partialHeaderRangePattern.matcher(line);
+                    if (headerMatcher.matches()) {
+                        finaliseCurrentEntry(currentData, textEntries, description, currentSection);
+                        currentData = new Data(headerMatcher.group(1).trim(), Integer.parseInt(headerMatcher.group(2)), -1, headerMatcher.group(3).equals("Merit"));
+                    } else if (partialHeaderMatcher.matches()) {
+                        var name = description.remove(description.size() - 1);
+                        finaliseCurrentEntry(currentData, textEntries, description, currentSection);
+                        currentData = new Data(name.trim(), Integer.parseInt(partialHeaderMatcher.group(1)), -1, partialHeaderMatcher.group(2).equals("Merit"));
+                    } else if (headerRangeMatcher.matches()) {
+                        finaliseCurrentEntry(currentData, textEntries, description, currentSection);
+                        currentData = new Data(headerRangeMatcher.group(1).trim(), Integer.parseInt(headerRangeMatcher.group(2)), Integer.parseInt(headerRangeMatcher.group(3)), headerRangeMatcher.group(4).equals("Merit"));
+                    } else if (partialHeaderRangeMatcher.matches()) {
+                        var name = description.remove(description.size() - 1);
+                        finaliseCurrentEntry(currentData, textEntries, description, currentSection);
+                        currentData = new Data(name.trim(), Integer.parseInt(partialHeaderRangeMatcher.group(1)), Integer.parseInt(partialHeaderRangeMatcher.group(2)), partialHeaderRangeMatcher.group(3).equals("Merit"));
+                    } else {
+                        description.add(line);
+                    }
+                }
+            } else if (textLocation.type().equals(TextLocationType.PARAGRAPH_BREAK)) {
+                textEntries.add(new StringEntry(fixText(description.stream().collect(CONTENT_AWARE_JOINER))));
+                description.clear();
+            } else if (textLocation.type().equals(TextLocationType.LIST)) {
+                textEntries.add(new StringEntry(fixText(description.stream().collect(CONTENT_AWARE_JOINER))));
+                description.clear();
+
+                var listItems = new ArrayList<String>();
+                for (var line : Utils.getTextAsLines(parser, textLocation)) {
+                    var listStartMatcher = listStartPattern.matcher(line);
+
+                    if (listStartMatcher.matches()) {
+                        if (!description.isEmpty()) {
+                            listItems.add(fixText(description.stream().collect(CONTENT_AWARE_JOINER)));
+                            description.clear();
+                        }
+                        description.add(listStartMatcher.group(1));
+                    } else {
+                        description.add(line);
+                    }
+                }
+
+                listItems.add(fixText(description.stream().collect(CONTENT_AWARE_JOINER)));
+
+                textEntries.add(new ListEntry(listItems));
+                description.clear();
+            } else {
+                log.error("Unexpected text location type [{}]", textLocation.type());
+            }
+        }
+    }
+
+    @SuppressWarnings("unchecked")
+    private void finaliseCurrentEntry(Data currentData, ArrayList<TextEntry> textEntries, ArrayList<String> description, String currentSection) {
+        if (currentData != null) {
+            if (!description.isEmpty()) {
+                textEntries.add(new StringEntry(fixText(description.stream().collect(CONTENT_AWARE_JOINER))));
+            }
+            if (currentData.merit) {
+                entries.add(new Merit(currentSection, currentData.name, (List<TextEntry>) textEntries.clone(), currentData.cost, currentData.max));
+            } else {
+                entries.add(new Flaw(currentSection, currentData.name, (List<TextEntry>) textEntries.clone(), currentData.cost, currentData.max));
+            }
+            textEntries.clear();
+            description.clear();
         }
     }
 

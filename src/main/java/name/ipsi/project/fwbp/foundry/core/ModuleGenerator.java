@@ -8,8 +8,9 @@ import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
-import java.nio.file.*;
-import java.nio.file.attribute.BasicFileAttributes;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.StandardOpenOption;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.stream.Stream;
@@ -123,15 +124,7 @@ public final class ModuleGenerator {
             log.info("Output directory [{}] does not exist - creating", outputPath);
             Files.createDirectories(outputPath);
         } else {
-            log.info("Output directory [{}] already exists - deleting", outputPath);
-            Files.walkFileTree(outputPath, new SimpleFileVisitor<>() {
-                @Override
-                public FileVisitResult visitFile(Path file, BasicFileAttributes attrs) throws IOException {
-                    log.debug("Deleting file {}", file);
-                    Files.delete(file);
-                    return FileVisitResult.CONTINUE;
-                }
-            });
+            log.debug("Output directory already exists");
         }
     }
 
