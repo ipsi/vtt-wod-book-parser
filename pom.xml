@@ -236,13 +236,31 @@
                                 <list>name.ipsi.project.fwbp.foundry.wod.ItemTypes</list>
                                 <list>name.ipsi.project.fwbp.foundry.wod.PowerTypes</list>
                                 <list>name.ipsi.project.fwbp.foundry.wod.WeaponConcealment</list>
-                                <list>name.ipsi.project.fwbp.foundry.wod.RangedWeaponData</list>
-                                <list>name.ipsi.project.fwbp.foundry.wod.RangedWeaponData$Clip</list>
-                                <list>name.ipsi.project.fwbp.foundry.wod.RangedWeaponData$Mode</list>
-                                <list>name.ipsi.project.fwbp.foundry.wod.MeleeWeaponData</list>
-                                <list>name.ipsi.project.fwbp.foundry.wod.Attack</list>
-                                <list>name.ipsi.project.fwbp.foundry.wod.Damage</list>
-                                <list>name.ipsi.project.fwbp.foundry.wod.werewolf.FetishData</list>
+                                <list>name.ipsi.project.fwbp.foundry.wod.data.item.ArmorData</list>
+                                <list>name.ipsi.project.fwbp.foundry.wod.data.item.ArmorData$ArmorDataBuilder</list>
+                                <list>name.ipsi.project.fwbp.foundry.wod.data.item.ArmorData$Forms</list>
+                                <list>name.ipsi.project.fwbp.foundry.wod.data.item.ArmorData$Soak</list>
+                                <list>name.ipsi.project.fwbp.foundry.wod.data.item.ExperienceData</list>
+                                <list>name.ipsi.project.fwbp.foundry.wod.data.item.ExperienceData$ExperienceDataBuilder</list>
+                                <list>name.ipsi.project.fwbp.foundry.wod.data.item.FeatureData</list>
+                                <list>name.ipsi.project.fwbp.foundry.wod.data.item.FeatureData$FeatureDataBuilder</list>
+                                <list>name.ipsi.project.fwbp.foundry.wod.data.item.FetishData</list>
+                                <list>name.ipsi.project.fwbp.foundry.wod.data.item.FetishData$FetishDataBuilder</list>
+                                <list>name.ipsi.project.fwbp.foundry.wod.data.item.MeleeWeaponData</list>
+                                <list>name.ipsi.project.fwbp.foundry.wod.data.item.MeleeWeaponData$MeleeWeaponDataBuilder</list>
+                                <list>name.ipsi.project.fwbp.foundry.wod.data.item.MeleeWeaponData$Attack</list>
+                                <list>name.ipsi.project.fwbp.foundry.wod.data.item.MeleeWeaponData$Damage</list>
+                                <list>name.ipsi.project.fwbp.foundry.wod.data.item.PowerData</list>
+                                <list>name.ipsi.project.fwbp.foundry.wod.data.item.PowerData$PowerDataBuilder</list>
+                                <list>name.ipsi.project.fwbp.foundry.wod.data.item.RangedWeaponData</list>
+                                <list>name.ipsi.project.fwbp.foundry.wod.data.item.RangedWeaponData$RangedWeaponDataBuilder</list>
+                                <list>name.ipsi.project.fwbp.foundry.wod.data.item.RangedWeaponData$Attack</list>
+                                <list>name.ipsi.project.fwbp.foundry.wod.data.item.RangedWeaponData$Clip</list>
+                                <list>name.ipsi.project.fwbp.foundry.wod.data.item.RangedWeaponData$Damage</list>
+                                <list>name.ipsi.project.fwbp.foundry.wod.data.item.RangedWeaponData$Mode</list>
+                                <list>name.ipsi.project.fwbp.foundry.wod.data.item.RoteData</list>
+                                <list>name.ipsi.project.fwbp.foundry.wod.data.item.RoteData$Instrument</list>
+                                <list>name.ipsi.project.fwbp.foundry.wod.data.item.RoteData$RoteDataBuilder</list>
                                 <list>name.ipsi.project.fwbp.foundry.wod.werewolf.FetishType</list>
                                 <list>name.ipsi.project.fwbp.foundry.core.Module</list>
                                 <list>name.ipsi.project.fwbp.foundry.core.ModulePack</list>
