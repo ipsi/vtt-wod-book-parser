@@ -7,10 +7,7 @@ import name.ipsi.project.fwbp.foundry.templating.Templater;
 import name.ipsi.project.fwbp.foundry.wod.FeatureTypes;
 import name.ipsi.project.fwbp.foundry.wod.ItemTypes;
 import name.ipsi.project.fwbp.foundry.wod.PowerTypes;
-import name.ipsi.project.fwbp.foundry.wod.data.item.FeatureData;
-import name.ipsi.project.fwbp.foundry.wod.data.item.MeleeWeaponData;
-import name.ipsi.project.fwbp.foundry.wod.data.item.PowerData;
-import name.ipsi.project.fwbp.foundry.wod.data.item.RangedWeaponData;
+import name.ipsi.project.fwbp.foundry.wod.data.item.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -150,8 +147,8 @@ public class Werewolf20FoundryConverter {
                 weapon.id(),
                 weapon.name(),
                 ItemTypes.MELEE_WEAPON,
-                weapon.natural() ? "systems/worldofdarkness/assets/img/items/naturalweapons.svg"
-                        : "systems/worldofdarkness/assets/img/items/meleeweapons.svg",
+                weapon.natural() ? ItemImages.NATURALWEAPONS
+                        : ItemImages.MELEEWEAPONS,
                 new MeleeWeaponData.MeleeWeaponDataBuilder()
                         .withAttack(new MeleeWeaponData.Attack(
                                 "dexterity",
@@ -187,7 +184,7 @@ public class Werewolf20FoundryConverter {
                 weapon.id(),
                 weapon.name(),
                 ItemTypes.RANGED_WEAPON,
-                "systems/worldofdarkness/assets/img/items/rangedweapons.svg",
+                ItemImages.RANGEDWEAPONS,
                 new RangedWeaponData.RangedWeaponDataBuilder()
                         .withAttack(new RangedWeaponData.Attack(
                                 "dexterity",
@@ -221,7 +218,7 @@ public class Werewolf20FoundryConverter {
                 weapon.id(),
                 weapon.name(),
                 ItemTypes.RANGED_WEAPON,
-                "systems/worldofdarkness/assets/img/items/rangedweapons.svg",
+                ItemImages.RANGEDWEAPONS,
                 new RangedWeaponData.RangedWeaponDataBuilder()
                         .withAttack(new RangedWeaponData.Attack(
                                 "dexterity",
@@ -302,7 +299,7 @@ public class Werewolf20FoundryConverter {
                 g.id(),
                 g.name(),
                 ItemTypes.POWER,
-                "systems/worldofdarkness/assets/img/items/power.svg",
+                ItemImages.MAIN_POWER_WEREWOLF,
                 new PowerData.PowerDataBuilder()
                         .withDescription(description)
                         .withDice1(gr != null ? convertCharacteristic(gr.characteristicOne()) : "")
@@ -329,7 +326,7 @@ public class Werewolf20FoundryConverter {
                 b.id(),
                 b.name(),
                 ItemTypes.FEATURE,
-                "systems/worldofdarkness/assets/img/items/feature.svg",
+                ItemImages.FEATURE,
                 new FeatureData.FeatureDataBuilder()
                         .withDescription(description)
                         .withType(FeatureTypes.BACKGROUND)
@@ -351,7 +348,7 @@ public class Werewolf20FoundryConverter {
                 r.id(),
                 r.name(),
                 ItemTypes.POWER,
-                "systems/worldofdarkness/assets/img/items/ritual_werewolf.svg",
+                ItemImages.RITUAL_WEREWOLF,
                 new PowerData.PowerDataBuilder()
                         .withDescription(description)
                         .withDice1(r.rollData() != null ? convertCharacteristic(r.rollData().characteristicOne()) : null)
@@ -378,13 +375,13 @@ public class Werewolf20FoundryConverter {
                 f.id(),
                 f.name(),
                 ItemTypes.FETISH,
-                "systems/worldofdarkness/assets/img/items/fetish.svg",
-                new FetishData(
-                        description,
-                        f.gnosis(),
-                        f.level().foundryLevel(),
-                        FetishType.FETISH
-                ),
+                ItemImages.FETISH_WEREWOLF,
+                new FetishData.FetishDataBuilder()
+                        .withDescription(description)
+                        .withGnosis(f.gnosis())
+                        .withLevel(f.level().foundryLevel())
+                        .withType(FetishType.FETISH)
+                        .build(),
                 null,
                 folderIdsByName.get("Fetishes - Garou"),
                 0,
@@ -401,12 +398,12 @@ public class Werewolf20FoundryConverter {
                 t.id(),
                 t.name(),
                 ItemTypes.FETISH,
-                "systems/worldofdarkness/assets/img/items/fetish.svg",
-                new FetishData(
-                        description,
-                        t.gnosis(),
-                        FetishType.TALEN
-                ),
+                ItemImages.FETISH_WEREWOLF,
+                new FetishData.FetishDataBuilder()
+                        .withDescription(description)
+                        .withGnosis(t.gnosis())
+                        .withType(FetishType.TALEN)
+                        .build(),
                 null,
                 folderIdsByName.get("Talens - Garou"),
                 0,
@@ -423,7 +420,7 @@ public class Werewolf20FoundryConverter {
                 m.id(),
                 m.name(),
                 ItemTypes.FEATURE,
-                "systems/worldofdarkness/assets/img/items/feature.svg",
+                ItemImages.FEATURE,
                 new FeatureData.FeatureDataBuilder()
                         .withDescription(description)
                         .withLevel(String.valueOf(m.cost()))
@@ -446,7 +443,7 @@ public class Werewolf20FoundryConverter {
                 f.id(),
                 f.name(),
                 ItemTypes.FEATURE,
-                "systems/worldofdarkness/assets/img/items/feature.svg",
+                ItemImages.FEATURE,
                 new FeatureData.FeatureDataBuilder()
                         .withDescription(description)
                         .withLevel(String.valueOf(f.cost()))

@@ -33,10 +33,39 @@ public class DataClassGenerator {
     public void generate() throws IOException {
         record system(String id, Path path) {}
         for (var system : Arrays.asList(
-                new system("wod", Path.of("../Foundry_WoD20/template.json")),
-                new system("wod5e", Path.of("../foundry-WOD5/template.json"))
+                new system("wod", Path.of("..", "Foundry_WoD20")),
+                new system("wod5e", Path.of("..", "foundry-WOD5"))
         )) {
-            var template = new ObjectMapper().readValue(system.path().toFile(), Template.class);
+            var dirPath = Path.of("src", "main", "java", "name", "ipsi", "project", "fwbp", "foundry", system.id(), "data", "item");
+            var template = new ObjectMapper().readValue(system.path().resolve("template.json").toFile(), Template.class);
+
+            var itemImages = system.path().resolve("assets").resolve("img").resolve("items");
+            if (Files.isDirectory(itemImages)) {
+                try(var stream = Files.list(itemImages)) {
+                    var fileNames = stream
+                            .map(s -> {
+                                String fileName = s.getFileName().toString();
+                                if (fileName.startsWith("main")) {
+                                    fileName = "main_" + fileName.substring(4);
+                                }
+                                return String.format("public static final String %s = \"%s\";", fileName.toUpperCase().substring(0, fileName.lastIndexOf(".")), system.path().relativize(s));
+                            })
+                            .collect(Collectors.joining("\n"));
+
+                    Files.writeString(dirPath.resolve("ItemImages.java"), String.format("""
+                            package name.ipsi.project.fwbp.foundry.%s.data.item;
+                            
+                            public class ItemImages {
+                                
+                            %s
+                                
+                                private ItemImages() {
+                                    // Not instantiable
+                                }
+                            }
+                            """, system.id(), fileNames.indent(4)));
+                }
+            }
 
             for (var name : (List<String>)template.items.get("types")) {
                 var typeData = (Map<String, ?>)template.items().get(name);
@@ -70,8 +99,6 @@ public class DataClassGenerator {
                         .map(s -> "import " + s + ";")
                         .collect(Collectors.joining("\n"))
                         .transform(s -> s.length() > 0 ? "\n" + s + "\n" : s)));
-
-                var dirPath = Path.of("src", "main", "java", "name", "ipsi", "project", "fwbp", "foundry", system.id(), "data", "item");
 
                 if (!Files.isDirectory(dirPath)) {
                     Files.createDirectories(dirPath);

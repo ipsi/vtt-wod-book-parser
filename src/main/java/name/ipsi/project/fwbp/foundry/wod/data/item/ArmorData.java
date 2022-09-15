@@ -62,7 +62,7 @@ public record ArmorData(
             this.worldanvil = worldanvil;
             return this;
         }
-
+        
         public ArmorDataBuilder withDescription(String description){
             this.description = description;
             return this;
